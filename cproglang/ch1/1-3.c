@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+/**
+ * modify the temperature conversion program to print a heading above the table.
+ */
 main()
 {
 	float fahr, celsius;
