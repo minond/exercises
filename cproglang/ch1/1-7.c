@@ -5,6 +5,6 @@
  */
 main()
 {
-	printf("EOF: %i", EOF);
-	return 0;
+    printf("EOF: %i", EOF);
+    return 0;
 }

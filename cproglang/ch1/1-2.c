@@ -6,11 +6,11 @@
  */
 main()
 {
-	printf("slash n: ");
-	printf("\n");
-	printf(".");
+    printf("slash n: ");
+    printf("\n");
+    printf(".");
 
-	printf("slash a: ");
-	printf("\a");
-	printf(".");
+    printf("slash a: ");
+    printf("\a");
+    printf(".");
 }

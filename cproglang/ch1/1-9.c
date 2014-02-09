@@ -9,21 +9,21 @@
  */
 main()
 {
-	int state, c;
+    int state, c;
 
-	state = CAN_REPLACE;
+    state = CAN_REPLACE;
 
-	while ((c = getchar()) != EOF) {
-		if (c == ' ' || c == '\t') {
-			if (state == CAN_REPLACE) {
-				state = REPLACED;
-				putchar(c);
-			}
-		} else {
-			state = CAN_REPLACE;
-			putchar(c);
-		}
-	}
+    while ((c = getchar()) != EOF) {
+        if (c == ' ' || c == '\t') {
+            if (state == CAN_REPLACE) {
+                state = REPLACED;
+                putchar(c);
+            }
+        } else {
+            state = CAN_REPLACE;
+            putchar(c);
+        }
+    }
 
-	return 0;
+    return 0;
 }

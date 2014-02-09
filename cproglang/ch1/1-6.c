@@ -5,10 +5,10 @@
  */
 main()
 {
-	int c;
+    int c;
 
-	c = getchar() != EOF;
-	printf("valud of 'getchar() != EOF' is: %i", c);
+    c = getchar() != EOF;
+    printf("valud of 'getchar() != EOF' is: %i", c);
 
-	return 0;
+    return 0;
 }
