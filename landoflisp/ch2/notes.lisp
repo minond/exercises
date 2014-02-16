@@ -1,0 +1,16 @@
+(let ((a 1)
+      (b 2)
+      (c 3))
+    (+ a b c))
+
+(flet ((add (a b)
+            (+ a b))
+       (sub (a b)
+            (- a b)))
+    (sub (add 10 10) 3))
+
+(labels ((add1 (a b)
+                (+ a b))
+         (add2 (a b)
+                (add1 a b)))
+    (add2 3 2))
