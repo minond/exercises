@@ -4,20 +4,23 @@ function empty_word (word) {
     return !!word;
 }
 
+function counter (word) {
+    if (!this.hasOwnProperty(word)) {
+        this[ word ] = 0;
+    }
+
+    this[ word ]++;
+}
+
 function words (phrase) {
-    var counter = {},
+    var tracker = {},
         splitter = /[\s,.~`<>/\\=!¡?¿@$#%^&*():;{}[\]'"\|\-]+/g;
 
-    phrase.toLowerCase().split(splitter).filter(empty_word)
-        .forEach(function (word) {
-            if (!counter.hasOwnProperty(word)) {
-                counter[ word ] = 0;
-            }
+    phrase.toLowerCase().split(splitter)
+        .filter(empty_word)
+        .forEach(counter, tracker);
 
-            counter[ word ]++;
-        });
-
-    return counter;
+    return tracker;
 }
 
 module.exports = words;
