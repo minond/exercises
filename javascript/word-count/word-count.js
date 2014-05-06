@@ -1,13 +1,12 @@
 'use strict';
 
-var splitter = /[\s,.~`<>/\\=!¡?¿@$#%^&*():;{}[\]'"\|\-]+/g;
-
 function empty_word (word) {
     return !!word;
 }
 
 function words (phrase) {
-    var counter = {};
+    var counter = {},
+        splitter = /[\s,.~`<>/\\=!¡?¿@$#%^&*():;{}[\]'"\|\-]+/g;
 
     phrase.toLowerCase().split(splitter).filter(empty_word)
         .forEach(function (word) {
