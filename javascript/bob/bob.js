@@ -2,9 +2,6 @@
 
 function Bob () {}
 
-/**
- * see README.md for definition on input/output
- */
 Bob.prototype.hey = function (message) {
     var response = 'Whatever.',
         has_letter = /[a-zA-Z]/.test(message),
