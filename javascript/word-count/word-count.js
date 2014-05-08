@@ -12,7 +12,7 @@ function counter (word) {
     this[ word ]++;
 }
 
-function words (phrase) {
+module.exports = function (phrase) {
     var tracker = {},
         splitter = /[\s,.~`<>/\\=!¡?¿@$#%^&*():;{}[\]'"\|\-]+/g;
 
@@ -21,6 +21,4 @@ function words (phrase) {
         .forEach(counter, tracker);
 
     return tracker;
-}
-
-module.exports = words;
+};

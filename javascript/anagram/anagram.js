@@ -4,7 +4,7 @@ function normalize (word) {
     return word.toLowerCase().split("").sort().join("");
 }
 
-function anagram (word) {
+module.exports = function (word) {
     var normalized = normalize(word);
 
     return {
@@ -15,6 +15,4 @@ function anagram (word) {
             });
         }
     };
-}
-
-module.exports = anagram;
+};

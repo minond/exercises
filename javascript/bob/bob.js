@@ -1,13 +1,11 @@
+'use strict';
+
 function Bob () {}
 
 /**
  * see README.md for definition on input/output
  */
 Bob.prototype.hey = function (message) {
-    'use strict';
-
-    message = message || '';
-
     var response = 'Whatever.',
         has_letter = /[a-zA-Z]/.test(message),
         is_empty = !message.replace(/\s+/, ''),
