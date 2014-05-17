@@ -1,6 +1,6 @@
 class Bob
   def hey(msg)
-    if msg === msg.upcase and msg.downcase =~ /[a-z]/
+    if msg === msg.upcase and msg =~ /[A-Z]/
       'Woah, chill out!'
     elsif msg[-1] === '?'
       'Sure.'
