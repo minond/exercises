@@ -4,6 +4,6 @@ class Grains
   end
 
   def total
-    (1..64).map(&method(:square)).inject(:+)
+    square(65) - 1
   end
 end
