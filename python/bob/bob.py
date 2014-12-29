@@ -4,10 +4,10 @@ def is_question(message):
     return message.endswith('?')
 
 def is_yelling(message):
-    return message.upper() == message and re.search('[a-zA-Z]+', message)
+    return message.isupper()
 
 def is_nothing(message):
-    return not message or message.strip() == ''
+    return not message or message.isspace()
 
 class Bob:
     def hey(self, message):
