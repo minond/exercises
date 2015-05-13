@@ -25,11 +25,19 @@
                                     <action selector="recordAudio:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bOq-Kf-KUG"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YXC-b9-bBr">
+                                <rect key="frame" x="264" y="428" width="73" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="BOA-XC-uDo" secondAttribute="centerX" id="HM8-Op-lFN"/>
+                            <constraint firstItem="YXC-b9-bBr" firstAttribute="top" secondItem="BOA-XC-uDo" secondAttribute="bottom" constant="28" id="OXF-10-VEW"/>
                             <constraint firstAttribute="centerY" secondItem="BOA-XC-uDo" secondAttribute="centerY" id="UxE-Dj-5u2"/>
+                            <constraint firstAttribute="centerX" secondItem="YXC-b9-bBr" secondAttribute="centerX" constant="-0.5" id="y9x-Ba-V7P"/>
                         </constraints>
                     </view>
                 </viewController>
