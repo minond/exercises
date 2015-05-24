@@ -31,8 +31,12 @@
                                     <action selector="recordAudio:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bOq-Kf-KUG"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goL-Cg-U14">
-                                <rect key="frame" x="270" y="520" width="60" height="60"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goL-Cg-U14">
+                                <rect key="frame" x="270" y="479.5" width="60" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="BCA-Z5-92y"/>
+                                    <constraint firstAttribute="width" constant="60" id="Dhg-pt-k00"/>
+                                </constraints>
                                 <state key="normal" image="stop">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -44,8 +48,9 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="BOA-XC-uDo" secondAttribute="centerX" id="HM8-Op-lFN"/>
-                            <constraint firstItem="YXC-b9-bBr" firstAttribute="top" secondItem="BOA-XC-uDo" secondAttribute="bottom" constant="28" id="OXF-10-VEW"/>
+                            <constraint firstItem="YXC-b9-bBr" firstAttribute="top" secondItem="BOA-XC-uDo" secondAttribute="bottom" constant="30" id="OXF-10-VEW"/>
                             <constraint firstAttribute="centerY" secondItem="BOA-XC-uDo" secondAttribute="centerY" id="UxE-Dj-5u2"/>
+                            <constraint firstItem="goL-Cg-U14" firstAttribute="top" secondItem="YXC-b9-bBr" secondAttribute="bottom" constant="30" id="XIw-rs-i4K"/>
                             <constraint firstAttribute="centerX" secondItem="goL-Cg-U14" secondAttribute="centerX" id="bHW-8U-PPa"/>
                             <constraint firstAttribute="centerX" secondItem="YXC-b9-bBr" secondAttribute="centerX" constant="-0.5" id="y9x-Ba-V7P"/>
                         </constraints>
