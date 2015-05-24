@@ -16,6 +16,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YXC-b9-bBr">
+                                <rect key="frame" x="264" y="428" width="73" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BOA-XC-uDo">
                                 <rect key="frame" x="200" y="200" width="200" height="200"/>
                                 <state key="normal" image="microphone">
@@ -25,18 +31,22 @@
                                     <action selector="recordAudio:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="bOq-Kf-KUG"/>
                                 </connections>
                             </button>
-                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YXC-b9-bBr">
-                                <rect key="frame" x="264" y="428" width="73" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goL-Cg-U14">
+                                <rect key="frame" x="270" y="520" width="60" height="60"/>
+                                <state key="normal" image="stop">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="stopRecording:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="D96-7g-HsB"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="BOA-XC-uDo" secondAttribute="centerX" id="HM8-Op-lFN"/>
                             <constraint firstItem="YXC-b9-bBr" firstAttribute="top" secondItem="BOA-XC-uDo" secondAttribute="bottom" constant="28" id="OXF-10-VEW"/>
                             <constraint firstAttribute="centerY" secondItem="BOA-XC-uDo" secondAttribute="centerY" id="UxE-Dj-5u2"/>
+                            <constraint firstAttribute="centerX" secondItem="goL-Cg-U14" secondAttribute="centerX" id="bHW-8U-PPa"/>
                             <constraint firstAttribute="centerX" secondItem="YXC-b9-bBr" secondAttribute="centerX" constant="-0.5" id="y9x-Ba-V7P"/>
                         </constraints>
                     </view>
@@ -50,5 +60,6 @@
     </scenes>
     <resources>
         <image name="microphone" width="200" height="200"/>
+        <image name="stop" width="100" height="100"/>
     </resources>
 </document>
