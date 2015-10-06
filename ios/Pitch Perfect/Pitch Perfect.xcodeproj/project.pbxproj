@@ -156,6 +156,7 @@
 		B7BDE5A01AFB156B001C4D96 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = minond;
 				TargetAttributes = {
@@ -409,6 +410,7 @@
 				B7BDE5C91AFB156B001C4D96 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B7BDE5CA1AFB156B001C4D96 /* Build configuration list for PBXNativeTarget "Pitch PerfectTests" */ = {
 			isa = XCConfigurationList;
@@ -417,6 +419,7 @@
 				B7BDE5CC1AFB156B001C4D96 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
