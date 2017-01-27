@@ -1,2 +1,6 @@
 erlang/*/*.beam
 python/*/*.pyc
+scala/*/project
+scala/*/target
+*.swp
+*.swo
