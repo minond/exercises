@@ -3,6 +3,7 @@
 (* To run the test, add a new line to the top of this file: use "homeworkname.sml"; *)
 (* All the tests should evaluate to true. For example, the REPL should say: val test1 = true : bool *)
 
+use "hw1.sml";
 
 val test1 = is_older ((1,2,3),(2,3,4)) = true
 
