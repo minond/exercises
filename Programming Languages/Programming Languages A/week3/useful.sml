@@ -11,6 +11,41 @@ datatype rank
   | Ace
   | Num of int
 
+type card = suit * rank
+
+type name_record =
+  { student_num : int option
+  , first : string
+  , middle : string option
+  , last : string
+  }
+
+fun isQueenOfSpades (c : card) =
+  #1 c = Spade andalso #2 c = Queen
+
+fun isQueenOfSpades (c : card) =
+  case c
+   of (Spade, Queen) => true
+    | _ => false
+
+val c1 : card = (Diamond, Ace)
+val c2 : suit * rank = (Diamond, Ace)
+val c3 = (Diamond, Ace)
+
+datatype my_int_list
+  = Empty
+  | Cons of int * my_int_list
+
+fun append_to_my_int_list (l, h) =
+  case l
+   of Empty => h
+    | Cons (real_h, rest') => Cons(real_h, append_to_my_int_list(rest', h))
+
+fun append (xs : 'a list, x : 'a) =
+  case xs
+   of [] => [x]
+    | h::xs' => h :: append(xs', x)
+
 datatype id
   = StudentNum of int
   | Name of string * (string option) * string
