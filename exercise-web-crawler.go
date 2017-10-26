@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -64,21 +63,21 @@ func GetPageLinks(baseUrl string, node *html.Node) []string {
 	return links
 }
 
-func Crawl(url string, depth int, ch chan int) (Page, error) {
+func Crawl(url string, depth int, ch chan int) {
 	if depth == 0 {
-		return Page{}, nil
+		return
 	}
 
 	res, err := http.Get(url)
 
 	if err != nil {
-		return Page{}, fmt.Errorf("Error requesting page: %v", err)
+		return
 	}
 
 	doc, err := html.Parse(res.Body)
 
 	if err != nil {
-		return Page{}, fmt.Errorf("Error creating parser: %v", err)
+		return
 	}
 
 	title := GetPageTitle(doc)
@@ -105,17 +104,12 @@ func Crawl(url string, depth int, ch chan int) (Page, error) {
 			log.Println("Done")
 		}
 	}
-
-	return Page{
-		Title: title,
-		Links: links,
-	}, nil
 }
 
 func main() {
 	ch := make(chan int)
 
-	go Crawl("https://golang.org/", 4, ch)
+	go Crawl("https://golang.org/", 10, ch)
 
 	for {
 		v, ok := <-ch
