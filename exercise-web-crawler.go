@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -15,14 +17,18 @@ type Page struct {
 
 func GetPageTitle(node *html.Node) string {
 	if node.Type == html.ElementNode && node.Data == "title" {
-		return node.FirstChild.Data
+		if node.FirstChild == nil {
+			return ""
+		} else {
+			return strings.TrimSpace(node.FirstChild.Data)
+		}
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		title := GetPageTitle(c)
 
 		if title != "" {
-			return title
+			return strings.TrimSpace(title)
 		}
 	}
 
@@ -58,7 +64,7 @@ func GetPageLinks(baseUrl string, node *html.Node) []string {
 	return links
 }
 
-func Crawl(url string, depth int) (Page, error) {
+func Crawl(url string, depth int, ch chan int) (Page, error) {
 	if depth == 0 {
 		return Page{}, nil
 	}
@@ -75,15 +81,44 @@ func Crawl(url string, depth int) (Page, error) {
 		return Page{}, fmt.Errorf("Error creating parser: %v", err)
 	}
 
+	title := GetPageTitle(doc)
+	links := GetPageLinks(url, doc)
+
+	log.Printf(`Page "%s" (%s) with %v links at a depth of %v.`,
+		title, url, len(links), depth)
+
+	expected := len(links)
+	counter := 0
+	subCh := make(chan int)
+	ch <- expected
+
+	for _, link := range links {
+		go Crawl(link, depth-1, subCh)
+	}
+
+	for {
+		<-subCh
+		counter = counter + 1
+
+		if counter == expected {
+			close(subCh)
+			log.Println("Done")
+		}
+	}
+
 	return Page{
-		Title: GetPageTitle(doc),
-		Links: GetPageLinks(url, doc),
+		Title: title,
+		Links: links,
 	}, nil
 }
 
 func main() {
-	page1, _ := Crawl("https://golang.org/", 10)
-	page2, _ := Crawl(page1.Links[3], 10)
+	ch := make(chan int)
 
-	fmt.Println(page2)
+	go Crawl("https://golang.org/", 4, ch)
+
+	for {
+		v, ok := <-ch
+		log.Println(v, ok)
+	}
 }
