@@ -1,0 +1,6 @@
+[submodule "Build Your Own Lisp"]
+	path = Build Your Own Lisp
+	url = git@github.com:minond/lithp.git
+[submodule "Language Implementation Patterns"]
+	path = Language Implementation Patterns
+	url = git@github.com:minond/lang-impl-patterns.git
