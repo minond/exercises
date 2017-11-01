@@ -1,1 +1,0 @@
-My exercism.io scripts
