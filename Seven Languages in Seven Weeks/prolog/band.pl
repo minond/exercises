@@ -1,0 +1,56 @@
+guitar(antonio).
+guitar(phillip).
+guitar(wayne).
+guitar(patrick).
+guitar(todd).
+guitar(willie).
+guitar(patrick).
+guitar(keith).
+guitar(ryan).
+guitar(timothy).
+guitar(patrick).
+guitar(walter).
+guitar(roger).
+guitar(ronald).
+guitar(eugene).
+drums(paul).
+drums(roger).
+drums(andrew).
+drums(steve).
+drums(alan).
+drums(carlos).
+drums(jimmy).
+drums(phillip).
+drums(scott).
+drums(larry).
+drums(martin).
+drums(ernest).
+drums(kevin).
+drums(victor).
+sings(kenneth).
+sings(christopher).
+sings(ernest).
+sings(samuel).
+sings(kevin).
+sings(edward).
+bass(henry).
+bass(patrick).
+bass(brandon).
+bass(brandon).
+bass(antonio).
+bass(shawn).
+bass(richard).
+bass(justin).
+bass(larry).
+bass(keith).
+bass(harry).
+bass(ronald).
+bass(walter).
+bass(william).
+bass(phillip).
+
+band(Guitarist, Drummer, Singer, Bassist) :-
+  guitar(Guitarist),
+  drums(Drummer),
+  sings(Singer),
+  bass(Bassist).
