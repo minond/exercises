@@ -57,3 +57,64 @@ flatten_alt([H|T], Flat) :-
   flatten_alt(H, Fh),
   flatten_alt(T, Th),
   append(Fh, Th, Flat).
+
+% 1.08 (**) Eliminate consecutive duplicates of list elements. If a list
+% contains repeated elements they should be replaced with a single copy of the
+% element. The order of the elements should not be changed.
+%
+% Example:
+% ?- compress([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
+% X = [a,b,c,a,d,e]
+compress([], []).
+compress([H|[H|T]], Out) :- compress([H|T], Out).
+compress([H|T], [H|Out]) :- compress(T, Out).
+
+% 1.09 (**) Pack consecutive duplicates of list elements into sublists.  If a
+% list contains repeated elements they should be placed in separate sublists.
+%
+% Example:
+% ?- pack([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
+% X = [[a,a,a,a],[b],[c,c],[a,a],[d],[e,e,e,e]]
+
+% 1.10 (*) Run-length encoding of a list.  Use the result of problem 1.09 to
+% implement the so-called run-length encoding data compression method.
+% Consecutive duplicates of elements are encoded as terms [N,E] where N is the
+% number of duplicates of the element E.
+%
+% Example:
+% ?- encode([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
+% X = [[4,a],[1,b],[2,c],[2,a],[1,d],[4,e]]
+
+% 1.11 (*) Modified run-length encoding.  Modify the result of problem 1.10 in
+% such a way that if an element has no duplicates it is simply copied into the
+% result list. Only elements with duplicates are transferred as [N,E] terms.
+%
+% Example:
+% ?- encode_modified([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
+% X = [[4,a],b,[2,c],[2,a],d,[4,e]]
+
+% 1.12 (**) Decode a run-length encoded list.  Given a run-length code list
+% generated as specified in problem 1.11. Construct its uncompressed version.
+
+% 1.13 (**) Run-length encoding of a list (direct solution).  Implement the
+% so-called run-length encoding data compression method directly. I.e. don't
+% explicitly create the sublists containing the duplicates, as in problem 1.09,
+% but only count them. As in problem 1.11, simplify the result list by replacing
+% the singleton terms [1,X] by X.
+%
+% Example:
+% ?- encode_direct([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
+% X = [[4,a],b,[2,c],[2,a],d,[4,e]]
+
+% 1.14 (*) Duplicate the elements of a list.
+% Example:
+% ?- dupli([a,b,c,c,d],X).
+% X = [a,a,b,b,c,c,c,c,d,d]
+
+% 1.15 (**) Duplicate the elements of a list a given number of times.
+% Example:
+% ?- dupli([a,b,c],3,X).
+% X = [a,a,a,b,b,b,c,c,c]
+%
+% What are the results of the goal:
+% ?- dupli(X,3,Y).
