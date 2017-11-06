@@ -70,7 +70,8 @@ fun get_substitutions2(subs : string list list, s : string) : string list =
    begin with the original name (then have 0 or more other names) *)
 fun similar_names(names : string list list, {first : string, middle : string, last : string}) =
   let
-    val subs = get_substitutions2 (names, first)
+    val options = get_substitutions2 (names, first)
+    val first_names = first :: options
 
     fun fullname(first : string) =
       { first = first
@@ -81,7 +82,7 @@ fun similar_names(names : string list list, {first : string, middle : string, la
     fun first_names_to_fullnames(names : string list) =
       case names
        of [] => []
-        | name::rest => fullname (name) :: first_names_to_fullnames (rest)
+        | first_name::rest => fullname first_name :: first_names_to_fullnames rest
   in
-    fullname (first) :: first_names_to_fullnames subs
+    first_names_to_fullnames first_names
   end
