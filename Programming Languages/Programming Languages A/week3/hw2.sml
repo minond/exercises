@@ -86,3 +86,67 @@ fun similar_names(names : string list list, {first : string, middle : string, la
   in
     first_names_to_fullnames first_names
   end
+
+(* 2a. Write a function card_color, which takes a card and returns its color
+  (spades and clubs are black, diamonds and hearts are red). Note: One
+  case-expression is enough. *)
+fun card_color((Spades, _) : card) = Black
+  | card_color((Clubs, _) : card) = Black
+  | card_color((Diamonds, _) : card) = Red
+  | card_color((Hearts, _) : card) = Red
+
+(* 2b. Write a function card_value, which takes a card and returns its value
+   (numbered cards have their number as the value, aces are 11, everything else
+   is 10). Note: One case-expression is enough. *)
+fun card_value((_, Num n) : card) = n
+  | card_value((_, Ace) : card) = 11
+  | card_value(x : card) = 10
+
+(* 2c. Write a function remove_card, which takes a list of cards cs, a card c,
+   and an exception e. It returns a list that has all the elements of cs except
+   c.  If c is in the list more than once, remove only the first one. If c is
+   not in the list, raise the exception e. You can compare cards with =. *)
+fun remove_card(cards : card list, c : card, e : exn) =
+  case cards
+   of [] => raise e
+    | h::t =>
+      if h = c then
+        t
+      else
+        h :: remove_card (t, c, e)
+
+(* 2d. Write a function all_same_color, which takes a list of cards and returns
+   true if all the cards in the list are the same color. Hint: An elegant
+   solution is very similar to one of the functions using nested
+   pattern-matching in the lectures. *)
+fun all_same_color(cards : card list) =
+  let
+    fun color_check(col, cards) =
+      case cards
+       of [] => true
+        | h::t =>
+          let
+            val same = card_color(h) = col
+          in
+            same andalso color_check(col, t)
+          end
+  in
+    case cards
+     of [] => true
+      | h::[] => true
+      | h::t => color_check (card_color(h), t)
+  end
+
+(* 2e. Write a function sum_cards, which takes a list of cards and returns the
+   sum of their values. Use a locally defined helper function that is tail
+   recursive. (Take “calls use a constant amount of stack space” as a
+   requirement for this problem.) *)
+fun sum_cards(cards : card list) =
+  let
+    fun aux (xs, acc) =
+      case xs
+       of [] => acc
+        | x::xs' => aux(xs', acc + card_value (x))
+  in
+    aux (cards, 0)
+  end
