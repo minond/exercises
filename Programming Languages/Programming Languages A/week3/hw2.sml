@@ -209,30 +209,17 @@ fun score(cards : card list, goal : int) : int =
 
    Sample solution for (g) is under 20 lines. *)
 fun officiate(cards : card list, moves : move list, goal : int) : int =
-  let
-    fun turn(held_cards : card list, card_list : card list, moves : move list) =
-      case moves
-       of [] => held_cards
-        | move::next_moves =>
-          case move
-           of Draw =>
-              (case card_list
-               of [] => held_cards
-                | c::next_card_list =>
-                  let
-                    val next_held_cards = c :: held_cards
-                  in
-                    if sum_cards (next_held_cards) > goal then
-                      next_held_cards
-                    else
-                      turn (next_held_cards, next_card_list, next_moves)
-                  end)
-            | Discard c =>
-              turn (remove_card (held_cards, c, IllegalMove), card_list, next_moves)
+  let fun turn(held_cards : card list, card_list : card list, moves : move list) =
+    case (moves, card_list)
+     of ((Discard c)::next_moves, _) =>
+        turn (remove_card (held_cards, c, IllegalMove), card_list, next_moves)
+      | ((Draw)::next_moves, c::next_card_list) =>
+        let val next_held_cards = c :: held_cards
+        in
+          if sum_cards (next_held_cards) > goal then next_held_cards
+          else turn (next_held_cards, next_card_list, next_moves)
+        end
+      | (_, _) => held_cards
   in
-    let
-      val held_cards = turn ([], cards, moves)
-    in
-      score (held_cards, goal)
-    end
+    score (turn ([], cards, moves), goal)
   end
