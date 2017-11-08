@@ -150,3 +150,38 @@ fun sum_cards(cards : card list) =
   in
     aux (cards, 0)
   end
+
+(* A game is played with a card-list and a goal. The player has a list of
+   held-cards, initially empty. The player makes a move by either drawing,
+   which means removing the first card in the card-list from the card-list and
+   adding it to the held-cards, or discarding, which means choosing one of the
+   held-cards to remove. The game ends either when the player chooses to make
+   no more moves or when the sum of the values of the held-cards is greater
+   than the goal.
+
+   The objective is to end the game with a low score (0 is best). Scoring works
+   as follows: Let sum be the sum of the values of the held-cards. If sum is
+   greater than goal, the preliminary score is three times (sum−goal), else the
+   preliminary score is (goal − sum). The score is the preliminary score unless
+   all the held-cards are the same color, in which case the score is the
+   preliminary score divided by 2 (and rounded down as usual with integer
+   division; use ML’s div operator).*)
+
+(* 2f. Write a function score, which takes a card list (the held-cards) and an
+   int (the goal) and computes the score as described above. *)
+fun score(cards : card list, goal : int) : int =
+  let
+    val score_sum = sum_cards cards
+    val all_same = all_same_color cards
+
+    val prelim_score =
+      if score_sum > goal then
+        3 * (score_sum - goal)
+      else
+        goal - score_sum
+  in
+    if all_same then
+      prelim_score div 2
+    else
+      prelim_score
+  end
