@@ -2,7 +2,17 @@
    null, hd, tl, isSome, or valOf, nor may you use anything containing a #
    character or features not used in class (such as mutation). Note that list
    order does not matter unless specifically stated in the problem. *)
-use "hw2provided.sml";
+datatype suit = Clubs | Diamonds | Hearts | Spades
+datatype rank = Jack | Queen | King | Ace | Num of int
+type card = suit * rank
+
+datatype color = Red | Black
+datatype move = Discard of card | Draw
+
+exception IllegalMove
+
+fun same_string(s1 : string, s2 : string) =
+  s1 = s2
 
 (* 1a. Write a function all_except_option, which takes a string and a string
    list. Return NONE if the string is not in the list, else return SOME lst
