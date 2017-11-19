@@ -56,7 +56,8 @@ void main() {
     writeln(div(a, b));
     break;
 
-  default: assert(0);
+  default:
+    assert(0);
   }
 
   static assert(__traits(compiles, add(1, 2)));
