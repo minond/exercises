@@ -1,5 +1,4 @@
-void main()
-{
+void main() {
   import std.stdio : writeln;
 
   // bool                        8 bit
@@ -21,8 +20,8 @@ void main()
   // - Number types have a `.`min` and a `.max` property.`
   int thousands = 42_832_000;
 
-  uint thousands2 = thousands;            // ok
-  short lessSo = cast(short) thousands;   // cast required
+  uint thousands2 = thousands; // ok
+  short lessSo = cast(short) thousands; // cast required
 
   int g; // default value of int is 0
   assert(g == 0);

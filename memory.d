@@ -13,20 +13,17 @@ import std.stdio : writeln;
 //   - @trusted: this could be a safe or an unsafe function, but it is one that
 //     is trusted and can therefore be called by `@safe` functions.
 
-void safeFun() @safe
-{
+void safeFun() @safe {
   writeln("Hello, World!");
-  int * p = new int;
+  int* p = new int;
 }
 
-void unsafeFun()
-{
+void unsafeFun() {
   int* p = new int;
   int* fiddling = p + 5;
 }
 
-void main()
-{
+void main() {
   int a;
   int* b = &a;
   auto c = &a;

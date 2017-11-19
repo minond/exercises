@@ -3,13 +3,11 @@ import std.stdio : writeln;
 // By default everything is mutable. A `const` can point to mutable data but an
 // `immutable` cannot. `const` is only enforced in the current scope.
 
-void foo(const char[] s)
-{
+void foo(const char[] s) {
   writeln(s);
 }
 
-void main()
-{
+void main() {
   int m = 100;
   m = 200;
   writeln("m type: ", typeof(m).stringof);
