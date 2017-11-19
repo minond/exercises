@@ -1,7 +1,7 @@
 import std.stdio : writefln;
 
-// Standard stuff. `while`, `do/while`, c `for` loops, java-like `for` loops,
-// labels that can be used in `break/continue`, etc.
+// Standard stuff. `while`, `do/while`, c `for` loops, java-like `foreach`
+// loops, labels that can be used in `break/continue`, etc.
 void main() {
   auto testers = [[5, 15],
     [2, 3, 2, 3],
