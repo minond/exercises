@@ -3,9 +3,7 @@ import std.stdio : writefln;
 // Standard stuff. `while`, `do/while`, c `for` loops, java-like `foreach`
 // loops, labels that can be used in `break/continue`, etc.
 void main() {
-  auto testers = [[5, 15],
-    [2, 3, 2, 3],
-    [3, 6, 2, 9]];
+  auto testers = [[5, 15], [2, 3, 2, 3], [3, 6, 2, 9]];
 
   for (uint i = 0; i < testers.length; i++) {
     writefln("The average of %s is %s", testers[i], average(testers[i]));
