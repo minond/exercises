@@ -1,7 +1,8 @@
-scala/*/project
-scala/*/target
+*/project
+*/target
 
 *.beam
 *.pyc
 *.swp
 *.swo
+*.class
