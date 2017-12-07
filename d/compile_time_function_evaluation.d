@@ -4,12 +4,12 @@ import std.stdio : writeln;
 
 auto sqrt(T)(T x) {
   auto goodNuff = 0.01;
-  T z = x*x, old = 0;
+  T z = x * x, old = 0;
   int iter;
 
   while (abs(z - old) > goodNuff) {
     old = z;
-    z -= ((z*z)-x) / (2*z);
+    z -= ((z * z) - x) / (2 * z);
   }
 
   return z;

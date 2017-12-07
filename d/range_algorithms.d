@@ -1,5 +1,6 @@
 // Check out `std.range` and `std.algorithm`.
-import std.algorithm : filter, map, each, canFind, splitter, sort, uniq, chunkBy, joiner;
+import std.algorithm : filter, map, each, canFind, splitter, sort, uniq,
+  chunkBy, joiner;
 import std.array : empty, array;
 import std.conv : to;
 import std.string : format;
@@ -21,15 +22,9 @@ void main() {
   auto wordCharCounts = words.map!`a.count`;
   writeln(wordCharCounts);
 
-  zip(wordCharCounts, words)
-    // convert to an array so we can call .sort
-    .array()
-    .sort()
-    .uniq()
-    .chunkBy!(a => a[0])
-    .map!(chunk => format("%d -> %s", chunk[0], chunk[1].map!(a => a[1]).joiner(", ")))
-    .joiner("\n")
-    .writeln();
+  zip(wordCharCounts, words) // convert to an array so we can call .sort
+  .array().sort().uniq().chunkBy!(a => a[0]).map!(chunk => format("%d -> %s",
+      chunk[0], chunk[1].map!(a => a[1]).joiner(", "))).joiner("\n").writeln();
 
   auto range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
