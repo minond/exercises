@@ -36,5 +36,6 @@ T sqrt(T)(T number) {
 
 void main() {
   import std.stdio : writeln;
+
   writeln("Hi");
 }
