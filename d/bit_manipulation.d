@@ -3,10 +3,8 @@ import std.stdio : writeln;
 
 struct BitVector {
   // Field widths must sum to 8, 16, 32, or 64.
-  mixin(bitfields!(// Field 1
-      uint, "x1", 2, int, "y1", 3, uint, "z1", 2, bool, "flag1", 1,// Field 2
-      uint, "x2",
-      2, int, "y2", 3, uint, "z2", 2, bool, "flag2", 1));
+  mixin(bitfields!(uint, "x1", 2, int, "y1", 3, uint, "z1", 2, bool, "flag1",
+      1, uint, "x2", 2, int, "y2", 3, uint, "z2", 2, bool, "flag2", 1));
 }
 
 struct BadVector {
