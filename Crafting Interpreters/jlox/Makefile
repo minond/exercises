@@ -3,7 +3,7 @@
 all: build run
 
 build:
-	javac -d build src/java/main/com/craftinginterpreters/lox/Lox.java
+	javac -d build src/java/main/com/craftinginterpreters/lox/*.java
 
 run:
 	java -cp ./build/ com/craftinginterpreters/lox/Lox
