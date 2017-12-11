@@ -97,14 +97,73 @@ class Scanner {
         line++;
         break;
 
+      case '"':
+        string();
+        break;
+
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        number();
+        break;
+
       default:
         Lox.error(line, "Unexpected character: " + c);
         break;
     }
   }
 
+  private void number() {
+    while (isDigit(peek())) {
+      advance();
+    }
+
+    if (peek() == '.' && isDigit(peekNext())) {
+      // Eat the '.'.
+      advance();
+
+      while (isDigit(peek())) {
+        advance();
+      }
+    }
+
+    addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
+  }
+
+  private void string() {
+    while (!isAtEnd() && peek() != '"') {
+      if (peek() == '\n') {
+        line++;
+      }
+
+      advance();
+    }
+
+    if (isAtEnd()) {
+      Lox.error(line, "Unterminated string.");
+      return;
+    }
+
+    // Eat the closing '"'.
+    advance();
+
+    String value = source.substring(start + 1, current - 1);
+    addToken(STRING, value);
+  }
+
   private boolean isAtEnd() {
     return current >= source.length();
+  }
+
+  private boolean isDigit(char c) {
+    return c >= '0' && c <= '9';
   }
 
   private void addToken(TokenType type) {
@@ -140,6 +199,14 @@ class Scanner {
     }
 
     return source.charAt(current);
+  }
+
+  private char peekNext() {
+    if (current + 1 >= source.length()) {
+      return '\0';
+    }
+
+    return source.charAt(current + 1);
   }
 
   public List<Token> scanTokens() {
