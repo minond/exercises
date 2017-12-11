@@ -101,23 +101,32 @@ class Scanner {
         string();
         break;
 
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        number();
+      case 'o':
+        if (peek() == 'r') {
+          addToken(OR);
+        }
+
         break;
 
       default:
-        Lox.error(line, "Unexpected character: " + c);
+        if (isDigit(c)) {
+          number();
+        } else if (isAlpha(c)) {
+          identifier();
+        } else {
+          Lox.error(line, "Unexpected character: " + c);
+        }
+
         break;
     }
+  }
+
+  private void identifier() {
+    while (isAlphaNumeric(peek())) {
+      advance();
+    }
+
+    addToken(IDENTIFIER);
   }
 
   private void number() {
@@ -164,6 +173,14 @@ class Scanner {
 
   private boolean isDigit(char c) {
     return c >= '0' && c <= '9';
+  }
+
+  private boolean isAlpha(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+  }
+
+  private boolean isAlphaNumeric(char c) {
+    return isDigit(c) || isAlpha(c);
   }
 
   private void addToken(TokenType type) {
