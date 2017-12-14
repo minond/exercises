@@ -33,6 +33,8 @@ public class GenerateAst {
     writer.println("");
     writer.printf("abstract class %s {\n", baseName);
 
+    defineVisitor(writer, baseName, types);
+
     // AST classes.
     for (String type : types) {
       String className = type.split(":")[0].trim();
@@ -40,6 +42,7 @@ public class GenerateAst {
       defineType(writer, baseName, className, fields);
     }
 
+    writer.println("\n  abstract <R> R accept(Visitor<R> visitor);");
     writer.println("}");
     writer.close();
   }
@@ -59,6 +62,11 @@ public class GenerateAst {
     }
     writer.printf("    }\n\n");
 
+    // Visitor
+    writer.println("\n    <R> R accept(Visitor<R> visitor) {");
+    writer.printf("      return visitor.visit%s%s(this);\n", className, baseName);
+    writer.println("    }");
+
     // Fields
     for (String field : fieldList) {
       writer.printf("    final %s;\n", field);
@@ -66,5 +74,17 @@ public class GenerateAst {
 
     // End of class definition
     writer.printf("  }");
+  }
+
+  private static void defineVisitor(PrintWriter writer, String baseName, List<String> types) {
+    writer.println("    interface Visitor<R> {");
+
+    for (String type : types) {
+      String typeName = type.split(":")[0].trim();
+      writer.printf(
+          "      R visit%s%s (%s %s);\n", typeName, baseName, typeName, baseName.toLowerCase());
+    }
+
+    writer.println("    }");
   }
 }
