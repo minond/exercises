@@ -14,6 +14,14 @@ class Parser {
     this.tokens = tokens;
   }
 
+  Expr parse() {
+    try {
+      return expression();
+    } catch (ParseError err) {
+      return null;
+    }
+  }
+
   // expression = equality ;
   private Expr expression() {
     return equality();
@@ -98,7 +106,31 @@ class Parser {
       return new Expr.Grouping(expr);
     }
 
-    throw new Error("Invalid expression");
+    throw error(peek(), "Expecting expression.");
+  }
+
+  private void synchronize() {
+    advance();
+
+    while (!isAtEnd()) {
+      if (previous().type == SEMICOLON) {
+        return;
+      }
+
+      switch (peek().type) {
+      case CLASS:
+      case FOR:
+      case FUN:
+      case IF:
+      case PRINT:
+      case RETURN:
+      case VAR:
+      case WHILE:
+        return;
+      }
+
+      advance();
+    }
   }
 
   private void consume(TokenType tokenType, String message) {
