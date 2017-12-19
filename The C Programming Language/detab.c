@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
   int c;
   bool sol = true;
 
-  int n = atoi(argv[1]);
+  int n = argc > 1 ? atoi(argv[1]) : 2;
   char spaces[10];
 
   for (int i = 0; i < n; i++) {
