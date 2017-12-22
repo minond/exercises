@@ -12,10 +12,10 @@
      (println (sequence 3 8 3)) ; ’(3 6)
      (println (sequence 3 2 1)) ; ’() |#
 (define (sequence low high stride)
-  (if (>= low high)
-      '()
-      (let ([next (+ low stride)])
-        (cons next (sequence next high stride)))))
+  (let ([next (+ low stride)])
+    (cons low (if (> next high)
+                null
+                (sequence next high stride)))))
 
 #| 2. Write a function string-append-map that takes a list of strings xs and a
    string suffix and returns a list of strings. Each element of the output
@@ -28,7 +28,7 @@
       "Mr. ")) |#
 (define (string-append-map xs suffix)
   (map (lambda (item)
-         (string-append suffix item))
+         (string-append item suffix))
        xs))
 
 #| 3. Write a function list-nth-mod that takes a list xs and a number n. If the
@@ -53,11 +53,12 @@
    with this function instead of the graphics code. |#
 (define (stream-for-n-steps s n)
   (letrec ([nth (lambda (i stream)
-                  (cond [(zero? i) (car (stream))]
-                        [#t (nth (- i 1) (cdr (stream)))]))]
+                  (if (zero? i) (car (stream))
+                      (nth (- i 1) (cdr (stream)))))]
            [next (lambda (i)
-                  (cond [(= i n) null]
-                        [#t (cons (nth i s) (next (+ i 1)))]))])
+                  (if (= i n)
+                    null
+                    (cons (nth i s) (next (+ i 1)))))])
     (next 0)))
 
 #| 5. Write a stream funny-number-stream that is like the stream of natural
@@ -67,8 +68,9 @@
    number and the cdr will be another stream. |#
 (define funny-number-stream
   (letrec ([f (lambda (n)
-                (cons (cond [(zero? (modulo n 5)) (- n)]
-                            [#t n]) (lambda () (f (+ n 1)))))])
+                (cons (if (zero? (modulo n 5))
+                        (- n)
+                        n) (lambda () (f (+ n 1)))))])
     (lambda () (f 1))))
 
 #| 6. Write a stream dan-then-dog, where the elements of the stream alternate
@@ -77,7 +79,6 @@
    pair of "dan.jpg" and a thunk that when called produces a pair of "dog.jpg"
    and a thunk that when called... etc. Sample solution: 4 lines. |#
 (define dan-then-dog
-  (letrec ([f (lambda (o) (cons (cond [(zero? o) "dan.jpg"]
-                                      [#t "dog.jpg"]) (lambda () (f (cond [(zero? o) 1]
-                                                                          [#t 0])))))])
+  (letrec ([f (lambda (o) (cons (if (zero? o) "dan.jpg" "dog.jpg")
+                                (lambda () (f (if (zero? o) 1 0)))))])
     (lambda () (f 0))))
