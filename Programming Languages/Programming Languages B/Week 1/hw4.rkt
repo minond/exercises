@@ -108,5 +108,7 @@
    problems. Hints: Use one of the functions you wrote earlier. Use a recursive
    helper function that takes a number n and calls itself with (+ n 1) inside a
    thunk. |#
-; (define (cycle-lists xs ys)
-;   )
+(define (cycle-lists xs ys)
+  (letrec ([f (lambda (n) (cons (cons (list-nth-mod xs n) (list-nth-mod ys n))
+                                (lambda () (f (+ n 1)))))])
+    (lambda () (f 0))))
