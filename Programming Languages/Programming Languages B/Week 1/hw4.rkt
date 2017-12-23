@@ -45,7 +45,7 @@
   (cond [(< n 0) (error "list-nth-mod: negative number")]
         [(null? xs) (error "list-nth-mod: empty list")]
         [#t (let ([ith (remainder n (length xs))])
-                 (car (list-tail xs n)))]))
+                 (car (list-tail xs ith)))]))
 
 #| 4. Write a function stream-for-n-steps that takes a stream s and a number n.
    It returns a list holding the first n values produced by s in order. Assume
@@ -95,3 +95,18 @@
                       (nth (- i 1) (cdr (stream)))))]
            [f (lambda (n) (cons (cons 0 (nth n s)) (lambda () (f (+ n 1)))))])
     (lambda () (f 1))))
+
+#| 8. Write a function cycle-lists that takes two lists xs and ys and returns a
+   stream. The lists may or may not be the same length, but assume they are
+   both non-empty. The elements produced by the stream are pairs where the
+   first part is from xs and the second part is from ys. The stream cycles
+   forever through the lists. For example, if xs is ’(1 2 3) and ys is ’("a" "b"),
+   then the stream would produce, (1 . "a"), (2 . "b"), (3 . "a"), (1 . "b"),
+   (2 . "a"), (3 . "b"), (1 . "a"), (2 . "b"), etc.
+
+   Sample solution is 6 lines and is more complicated than the previous stream
+   problems. Hints: Use one of the functions you wrote earlier. Use a recursive
+   helper function that takes a number n and calls itself with (+ n 1) inside a
+   thunk. |#
+; (define (cycle-lists xs ys)
+;   )
