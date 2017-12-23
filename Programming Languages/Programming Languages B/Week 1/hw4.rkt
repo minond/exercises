@@ -82,3 +82,16 @@
   (letrec ([f (lambda (o) (cons (if (zero? o) "dan.jpg" "dog.jpg")
                                 (lambda () (f (if (zero? o) 1 0)))))])
     (lambda () (f 0))))
+
+#| 7. Write a function stream-add-zero that takes a stream s and returns
+   another stream. If s would produce v for its ith element, then
+   (stream-add-zero s) would produce the pair (0 . v) for its ith element.
+   Sample solution: 4 lines. Hint: Use a thunk that when called uses s and
+   recursion.  Note: One of the provided tests in the file using graphics uses
+   (stream-add-zero dan-then-dog) with place-repeatedly. |#
+(define (stream-add-zero s)
+  (letrec ([nth (lambda (i stream)
+                  (if (zero? i) (car (stream))
+                      (nth (- i 1) (cdr (stream)))))]
+           [f (lambda (n) (cons (cons 0 (nth n s)) (lambda () (f (+ n 1)))))])
+    (lambda () (f 1))))
