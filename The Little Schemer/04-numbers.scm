@@ -89,14 +89,14 @@
 (debug `(le 4 2))
 (debug `(le 2 2))
 
-(define to-the-power-of
+(define power
   (lambda (n m)
     (cond
       ((zero? m) 1)
-      (else (mult n (to-the-power-of n (sub1 m)))))))
+      (else (mult n (power n (sub1 m)))))))
 
-(debug `(to-the-power-of 2 2))
-(debug `(to-the-power-of 2 3))
+(debug `(power 2 2))
+(debug `(power 2 3))
 
 (define div
   (lambda (n m)
@@ -112,3 +112,14 @@
 (debug `(div 24 11))
 (debug `(div 24 12))
 (debug `(div 24 13))
+
+(define eq
+  (lambda (n m)
+    (cond
+      ((zero? n) (zero? m))
+      ((zero? n) #f)
+      (else (eq (sub1 n) (sub1 m))))))
+
+(debug `(eq 21 21))
+(debug `(eq 21 32))
+(debug `(eq 21 (sub 32 11)))
