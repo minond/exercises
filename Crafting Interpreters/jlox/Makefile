@@ -3,7 +3,7 @@
 all: build run
 
 build:
-	scalac src/main/scala/*.scala
+	scalac -deprecation src/main/scala/*.scala
 
 run:
 	scala com.craftinginterpreters.lox.Main

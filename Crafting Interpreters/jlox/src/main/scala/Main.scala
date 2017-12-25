@@ -8,7 +8,7 @@ object Main {
   var hadError = false
 
   def main(args: Array[String]) = {
-    val tok = Token(TokenType.EQUAL_EQUAL, "==", "==", 3)
+    val tok = Token(TokenType.EQUAL_EQUAL, "==", Some("=="), 3)
     println(tok)
   }
 
