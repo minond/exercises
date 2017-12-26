@@ -11,7 +11,7 @@ object GenerateAst extends App {
   defineAst(args(0), "Expr", Array(
     "Binary   - left: Expr, operator: Token, right: Expr",
     "Grouping - expression: Expr",
-    "Literal  - value: Object",
+    "Literal  - value: Any",
     "Unary    - operator: Token, right: Expr"
   ))
 
@@ -27,20 +27,26 @@ object GenerateAst extends App {
     writer.println("import collection.mutable.MutableList")
     writer.println("")
 
-    writer.println(s"abstract class ${baseName} {")
-
-    // Visitor methods
-    defineVisitor(writer, baseName, types)
-
     // AST classes
-    for (ttype <- types) {
-      val className = ttype.split("-")(0).trim()
-      val fields = ttype.split("-")(1).trim()
-      writer.println("")
-      defineType(writer, baseName, className, fields)
+    writer.println(s"object ${baseName} {")
+
+    types.zipWithIndex.foreach {
+      case (ttype, i) =>
+        val className = ttype.split("-")(0).trim()
+        val fields = ttype.split("-")(1).trim()
+
+        if (i != 0)
+          writer.println("")
+
+        defineType(writer, baseName, className, fields)
     }
 
+    writer.println("}")
     writer.println("")
+
+    // abstract class with trait and accept method
+    writer.println(s"abstract class ${baseName} {")
+    defineVisitor(writer, baseName, types)
     writer.println("  def accept[T](visitor: Visitor[T]): T")
     writer.println("}")
     writer.close()
@@ -67,7 +73,7 @@ object GenerateAst extends App {
 
     for (ttype <- types) {
       val typeName = ttype.split("-")(0).trim()
-      writer.println(s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${typeName}): T")
+      writer.println(s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${baseName}.${typeName}): T")
     }
 
     writer.println("  }")
