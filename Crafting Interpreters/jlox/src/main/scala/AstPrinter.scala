@@ -14,10 +14,16 @@ class AstPrinter extends Expr.Visitor[String] {
   }
 
   override def visitLiteralExpr(expr: Expr.Literal): String = {
-    if (expr.value == null)
+    if (expr.value == null) {
       "nil"
-    else
-      expr.value.toString
+    } else {
+      // Since Expr.Literal.value is of type Any we get Option's instead of
+      // literal values.
+      expr.value match {
+        case Some(str) => str.toString
+        case None => "nil?"
+      }
+    }
   }
 
   override def visitUnaryExpr(expr: Expr.Unary): String = {
