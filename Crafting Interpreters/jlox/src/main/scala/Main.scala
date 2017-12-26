@@ -41,14 +41,13 @@ object Main {
     val scanner = new Scanner(source)
     val tokens = scanner.scanTokens()
 
-    // val printer = new AstPrinter()
+    val printer = new AstPrinter()
     val parser = new Parser(tokens)
 
     Try { parser.parse() } match {
       case Success(expression) =>
         if (!hadError)
-          // println(printer.print(expression))
-          println(expression)
+          println(printer.print(expression))
 
       case Failure(err) =>
     }
