@@ -31,158 +31,87 @@ class Scanner(source: String) {
 
   val tokens = new MutableList[Token]()
 
-  // private void scanToken() {
-  //   char c = advance();
-  //
-  //   switch (c) {
-  //     case '(':
-  //       addToken(LEFT_PAREN);
-  //       break;
-  //
-  //     case ')':
-  //       addToken(RIGHT_PAREN);
-  //       break;
-  //
-  //     case '{':
-  //       addToken(LEFT_BRACE);
-  //       break;
-  //
-  //     case '}':
-  //       addToken(RIGHT_BRACE);
-  //       break;
-  //
-  //     case ',':
-  //       addToken(COMMA);
-  //       break;
-  //
-  //     case '.':
-  //       addToken(DOT);
-  //       break;
-  //
-  //     case '-':
-  //       addToken(MINUS);
-  //       break;
-  //
-  //     case '+':
-  //       addToken(PLUS);
-  //       break;
-  //
-  //     case ';':
-  //       addToken(SEMICOLON);
-  //       break;
-  //
-  //     case '*':
-  //       addToken(STAR);
-  //       break;
-  //
-  //     case '!':
-  //       addToken(match('=') ? BANG_EQUAL : BANG);
-  //       break;
-  //
-  //     case '=':
-  //       addToken(match('=') ? EQUAL_EQUAL : EQUAL);
-  //       break;
-  //
-  //     case '<':
-  //       addToken(match('=') ? LESS_EQUAL : LESS);
-  //       break;
-  //
-  //     case '>':
-  //       addToken(match('=') ? GREATER : GREATER_EQUAL);
-  //       break;
-  //
-  //     case '/':
-  //       if (match('/')) {
-  //         while (peek() != '\n' && !isAtEnd()) {
-  //           advance();
-  //         }
-  //       } else {
-  //         addToken(SLASH);
-  //       }
-  //
-  //       break;
-  //
-  //     case ' ':
-  //     case '\r':
-  //     case '\t':
-  //       break;
-  //
-  //     case '\n':
-  //       line++;
-  //       break;
-  //
-  //     case '"':
-  //       string();
-  //       break;
-  //
-  //     case 'o':
-  //       if (peek() == 'r') {
-  //         addToken(OR);
-  //       }
-  //
-  //       break;
-  //
-  //     default:
-  //       if (isDigit(c)) {
-  //         number();
-  //       } else if (isAlpha(c)) {
-  //         identifier();
-  //       } else {
-  //         Lox.error(line, "Unexpected character: " + c);
-  //       }
-  //
-  //       break;
-  //   }
-  // }
-  //
-  // private void identifier() {
-  //   while (isAlphaNumeric(peek())) {
-  //     advance();
-  //   }
-  //
-  //   String text = source.substring(start, current);
-  //   TokenType type = keywords.get(text);
-  //
-  //   addToken(type != null ? type : IDENTIFIER);
-  // }
-  //
-  // private void number() {
-  //   while (isDigit(peek())) {
-  //     advance();
-  //   }
-  //
-  //   if (peek() == '.' && isDigit(peekNext())) {
-  //     // Eat the '.'.
-  //     advance();
-  //
-  //     while (isDigit(peek())) {
-  //       advance();
-  //     }
-  //   }
-  //
-  //   addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
-  // }
-  //
-  // private void string() {
-  //   while (!isAtEnd() && peek() != '"') {
-  //     if (peek() == '\n') {
-  //       line++;
-  //     }
-  //
-  //     advance();
-  //   }
-  //
-  //   if (isAtEnd()) {
-  //     Lox.error(line, "Unterminated string.");
-  //     return;
-  //   }
-  //
-  //   // Eat the closing '"'.
-  //   advance();
-  //
-  //   String value = source.substring(start + 1, current - 1);
-  //   addToken(STRING, value);
-  // }
+  private def scanToken() = {
+    advance()  match {
+      case '(' => addToken(LEFT_PAREN)
+      case ')' => addToken(RIGHT_PAREN)
+      case '{' => addToken(RIGHT_BRACE)
+      case '}' => addToken(LEFT_BRACE)
+      case ',' => addToken(COMMA)
+      case '.' => addToken(DOT)
+      case '-' => addToken(MINUS)
+      case '+' => addToken(PLUS)
+      case ';' => addToken(SEMICOLON)
+      case '*' => addToken(STAR)
+      case '!' => addToken(if (matches('=')) BANG_EQUAL else BANG)
+      case '=' => addToken(if (matches('=')) EQUAL_EQUAL else EQUAL)
+      case '<' => addToken(if (matches('=')) LESS_EQUAL else LESS)
+      case '>' => addToken(if (matches('=')) GREATER_EQUAL else GREATER)
+      case ' ' | '\r' | 't' =>
+      case '\n' => line += 1
+      case '"' => string()
+      case 'o' => if (peek() == 'r') addToken(OR)
+      case c if isDigit(c) => number()
+      case c if isAlpha(c) => identifier()
+
+      case '/' =>
+        if (matches('/')) {
+          while (peek() != '\n' && !isAtEnd()) {
+            advance()
+          }
+        } else {
+          addToken(SLASH)
+        }
+
+      case c =>
+        Main.error(line, s"Unterminated character: $c")
+    }
+  }
+
+  private def identifier() = {
+    while (isAlphaNumeric(peek()))
+      advance()
+
+    val value = source.substring(start, current)
+
+    if (Scanner.keywords.contains(value)) {
+      addToken(Scanner.keywords(value))
+    } else {
+      addToken(IDENTIFIER)
+    }
+  }
+
+  private def number() = {
+    while (isDigit(peek()))
+      advance()
+
+    if (peek() == '.' && isDigit(peekNext())) {
+      // Eat the '.'
+      advance()
+
+      while (isDigit(peek()))
+        advance()
+    }
+
+    addToken(NUMBER, Some(source.substring(start, current).toDouble))
+  }
+
+  private def string() = {
+    while (!isAtEnd() && peek() != '"') {
+      if (peek() == '\n')
+        line += 1
+
+      advance()
+    }
+
+    if (isAtEnd()) {
+      Main.error(line, "Unterminated string")
+    } else {
+      // Eat the closing '"'
+      advance()
+      addToken(STRING, Some(source.substring(start + 1, current - 1)))
+    }
+  }
 
   private def isAtEnd() = {
     current >= source.length
@@ -204,7 +133,7 @@ class Scanner(source: String) {
     addToken(ttype, None)
   }
 
-  private def addToken(ttype: TokenType, literal: Option[AnyRef]): Unit = {
+  private def addToken(ttype: TokenType, literal: Option[Any]): Unit = {
     val text = source.substring(start, current)
     tokens += new Token(ttype, text, Some(text), line)
   }
