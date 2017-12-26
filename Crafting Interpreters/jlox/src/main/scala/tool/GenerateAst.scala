@@ -21,35 +21,46 @@ object GenerateAst extends App {
 
     println(s"Generating $path.")
 
+    defineHeader(writer)
+    writer.println("")
+
+    defineImports(writer)
+    writer.println("")
+
+    defineClass(writer, baseName)
+    writer.println("")
+
+    defineObject(writer, baseName, types)
+    writer.close()
+  }
+
+  def defineHeader(writer: PrintWriter) = {
     writer.println("/* AUTO GENERATED - DO NOT EDIT */")
     writer.println("package com.craftinginterpreters.lox")
-    writer.println("")
+  }
+
+  def defineImports(writer: PrintWriter) = {
     writer.println("import collection.mutable.MutableList")
-    writer.println("")
+  }
 
-    // AST classes
+  def defineObject(writer: PrintWriter, baseName: String, types: Array[String]) = {
     writer.println(s"object ${baseName} {")
+    defineVisitor(writer, baseName, types)
 
-    types.zipWithIndex.foreach {
-      case (ttype, i) =>
-        val className = ttype.split("-")(0).trim()
-        val fields = ttype.split("-")(1).trim()
-
-        if (i != 0)
-          writer.println("")
-
-        defineType(writer, baseName, className, fields)
+    types.foreach { ttype =>
+      val className = ttype.split("-")(0).trim()
+      val fields = ttype.split("-")(1).trim()
+      writer.println("")
+      defineType(writer, baseName, className, fields)
     }
 
     writer.println("}")
-    writer.println("")
+  }
 
-    // abstract class with trait and accept method
+  def defineClass(writer: PrintWriter, baseName: String) = {
     writer.println(s"abstract class ${baseName} {")
-    defineVisitor(writer, baseName, types)
-    writer.println("  def accept[T](visitor: Visitor[T]): T")
+    writer.println(s"  def accept[T](visitor: ${baseName}.Visitor[T]): T")
     writer.println("}")
-    writer.close()
   }
 
   def defineType(writer: PrintWriter, baseName: String, className: String, fields: String) = {
@@ -58,8 +69,13 @@ object GenerateAst extends App {
       .map { field => field.split(":")(0).trim() }
       .mkString(", ")
 
+    val accessArgs = fields
+      .split(",")
+      .map { field => s"val $field" }
+      .mkString(", ")
+
     // Constructor
-    writer.println(s"  class $className($fields) extends $baseName {")
+    writer.println(s"  class $className($accessArgs) extends $baseName {")
 
     // Visitor
     writer.println(s"    def accept[T](visitor: Visitor[T]): T = {")
@@ -73,7 +89,7 @@ object GenerateAst extends App {
 
     for (ttype <- types) {
       val typeName = ttype.split("-")(0).trim()
-      writer.println(s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${baseName}.${typeName}): T")
+      writer.println(s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${typeName}): T")
     }
 
     writer.println("  }")
