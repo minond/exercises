@@ -31,6 +31,16 @@ class Scanner(source: String) {
 
   val tokens = new MutableList[Token]()
 
+  def scanTokens(): MutableList[Token] = {
+    while (!isAtEnd()) {
+      start = current
+      scanToken()
+    }
+
+    tokens += new Token(EOF, "", None, line)
+    return tokens
+  }
+
   private def scanToken() = {
     advance()  match {
       case '(' => addToken(LEFT_PAREN)
@@ -165,15 +175,5 @@ class Scanner(source: String) {
     } else {
       return source.charAt(current + 1)
     }
-  }
-
-  private def scanTokens(): MutableList[Token] = {
-    while (!isAtEnd()) {
-      start = current
-      // scanToken()
-    }
-
-    tokens += new Token(EOF, "", None, line)
-    return tokens
   }
 }
