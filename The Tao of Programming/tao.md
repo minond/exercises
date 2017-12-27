@@ -1,7 +1,7 @@
 # The Tao of Programming
 
 
-#### _Translated by Geoffrey James_
+#### _By Geoffrey James_
 
 
 ### Book 1 - The Silent Void
