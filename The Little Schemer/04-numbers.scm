@@ -1,4 +1,4 @@
-(load "common.scm")
+(load "00-common.scm")
 
 (define add1
   (lambda (n)
@@ -6,11 +6,13 @@
 
 (debug `(add1 42))
 
+
 (define sub1
   (lambda (n)
     (- n 1)))
 
 (debug `(sub1 42))
+
 
 (define add
   (lambda (n m)
@@ -20,6 +22,7 @@
 
 (debug `(add 21 21))
 
+
 (define sub
   (lambda (n m)
     (cond
@@ -27,6 +30,7 @@
       (else (sub1 (sub n (sub1 m)))))))
 
 (debug `(sub 100 10))
+
 
 (define mult
   (lambda (n m)
@@ -36,6 +40,7 @@
 
 (debug `(mult 4 3))
 
+
 (define tup+
   (lambda (t1 t2)
     (cond
@@ -44,6 +49,7 @@
       (else (cons (add (car t1) (car t2)) (tup+ (cdr t1) (cdr t2)))))))
 
 (debug `(tup+ '(1 2 3) '(4 5 6)))
+
 
 (define gt
   (lambda (n m)
@@ -56,6 +62,7 @@
 (debug `(gt 2 123))
 (debug `(gt 123 123))
 
+
 (define ge
   (lambda (n m)
     (cond
@@ -66,6 +73,7 @@
 (debug `(ge 123 2))
 (debug `(ge 2 123))
 (debug `(ge 123 123))
+
 
 (define lt
   (lambda (n m)
@@ -78,6 +86,7 @@
 (debug `(lt 4 2))
 (debug `(lt 2 2))
 
+
 (define le
   (lambda (n m)
     (cond
@@ -89,6 +98,7 @@
 (debug `(le 4 2))
 (debug `(le 2 2))
 
+
 (define power
   (lambda (n m)
     (cond
@@ -97,6 +107,7 @@
 
 (debug `(power 2 2))
 (debug `(power 2 3))
+
 
 (define div
   (lambda (n m)
@@ -112,6 +123,7 @@
 (debug `(div 24 11))
 (debug `(div 24 12))
 (debug `(div 24 13))
+
 
 (define eq
   (lambda (n m)
