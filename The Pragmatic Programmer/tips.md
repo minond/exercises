@@ -290,3 +290,109 @@ you incorporate it into your project.
 
 Requirements rarely lie on the surface. They're buried deep beneath layers of
 assumptions, misconceptions, and politics.
+
+
+## 52. Work with a User to Think Like a User
+
+It's the best way to gain insight into how the system will really be used.
+
+
+## 53. Abstractions Live Longer than Details
+
+Invest in the abstraction, not the implementation. Abstractions can survice the
+barrage of changes from different implementation and new technologies.
+
+
+## 54. Use a Project Glossary
+
+It's the best way to gain insight into how the system will really be used.
+
+
+## 55. Don't Think Outside the Box - Find the Box
+
+When faced with an impossible problem, identify the real constraints. Ask
+yourself: "Does it have to be done this way?" Does it have to be done at all?"
+
+
+## 56.Start When You're Reay
+
+You've been building experience all your life. Don't ignore niggling doubts.
+
+
+## 57. Some Things Are Better Done than Described
+
+Don't fall into the specification spiral - at some point you need to start
+coding.
+
+
+## 58. Don't Be a Slace to Formal Methods
+
+Don't blindly adopt any technique without putting it into the context of your
+developmen practices and capabilities.
+
+
+## 59. Costly Tools Don't Produce Better Designs
+
+Don't blindly adopt any technique without putting it into the context of your
+developemnt practices and capabilities.
+
+
+## 60. Organize Teams Around Functionality
+
+Don't separate designers from coders, testsers from data modelers. Build teams
+the way you build code.
+
+
+## 61. Don't Use Manual Procedures
+
+A shell script or batch file will execute the same instructions, in the same
+order, time after time.
+
+
+## 62. Test Early. Test Often. Test Automatically.
+
+Tests that run with every build are much more effective than test plans that
+sit on the shelf.
+
+
+## 63. Coding Isn't Done Until All the Tests Run
+
+Enough said.
+
+
+## 64. Use Saboteurs to Test Your Testing
+
+Introduce bugs on purpose in a separate copy of the source to verify that
+testing will catch them.
+
+
+## 65. Test State Coverage, Not Code Coverate
+
+Identify and test significant program states. Just testing lines of code isn't
+enough.
+
+## 66. Find Bugs Onces
+
+Once a human tester finds a bug, it should be the last time a human tester
+finds that bug. Automatic tests should check for it from then on.
+
+
+## 67. English is Just a Programming Language
+
+Write documents as you would write code: honor the DRY principle, use metadata,
+MVC, automatic generation, and so on.
+
+
+## 68. Building Documentation In, Don't Bold It On
+
+Documentation created separately from code is less likely to be correct and up
+to date.
+
+
+## 69. Come to understand your users' exceptations, then deliver just that
+little bit more.
+
+
+## 70. Sign Your Work
+
+Craftsmen of an earlier age were proud to sign their work. You should be, too.
