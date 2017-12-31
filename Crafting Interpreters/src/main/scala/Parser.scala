@@ -125,7 +125,7 @@ class Parser(tokens: MutableList[Token]) {
 
   private def error(token: Token, message: String): ParseError = {
     Main.error(token, message)
-    return new ParseError()
+    new ParseError()
   }
 
   private def matches(types: TokenType*): Boolean = {

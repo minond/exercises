@@ -44,6 +44,6 @@ class AstPrinter extends Expr.Visitor[String] {
     }
 
     builder.append(")")
-    return builder.toString
+    builder.toString
   }
 }

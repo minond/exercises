@@ -38,7 +38,7 @@ class Scanner(source: String) {
     }
 
     tokens += new Token(EOF, "", None, line)
-    return tokens
+    tokens
   }
 
   private def scanToken() = {
@@ -158,22 +158,20 @@ class Scanner(source: String) {
       return false
 
     current += 1
-    return true
+    true
   }
 
   private def peek(): Char = {
-    if (isAtEnd()) {
-      return '\0'
-    } else {
+    if (isAtEnd())
+      '\0'
+    else
       source.charAt(current)
-    }
   }
 
   private def peekNext(): Char = {
-    if (current + 1 >= source.length) {
-      return '\0'
-    } else {
-      return source.charAt(current + 1)
-    }
+    if (current + 1 >= source.length)
+      '\0'
+    else
+      source.charAt(current + 1)
   }
 }
