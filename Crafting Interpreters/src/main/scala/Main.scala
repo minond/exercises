@@ -6,7 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.file.{Files, Paths}
 
 object Main {
+  val interpreter = new Interpreter
+
   var hadError = false
+  var hadRuntimeError = false
 
   def main(args: Array[String]) = {
     if (args.length > 1) {
@@ -24,6 +27,8 @@ object Main {
 
     if (hadError)
       System.exit(65)
+    else if (hadRuntimeError)
+      System.exit(70)
   }
 
   private def runPrompt() = {
@@ -46,8 +51,11 @@ object Main {
 
     Try { parser.parse() } match {
       case Success(expression) =>
-        if (!hadError)
+        if (!hadError) {
           println(printer.print(expression))
+          println("")
+          interpreter.interpret(expression)
+        }
 
       case Failure(err) =>
     }
@@ -63,6 +71,12 @@ object Main {
 
   def error(line: Int, message: String) = {
     report(line, "", message)
+  }
+
+  def runtimeError(err: RuntimeError) = {
+    Console.err.println(err.getMessage())
+    Console.err.println(s"[line ${err.token.line}]")
+    hadRuntimeError = true
   }
 
   def report(line: Int, where: String, message: String) = {

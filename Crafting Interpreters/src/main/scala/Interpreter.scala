@@ -1,25 +1,45 @@
 package com.craftinginterpreters.lox
 
+import scala.util.{Try, Success, Failure}
 import com.craftinginterpreters.lox.TokenType._
 
 class Interpreter extends Expr.Visitor[Any] {
+  def interpret(expr: Expr): Unit  = {
+    Try { stringify(evaluate(expr)) } match {
+      case Success(value) => println(value)
+      case Failure(error: RuntimeError) => Main.runtimeError(error)
+      case Failure(error) => throw error
+    }
+  }
+
   override def visitBinaryExpr(expr: Expr.Binary): Any = {
     val left = evaluate(expr.left)
     val right = evaluate(expr.right)
 
-    (expr.operator, left.isInstanceOf[Double], right.isInstanceOf[Double]) match {
-      case (MINUS, _, _) => left.asInstanceOf[Double] - right.asInstanceOf[Double]
-      case (SLASH, _, _) => left.asInstanceOf[Double] / right.asInstanceOf[Double]
-      case (STAR, _, _) => left.asInstanceOf[Double] * right.asInstanceOf[Double]
-      case (PLUS, true, true) => left.asInstanceOf[Double] + right.asInstanceOf[Double]
-      case (PLUS, _, _) => left.asInstanceOf[String] + right.asInstanceOf[String]
+    expr.operator.ttype match {
+      // Arithmetic operator
+      case MINUS => asOpNumber(expr.operator, left) - asOpNumber(expr.operator, right)
+      case SLASH => asOpNumber(expr.operator, left) / asOpNumber(expr.operator, right)
+      case STAR => asOpNumber(expr.operator, left) * asOpNumber(expr.operator, right)
+      case PLUS =>
+        if (left.isInstanceOf[Double] && right.isInstanceOf[Double])
+          left.asInstanceOf[Double] + right.asInstanceOf[Double]
+        else if (left.isInstanceOf[String] && right.isInstanceOf[String])
+          left.asInstanceOf[String] + right.asInstanceOf[String]
+        else
+          throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
 
-      case (GREATER, _, _) => left.asInstanceOf[Double] > right.asInstanceOf[Double]
-      case (GREATER_EQUAL, _, _) => left.asInstanceOf[Double] >= right.asInstanceOf[Double]
-      case (LESS, _, _) => left.asInstanceOf[Double] < right.asInstanceOf[Double]
-      case (LESS_EQUAL, _, _) => left.asInstanceOf[Double] <= right.asInstanceOf[Double]
+      // Relational operators
+      case GREATER => asOpNumber(expr.operator, left) > asOpNumber(expr.operator, right)
+      case GREATER_EQUAL => asOpNumber(expr.operator, left) >= asOpNumber(expr.operator, right)
+      case LESS => asOpNumber(expr.operator, left) < asOpNumber(expr.operator, right)
+      case LESS_EQUAL => asOpNumber(expr.operator, left) <= asOpNumber(expr.operator, right)
 
-      case _ => null
+      // Equality operators
+      case BANG_EQUAL => !isEqual(left, right)
+      case EQUAL_EQUAL => isEqual(left, right)
+
+      case _ => throw new RuntimeError(expr.operator, "Unknown operator.")
     }
   }
 
@@ -38,8 +58,8 @@ class Interpreter extends Expr.Visitor[Any] {
     val right = evaluate(expr.right)
 
     expr.operator.ttype match {
-      case MINUS => -right.asInstanceOf[Double]
-      case BANG => !isTrouthy(right)
+      case MINUS => -asOpNumber(expr.operator, right)
+      case BANG => !isTruthy(right)
       case _ => null
     }
   }
@@ -48,12 +68,43 @@ class Interpreter extends Expr.Visitor[Any] {
     expr.accept(this)
   }
 
-  private def isTrouthy(value: Any): Boolean = {
+  private def isTruthy(value: Any): Boolean = {
     if (value == null)
-      return false
+      false
     else if (value.isInstanceOf[Boolean])
-      return value.asInstanceOf[Boolean]
+      value.asInstanceOf[Boolean]
     else
-      return true
+      true
+  }
+
+  private def isEqual(left: Any, right: Any): Boolean = {
+    if (left == null && right == null)
+      true
+    else if (left == null)
+      false
+    else
+      left == right
+  }
+
+  private def asOpNumber(op: Token, num: Any): Double = {
+    if (num.isInstanceOf[Double])
+      num.asInstanceOf[Double]
+    else
+      throw new RuntimeError(op, "Operand must be a number.")
+  }
+
+  private def stringify(value: Any): String = {
+    if (value == null) {
+      "nil"
+    } else if (value.isInstanceOf[Double]) {
+      val txt = value.toString
+
+      if (txt.endsWith(".0"))
+        txt.stripSuffix(".0")
+      else
+        txt
+    } else {
+      value.toString
+    }
   }
 }

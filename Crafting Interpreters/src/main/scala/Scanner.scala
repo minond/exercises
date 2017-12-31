@@ -145,7 +145,7 @@ class Scanner(source: String) {
 
   private def addToken(ttype: TokenType, literal: Option[Any]): Unit = {
     val text = source.substring(start, current)
-    tokens += new Token(ttype, text, Some(text), line)
+    tokens += new Token(ttype, text, literal, line)
   }
 
   private def advance(): Char = {
