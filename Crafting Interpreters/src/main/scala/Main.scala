@@ -52,8 +52,8 @@ object Main {
     Try { parser.parse() } match {
       case Success(expression) =>
         if (!hadError) {
-          println(printer.print(expression))
-          println("")
+          // TODO add flags to stop processing at different stages of
+          // interpretation: println(printer.print(expression))
           interpreter.interpret(expression)
         }
 
