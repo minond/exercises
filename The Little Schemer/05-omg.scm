@@ -41,3 +41,36 @@
       (else (cons (insertR* new old (car l)) (insertR* new old (cdr l)))))))
 
 (debug `(insertR* 'roast 'chuck '((how much (wood)) could ((a (wood) chuck)) (((chuck))) (if (a) ((wood chuck))) could chuck wood)))
+
+
+(define insertL*
+  (lambda (new old l)
+    (cond
+      ((null? l) '())
+      ((atom? (car l))
+       (cond
+         ((eq? (car l) old)
+          (cons new (cons old (insertL* new old (cdr l)))))
+         (else (cons (car l) (insertL* new old (cdr l))))))
+      (else (cons (insertL* new old (car l))
+                  (insertL* new old (cdr l)))))))
+
+(debug `(insertL* 'roast 'chuck '((how much (wood)) could ((a (wood) chuck)) (((chuck))) (if (a) ((wood chuck))) could chuck wood)))
+
+
+(define eqlist?
+  (lambda (l1 l2)
+    (cond
+      ((and (null? l1) (null? l2)) #t)
+      ((or (null? l1) (null? l2)) #f)
+      ((and (atom? (car l1)) (atom? (car l2)))
+       (and (eqan? (car l1) (car l2))
+            (eqlist? (cdr l1) (cdr l2))))
+      ((or (atom? (car l1)) (atom? (car l2))) #f)
+      (else
+        (and (eqlist? (car l1) (car l2))
+             (eqlist? (cdr l1) (cdr l2)))))))
+
+(debug `(eqlist?
+          '(1 2 3 4 5 6 7 8 9)
+          '(1 2 3 4 5 6 7 8 9)))
