@@ -163,14 +163,14 @@ class Scanner(source: String) {
 
   private def peek(): Char = {
     if (isAtEnd())
-      '\0'
+      '\u0000'
     else
       source.charAt(current)
   }
 
   private def peekNext(): Char = {
     if (current + 1 >= source.length)
-      '\0'
+      '\u0000'
     else
       source.charAt(current + 1)
   }
