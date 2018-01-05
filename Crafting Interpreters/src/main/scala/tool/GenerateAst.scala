@@ -8,6 +8,11 @@ object GenerateAst extends App {
     System.exit(1)
   }
 
+  defineAst(args(0), "Stmt", Array(
+    "Expression - expression: Expr",
+    "Print      - expression: Expr"
+  ))
+
   defineAst(args(0), "Expr", Array(
     "Binary   - left: Expr, operator: Token, right: Expr",
     "Grouping - expression: Expr",
@@ -71,6 +76,7 @@ object GenerateAst extends App {
 
     val accessArgs = fields
       .split(",")
+      .map { field => field.trim }
       .map { field => s"val $field" }
       .mkString(", ")
 

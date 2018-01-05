@@ -15,7 +15,7 @@ object Expr {
     def visitUnaryExpr (expr: Unary): T
   }
 
-  class Binary(val left: Expr, val  operator: Token, val  right: Expr) extends Expr {
+  class Binary(val left: Expr, val operator: Token, val right: Expr) extends Expr {
     def accept[T](visitor: Visitor[T]): T = {
       visitor.visitBinaryExpr(new Binary(left, operator, right))
     }
@@ -33,7 +33,7 @@ object Expr {
     }
   }
 
-  class Unary(val operator: Token, val  right: Expr) extends Expr {
+  class Unary(val operator: Token, val right: Expr) extends Expr {
     def accept[T](visitor: Visitor[T]): T = {
       visitor.visitUnaryExpr(new Unary(operator, right))
     }

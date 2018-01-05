@@ -1,5 +1,14 @@
 /*
 
+program    = statement* EOF ;
+
+statement  = exprStmt
+           | printStmt ;
+
+printStmt  = "print" expression ";" ;
+
+exprStmt   = expression ";" ;
+
 expression = literal
            | unary
            | binary
