@@ -9,10 +9,11 @@ class Parser(tokens: MutableList[Token]) {
 
   var current = 0
 
-  def parse(): Expr = {
+  def parse(): Either[ParseError, Expr] = {
     Try { expression() } match {
-      case Success(expr) => expr
-      case Failure(erro) => throw erro
+      case Failure(parseErr: ParseError) => Left(parseErr)
+      case Failure(unknownErr) => throw unknownErr
+      case Success(expr) => Right(expr)
     }
   }
 

@@ -1,6 +1,5 @@
 package com.craftinginterpreters.lox
 
-import scala.util.{Try, Success, Failure}
 import java.io.{BufferedReader, InputStreamReader};
 import java.nio.charset.Charset;
 import java.nio.file.{Files, Paths}
@@ -56,8 +55,11 @@ object Main {
     val printer = new AstPrinter()
     val parser = new Parser(tokens)
 
-    Try { parser.parse() } match {
-      case Success(expression) =>
+    parser.parse() match {
+      case Left(err) =>
+        println("Error parsing expression")
+
+      case Right(expression) =>
         if (!hadError) {
           printConfig match {
             case Some(OPT_PRINT_TOK) =>
@@ -71,8 +73,6 @@ object Main {
               interpreter.interpret(expression)
           }
         }
-
-      case Failure(err) =>
     }
   }
 
