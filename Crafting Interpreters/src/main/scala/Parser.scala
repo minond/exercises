@@ -9,12 +9,48 @@ class Parser(tokens: MutableList[Token]) {
 
   var current = 0
 
-  def parse(): Either[ParseError, Expr] = {
-    Try { expression() } match {
+  def parse(): Either[ParseError, List[Stmt]] = {
+    Try { program() } match {
       case Failure(parseErr: ParseError) => Left(parseErr)
       case Failure(unknownErr) => throw unknownErr
-      case Success(expr) => Right(expr)
+      case Success(stmt) => Right(stmt)
     }
+  }
+
+  // program    = statement* EOF ;
+  private def program(): List[Stmt] = {
+    var statements = List[Stmt]()
+
+    while (!isAtEnd()) {
+      statements = statements ++ List(statement())
+    }
+
+    return statements
+  }
+
+  // statement  = printStmt
+  //            | exprStmt ;
+  private def statement(): Stmt = {
+    if (check(PRINT)) {
+      printStmt()
+    } else {
+      exprStmt()
+    }
+  }
+
+  // printStmt  = "print" expression ";" ;
+  private def printStmt(): Stmt = {
+    consume(PRINT, "Expecting 'print' keyword at the start of print statement.")
+    val expr = expression()
+    consume(SEMICOLON, "Expecting a semicolon at the end of a print statement.")
+    new Stmt.Print(expr)
+  }
+
+  // exprStmt   = expression ";" ;
+  private def exprStmt(): Stmt = {
+    val expr = expression()
+    consume(SEMICOLON, "Expecting a semicolon at the end of a statement.")
+    new Stmt.Expression(expr)
   }
 
   // expression = equality ;
@@ -22,7 +58,7 @@ class Parser(tokens: MutableList[Token]) {
     equality()
   }
 
-  // equality = comparison ( ( "!=" | "==" ) comparison )* ;
+  // equality   = comparison ( ( "!=" | "==" ) comparison )* ;
   private def equality(): Expr = {
     var expr = comparison()
 
@@ -35,7 +71,7 @@ class Parser(tokens: MutableList[Token]) {
     expr
   }
 
-  // // comparison = addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+  // comparison = addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
   private def comparison(): Expr = {
     var expr = addition()
 
@@ -48,7 +84,7 @@ class Parser(tokens: MutableList[Token]) {
     expr
   }
 
-  // addition = multiplication ( ( "-" | "+" ) multiplication )* ;
+  // addition   = multiplication ( ( "-" | "+" ) multiplication )* ;
   private def addition(): Expr = {
     var expr = multiplication()
 

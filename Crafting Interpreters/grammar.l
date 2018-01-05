@@ -1,31 +1,11 @@
-/*
+program        = statement* EOF ;
 
-program    = statement* EOF ;
+statement      = printStmt
+               | exprStmt ;
 
-statement  = exprStmt
-           | printStmt ;
+printStmt      = "print" expression ";" ;
 
-printStmt  = "print" expression ";" ;
-
-exprStmt   = expression ";" ;
-
-expression = literal
-           | unary
-           | binary
-           | grouping ;
-
-literal    = NUMBER | STRING | "false" | "true" | "nil" ;
-
-grouping   = "(" expression ")" ;
-
-unary      = ( "-" | "!" ) expression ;
-
-binary     = expression operator expression ;
-
-operator   = "==" | "!=" | "<" | "<=" | ">" | ">="
-           | "+"  | "-"  | "*" | "/" ;
-
-*/
+exprStmt       = expression ";" ;
 
 expression     = equality ;
 
@@ -41,4 +21,4 @@ unary          = ( "!" | "-" ) unary
                | primary ;
 
 primary        = NUMBER | STRING | "false" | "true" | "nil"
-                 | "(" expression ")" ;
+               | "(" expression ")" ;

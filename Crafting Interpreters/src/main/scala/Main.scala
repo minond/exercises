@@ -57,21 +57,22 @@ object Main {
 
     parser.parse() match {
       case Left(err) =>
-        println("Error parsing expression")
+        println("Error parsing")
 
-      case Right(expression) =>
+      case Right(stmt) =>
         if (!hadError) {
-          printConfig match {
-            case Some(OPT_PRINT_TOK) =>
-              println(expression)
-              println(printTokens(expression))
-
-            case Some(OPT_PRINT_AST) =>
-              println(printer.print(expression))
-
-            case _ =>
-              interpreter.interpret(expression)
-          }
+          // printConfig match {
+          //   case Some(OPT_PRINT_TOK) =>
+          //     println(expression)
+          //     println(printTokens(expression))
+          //
+          //   case Some(OPT_PRINT_AST) =>
+          //     println(printer.print(expression))
+          //
+          //   case _ =>
+          //     interpreter.interpret(expression)
+          // }
+          println(stmt)
         }
     }
   }
