@@ -57,7 +57,7 @@ class Scanner(source: String) {
       case '=' => addToken(if (matches('=')) EQUAL_EQUAL else EQUAL)
       case '<' => addToken(if (matches('=')) LESS_EQUAL else LESS)
       case '>' => addToken(if (matches('=')) GREATER_EQUAL else GREATER)
-      case ' ' | '\r' | 't' =>
+      case ' ' | '\r' | '\t' =>
       case '\n' => line += 1
       case '"' => string()
       case 'o' => if (peek() == 'r') addToken(OR)

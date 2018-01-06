@@ -59,20 +59,38 @@ object Main {
       case Left(err) =>
         println("Error parsing")
 
-      case Right(stmt) =>
+      case Right(statements) =>
         if (!hadError) {
           // printConfig match {
           //   case Some(OPT_PRINT_TOK) =>
-          //     println(expression)
-          //     println(printTokens(expression))
+          //     statements.foreach { stmt =>
+          //       stmt match {
+          //         case stmt: Stmt.Expression =>
+          //           println(printTokens(stmt.expression))
+          //
+          //         case stmt: Stmt.Print =>
+          //           println(Token(TokenType.PRINT, "print", None, 0))
+          //           println(printTokens(stmt.expression))
+          //       }
+          //     }
           //
           //   case Some(OPT_PRINT_AST) =>
-          //     println(printer.print(expression))
+          //     println(statements)
+          //     statements.foreach { stmt =>
+          //       stmt match {
+          //         case stmt: Stmt.Expression =>
+          //           printer.print(stmt.expression)
+          //
+          //         case stmt: Stmt.Print =>
+          //           printer.print(stmt.expression)
+          //       }
+          //     }
           //
           //   case _ =>
-          //     interpreter.interpret(expression)
+          //     interpreter.interpret(statements)
           // }
-          println(stmt)
+
+          interpreter.interpret(statements)
         }
     }
   }

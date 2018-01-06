@@ -3,13 +3,23 @@ package com.craftinginterpreters.lox
 import scala.util.{Try, Success, Failure}
 import com.craftinginterpreters.lox.TokenType._
 
-class Interpreter extends Expr.Visitor[Any] {
-  def interpret(expr: Expr): Unit  = {
-    Try { stringify(evaluate(expr)) } match {
-      case Success(value) => println(value)
-      case Failure(error: RuntimeError) => Main.runtimeError(error)
-      case Failure(error) => throw error
+class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
+  def interpret(statements: List[Stmt]): Unit  = {
+    statements.foreach { stmt =>
+      Try { execute(stmt) } match {
+        case Success(_) =>
+        case Failure(err: RuntimeError) => Main.runtimeError(err)
+        case Failure(err) => throw err
+      }
     }
+  }
+
+  override def visitExpressionStmt(stmt: Stmt.Expression): Unit = {
+    evaluate(stmt.expression)
+  }
+
+  override def visitPrintStmt(stmt: Stmt.Print): Unit = {
+    println(stringify(evaluate(stmt.expression)))
   }
 
   override def visitBinaryExpr(expr: Expr.Binary): Any = {
@@ -51,6 +61,8 @@ class Interpreter extends Expr.Visitor[Any] {
     expr.value match {
       case Some(value) => value
       case None => null
+      case bool: java.lang.Boolean => bool
+      case _ => expr.value
     }
   }
 
@@ -62,6 +74,10 @@ class Interpreter extends Expr.Visitor[Any] {
       case BANG => !isTruthy(right)
       case _ => null
     }
+  }
+
+  private def execute(stmt: Stmt): Any = {
+    stmt.accept(this)
   }
 
   private def evaluate(expr: Expr): Any = {
