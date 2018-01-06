@@ -112,3 +112,18 @@
   (letrec ([f (lambda (n) (cons (cons (list-nth-mod xs n) (list-nth-mod ys n))
                                 (lambda () (f (+ n 1)))))])
     (lambda () (f 0))))
+
+#| 9. Write a function vector-assoc that takes a value v and a vector vec. It
+   should behave like Racket’s assoc library function except (1) it processes a
+   vector (Racket’s name for an array) instead of a list, (2) it allows vector
+   elements not to be pairs in which case it skips them, and (3) it always
+   takes exactly two arguments. Process the vector elements in order starting
+   from 0.  You must use library functions vector-length, vector-ref, and
+   equal?.  Return #f if no vector element is a pair with a car field equal to
+   v, else return the first pair with an equal car field. Sample solution is 9
+   lines, using one local recursive helper function. |#
+(define (vector-assoc v vec)
+  (letrec ([len (vector-length vec)]
+           [f (lambda (i)
+                (cond []
+                      []))])))
