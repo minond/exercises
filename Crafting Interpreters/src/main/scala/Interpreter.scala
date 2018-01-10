@@ -4,6 +4,8 @@ import scala.util.{Try, Success, Failure}
 import com.craftinginterpreters.lox.TokenType._
 
 class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
+  val env = Environment(Map())
+
   def interpret(statements: List[Stmt]): Unit  = {
     statements.foreach { stmt =>
       Try { execute(stmt) } match {
@@ -20,6 +22,12 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
 
   override def visitPrintStmt(stmt: Stmt.Print): Unit = {
     println(stringify(evaluate(stmt.expression)))
+  }
+
+  override def visitVarStmt (stmt: Stmt.Var): Unit = {
+    env.define(stmt.name.lexeme,
+      if (stmt.initializer != null) evaluate(stmt.initializer)
+      else null)
   }
 
   override def visitBinaryExpr(expr: Expr.Binary): Any = {
@@ -74,6 +82,10 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
       case BANG => !isTruthy(right)
       case _ => null
     }
+  }
+
+  override def visitVariableExpr (expr: Expr.Variable): Any = {
+    env.get(expr.name).getOrElse(null)
   }
 
   private def execute(stmt: Stmt): Any = {

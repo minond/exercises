@@ -10,14 +10,16 @@ object GenerateAst extends App {
 
   defineAst(args(0), "Stmt", Array(
     "Expression - expression: Expr",
-    "Print      - expression: Expr"
+    "Print      - expression: Expr",
+    "Var        - name: Token, initializer: Expr"
   ))
 
   defineAst(args(0), "Expr", Array(
     "Binary   - left: Expr, operator: Token, right: Expr",
     "Grouping - expression: Expr",
     "Literal  - value: Any",
-    "Unary    - operator: Token, right: Expr"
+    "Unary    - operator: Token, right: Expr",
+    "Variable - name: Token"
   ))
 
   def defineAst(outputDir: String, baseName: String, types: Array[String]) = {

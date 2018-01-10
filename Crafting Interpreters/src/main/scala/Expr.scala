@@ -13,6 +13,7 @@ object Expr {
     def visitGroupingExpr (expr: Grouping): T
     def visitLiteralExpr (expr: Literal): T
     def visitUnaryExpr (expr: Unary): T
+    def visitVariableExpr (expr: Variable): T
   }
 
   class Binary(val left: Expr, val operator: Token, val right: Expr) extends Expr {
@@ -36,6 +37,12 @@ object Expr {
   class Unary(val operator: Token, val right: Expr) extends Expr {
     def accept[T](visitor: Visitor[T]): T = {
       visitor.visitUnaryExpr(new Unary(operator, right))
+    }
+  }
+
+  class Variable(val name: Token) extends Expr {
+    def accept[T](visitor: Visitor[T]): T = {
+      visitor.visitVariableExpr(new Variable(name))
     }
   }
 }

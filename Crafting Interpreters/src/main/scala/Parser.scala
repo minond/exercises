@@ -22,10 +22,26 @@ class Parser(tokens: MutableList[Token]) {
     var statements = List[Stmt]()
 
     while (!isAtEnd()) {
-      statements = statements ++ List(statement())
+      Try { declaration() } match {
+        case Success(decl) =>
+          statements = statements ++ List(decl)
+
+        case Failure(err) =>
+          synchronize()
+      }
     }
 
     return statements
+  }
+
+  // declaration = varDecl
+  //             | statement ;
+  private def declaration(): Stmt = {
+    if (check(VAR)) {
+      varStmt()
+    } else {
+      statement()
+    }
   }
 
   // statement  = printStmt
@@ -36,6 +52,22 @@ class Parser(tokens: MutableList[Token]) {
     } else {
       exprStmt()
     }
+  }
+
+  // varDecl        = "var" IDENTIFIER ( "=" expression )? ";" ;
+  private def varStmt(): Stmt = {
+    consume(VAR, "Expecting 'var' keyword at the start of declaration.")
+    consume(IDENTIFIER, "Expecting identifier after 'var' in declaration.")
+
+    val name = previous()
+    val value = if (matches(EQUAL)) {
+      expression()
+    } else {
+      new Expr.Variable(name)
+    }
+
+    consume(SEMICOLON, "Expecting a semicolon at the end of a declaration.")
+    new Stmt.Var(name, value)
   }
 
   // printStmt  = "print" expression ";" ;
@@ -120,8 +152,10 @@ class Parser(tokens: MutableList[Token]) {
     }
   }
 
-  // primary = NUMBER | STRING | "false" | "true" | "nil"
-  //         | "(" expression ")" ;
+  // primary        = "true" | "false" | "null" | "this"
+  //                | NUMBER | STRING
+  //                | "(" expression ")"
+  //                | IDENTIFIER ;
   private def primary(): Expr = {
     if (matches(TRUE)) {
       new Expr.Literal(true)
@@ -129,12 +163,14 @@ class Parser(tokens: MutableList[Token]) {
       new Expr.Literal(false)
     } else if (matches(NIL)) {
       new Expr.Literal(null)
-    } else if (matches(STRING, NUMBER)) {
+    } else if (matches(NUMBER, STRING)) {
       new Expr.Literal(previous().literal)
     } else if (matches(LEFT_PAREN)) {
       val expr = expression()
       consume(RIGHT_PAREN, "Expecting ')' after expression.")
       new Expr.Grouping(expr)
+    } else if (matches(IDENTIFIER)) {
+      new Expr.Variable(previous())
     } else {
       throw error(peek(), "Expecting expression.")
     }

@@ -1,7 +1,12 @@
-program        = statement* EOF ;
+program        = declaration* EOF ;
+
+declaration    = varDecl
+               | statement ;
 
 statement      = printStmt
                | exprStmt ;
+
+varDecl        = "var" IDENTIFIER ( "=" expression )? ";" ;
 
 printStmt      = "print" expression ";" ;
 
@@ -20,5 +25,7 @@ multiplication = unary ( ( "/" | "*" ) unary )* ;
 unary          = ( "!" | "-" ) unary
                | primary ;
 
-primary        = NUMBER | STRING | "false" | "true" | "nil"
-               | "(" expression ")" ;
+primary        = "true" | "false" | "null" | "this"
+               | NUMBER | STRING
+               | "(" expression ")"
+               | IDENTIFIER ;

@@ -30,6 +30,10 @@ class AstPrinter extends Expr.Visitor[String] {
     parenthesize(expr.operator.lexeme, expr.right)
   }
 
+  override def visitVariableExpr(expr: Expr.Variable): String = {
+    expr.name.lexeme
+  }
+
   private def parenthesize(name: String, exprs: Expr*): String = {
     val builder = new StringBuilder()
 
