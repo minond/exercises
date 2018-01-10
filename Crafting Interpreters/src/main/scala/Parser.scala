@@ -60,11 +60,9 @@ class Parser(tokens: MutableList[Token]) {
     consume(IDENTIFIER, "Expecting identifier after 'var' in declaration.")
 
     val name = previous()
-    val value = if (matches(EQUAL)) {
-      expression()
-    } else {
-      new Expr.Variable(name)
-    }
+    val value =
+      if (matches(EQUAL)) expression()
+      else new Expr.Variable(name)
 
     consume(SEMICOLON, "Expecting a semicolon at the end of a declaration.")
     new Stmt.Var(name, value)
