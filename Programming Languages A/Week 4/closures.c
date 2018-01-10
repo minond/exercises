@@ -21,20 +21,20 @@ int size(List* xs) {
   return 1 + size(xs->tail);
 }
 
-List* map(int (*f)(int), List* xs) {
+List* map(int (*f)(void*, int), void* env, List* xs) {
   if (xs == NULL)
     return NULL;
 
-  return cons(f(xs->head), map(f, xs->tail));
+  return cons(f(env, xs->head), map(f, env, xs->tail));
 }
 
-List* filter(bool (*f)(int), List* xs) {
+List* filter(bool (*f)(void*, int), void* env, List* xs) {
   if (xs == NULL)
     return NULL;
-  else if (f(xs->head))
-    return cons(xs->head, filter(f, xs->tail));
+  else if (f(env, xs->head))
+    return cons(xs->head, filter(f, env, xs->tail));
   else
-    return filter(f, xs->tail);
+    return filter(f, env, xs->tail);
 }
 
 List* range(int max) {
@@ -65,18 +65,18 @@ void println(List* xs) {
   printf(" (size = %i)\n", size(xs));
 }
 
-int dbl(int n) {
+int dbl(void* env, int n) {
   return n * 2;
 }
 
-bool even(int n) {
+bool even(void* env, int n) {
   return n % 2 == 0;
 }
 
 int main(void) {
   List* xs = range(20);
-  List* ys = map(&dbl, xs);
-  List* es = filter(&even, xs);
+  List* ys = map(&dbl, NULL, xs);
+  List* es = filter(&even, NULL, xs);
 
   println(xs);
   println(ys);
