@@ -16,7 +16,7 @@ val empty_set =
                 else
                   make_set (x :: xs)
 
-            , member = fn x => contains x
+            , member = contains
             , size = fn () => List.length xs
             }
       end
