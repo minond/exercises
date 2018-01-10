@@ -65,18 +65,18 @@ void println(List* xs) {
   printf(" (size = %i)\n", size(xs));
 }
 
-int dbl(void* env, int n) {
-  return n * 2;
+int sum(void* x, int y) {
+  return (intptr_t) x + y;
 }
 
-bool even(void* env, int n) {
-  return n % 2 == 0;
+bool divisible(void* by, int n) {
+  return n % (intptr_t) by == 0;
 }
 
 int main(void) {
   List* xs = range(20);
-  List* ys = map(&dbl, NULL, xs);
-  List* es = filter(&even, NULL, xs);
+  List* ys = map(&sum, (void*) 5, xs);
+  List* es = filter(&divisible, (void*) 3, xs);
 
   println(xs);
   println(ys);
