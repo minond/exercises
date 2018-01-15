@@ -26,7 +26,7 @@ onto the natural recursion.
 Always change at least one argument while recurring. When recurring on a list
 of atoms, _lat_, use (_cdr lat_). When recurring on a number, _n_, use (_sub1
 n_). And when recurring on a list of S-expressions, _l_, use (_car l_) and
-(_cdr l_) if neither (_null? l_) nor (_atom?_ (_car l)) are true.
+(_cdr l_) if neither (_null? l_) nor (_atom?_ (_car l_)) are true.
 
 It must be changed to be closer to termination. The changing argument must be
 tested in the termination condition: when using _cdr_, test termination with
