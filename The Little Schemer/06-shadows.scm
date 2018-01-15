@@ -34,3 +34,14 @@
 (debug '(zub1 '(() ())))
 (debug '(edd1 (edd1 '(() ()))))
 (debug '(edd1 (edd1 (edd1 '(() ())))))
+
+
+(define lat?
+  (lambda (xs)
+    (cond
+      ((null? xs) #t)
+      ((atom? (car xs)) (lat? (cdr xs)))
+      (else #f))))
+
+(debug `(lat? '(1 2 3)))                    ; #t, of course
+(debug `(lat? '((()) (() ()) (() () ()))))  ; #f, you must beware of shadows.
