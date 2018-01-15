@@ -47,17 +47,20 @@ terminating line.
 
 ### The Sixth Commandment
 
-_TODO_
+Simplify only after the function is correct.
 
 
 ### The Seventh Commandment
 
-_TODO_
+Recur on the _subparts_ that are of the same nature:
+
+- On the sublists of a list.
+- On the subexpressions of an arithmetic expression.
 
 
 ### The Eighth Commandment
 
-_TODO_
+Use help functions to abstract from representations.
 
 
 ### The Ninth Commandment
