@@ -217,3 +217,59 @@ fun check_pat p =
   in
     no_repeats (strings p)
   end
+
+(* 11. Write a function match that takes a valu * pattern and returns a
+ * (string * valu) list option, namely NONE if the pattern does not match and
+ * SOME lst where lst is the list of bindings if it does. Note that if the
+ * value matches but the pattern has no patterns of the form Variable s, then
+ * the result is SOME []. Hints: Sample solution has one case expression with
+ * 7 branches. The branch for tuples uses all_answers and ListPair.zip. Sample
+ * solution is 13 lines. Remember to look above for the rules for what patterns
+ * match what values, and what bindings they produce. These are hints: We are
+ * not requiring all_answers and ListPair.zip here, but they make it easier. *)
+(* (valu * pattern) -> (string * valu) list option *)
+fun match (v, p) =
+  case (v, p)
+    (* Wildcard matches everything and produces the empty list of bindings. *)
+   of (_, Wildcard) => SOME []
+
+    (* Variable s matches any value v and produces the one-element list holding (s,v). *)
+    | (_, Variable s) => SOME [(s, v)]
+
+    (* UnitP matches only Unit and produces the empty list of bindings. *)
+    | (Unit, UnitP) => SOME []
+
+    (* ConstP 17 matches only Const 17 and produces the empty list of bindings
+     * (and similarly for other integers). *)
+    | (Const x, ConstP y) =>
+        if x = y then
+          SOME []
+        else
+          NONE
+
+    (* TupleP ps matches a value of the form Tuple vs if ps and vs have the
+     * same length and for all i, the ith element of ps matches the ith element
+     * of vs. The list of bindings produced is all the lists from the nested
+     * pattern matches appended together. *)
+    | (Tuple xs, TupleP ys) =>
+        if List.length xs = List.length ys then
+          SOME (foldl (fn (arg, bindings) =>
+            case match arg
+             of NONE => bindings
+              | SOME b => bindings @ b
+          ) [] (ListPair.zip (xs, ys)))
+        else
+          NONE
+
+    (* ConstructorP(s1,p) matches Constructor(s2,v) if s1 and s2 are the same
+     * string (you can compare them with =) and p matches v. The list of
+     * bindings produced is the list from the nested pattern match. We call the
+     * strings s1 and s2 the constructor name. *)
+    | (Constructor (s1, v'), ConstructorP(s2, p')) =>
+        if s1 = s2 then
+          match (v', p')
+        else
+          NONE
+
+    (* Nothing else matches. *)
+    | _ => NONE
