@@ -106,7 +106,7 @@ fun all_answers f xs =
         | h::t =>
             case f h
              of NONE => NONE
-              | SOME v => tick t (v :: acc)
+              | SOME v => tick t (v @ acc)
   in
     tick xs []
   end
@@ -210,7 +210,7 @@ fun check_pat p =
         | ConstructorP (_, p) => strings p
         | _ => []
 
-    fun no_repeats xs =
+    fun no_repeats (xs : string list) =
       case xs
        of [] => true
         | h::t => not (List.exists (fn s => s = h) t) andalso no_repeats t
