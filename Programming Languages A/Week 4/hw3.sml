@@ -44,14 +44,14 @@ fun longest_string2 xs =
  *
  *   • longest_string3 and longest_string4 are defined with val-bindings and
  *     partial applications of longest_string_helper. *)
-fun longest_string_helper f xs s =
-  foldl (size_comparison f) s xs
+fun longest_string_helper f xs =
+  foldl (size_comparison f) "" xs
 
-val longest_string3 = fn xs =>
-  longest_string_helper (fn (a, b) => a > b) xs ""
+val longest_string3 =
+  longest_string_helper (fn (a, b) => a > b)
 
-val longest_string4 = fn xs =>
-  longest_string_helper (fn (a, b) => a >= b) xs ""
+val longest_string4 =
+  longest_string_helper (fn (a, b) => a >= b)
 
 (* 5. Write a function longest_capitalized that takes a string list and returns
  * the longest string in the list that begins with an uppercase letter, or ""
