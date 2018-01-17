@@ -45,11 +45,13 @@ fun longest_string2 xs =
  *   • longest_string3 and longest_string4 are defined with val-bindings and
  *     partial applications of longest_string_helper. *)
 fun longest_string_helper f xs s =
-  foldl f s xs
+  foldl (size_comparison f) s xs
 
-val longest_string3 = longest_string1
+val longest_string3 = fn xs =>
+  longest_string_helper (fn (a, b) => a > b) xs ""
 
-val longest_string4 = longest_string2
+val longest_string4 = fn xs =>
+  longest_string_helper (fn (a, b) => a >= b) xs ""
 
 (* 5. Write a function longest_capitalized that takes a string list and returns
  * the longest string in the list that begins with an uppercase letter, or ""
@@ -127,4 +129,91 @@ datatype valu = Const of int
 
 (* Given valu v and pattern p, either p matches v or not. If it does, the match
  * produces a list of string * valu pairs; order in the list does not matter.
- * The rules for matching should be unsurprising: *)
+ * The rules for matching should be unsurprising:
+ *
+ *   • Wildcard matches everything and produces the empty list of bindings.
+ *
+ *   • Variable s matches any value v and produces the one-element list holding
+ *     (s,v).
+ *
+ *   • UnitP matches only Unit and produces the empty list of bindings.
+ *
+ *   • ConstP 17 matches only Const 17 and produces the empty list of bindings
+ *     (and similarly for other integers).
+ *
+ *   • TupleP ps matches a value of the form Tuple vs if ps and vs have the same
+ *     length and for all i, the ith element of ps matches the ith element of
+ *     vs. The list of bindings produced is all the lists from the nested
+ *     pattern matches appended together.
+ *
+ *   • ConstructorP(s1,p) matches Constructor(s2,v) if s1 and s2 are the same
+ *     string (you can compare them with =) and p matches v. The list of
+ *     bindings produced is the list from the nested pattern match. We call the
+ *     strings s1 and s2 the constructor name.
+ *
+ *   • Nothing else matches. *)
+
+(* 9. (This problem uses the pattern datatype but is not really about
+ * pattern-matching.) A function g has been provided to you.
+ *
+ * (a) Use g to define a function count_wildcards that takes a pattern and
+ * returns how many Wildcard patterns it contains.
+ *
+ * (b) Use g to define a function count_wild_and_variable_lengths that takes a
+ * pattern and returns the number of Wildcard patterns it contains plus the sum
+ * of the string lengths of all the variables in the variable patterns it
+ * contains. (Use String.size. We care only about variable names; the
+ * constructor names are not relevant.
+ *
+ * (c) Use g to define a function count_some_var that takes a string and a
+ * pattern (as a pair) and returns the number of times the string appears as a
+ * variable in the pattern. We care only about variable names; the constructor
+ * names are not relevant. *)
+
+(* (unit -> int) -> (string -> int) -> pattern -> int *)
+fun g f1 f2 p =
+  let
+    val r = g f1 f2
+  in
+    case p
+     of Wildcard           => f1 ()
+      | Variable x         => f2 x
+      | TupleP ps          => List.foldl (fn (p, i) => (r p) + i) 0 ps
+      | ConstructorP(_, p) => r p
+      | _                  => 0
+  end
+
+fun count_wildcards p =
+  g (fn () => 1) (fn s => 0) p
+
+fun count_wild_and_variable_lengths p =
+  g (fn () => 1) String.size p
+
+fun count_some_var (s, p) =
+  g (fn () => 0) (fn s' => if s = s' then 1 else 0) p
+
+(* 10. Write a function check_pat that takes a pattern and returns true if and
+ * only if all the variables appearing in the pattern are distinct from each
+ * other (i.e., use different strings). The constructor names are not relevant.
+ * Hints: The sample solution uses two helper functions. The first takes a
+ * pattern and returns a list of all the strings it uses for variables. Using
+ * foldl with a function that uses @ is useful in one case. The second takes a
+ * list of strings and decides if it has repeats. List.exists may be useful.
+ * Sample solution is 15 lines. These are hints: We are not requiring foldl and
+ * List.exists here, but they make it easier. *)
+fun check_pat p =
+  let
+    fun strings p =
+      case p
+       of Variable s => [s]
+        | TupleP ps => foldl (fn (p, acc) => strings p @ acc) [] ps
+        | ConstructorP (_, p) => strings p
+        | _ => []
+
+    fun no_repeats xs =
+      case xs
+       of [] => true
+        | h::t => not (List.exists (fn s => s = h) t) andalso no_repeats t
+  in
+    no_repeats (strings p)
+  end
