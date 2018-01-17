@@ -96,4 +96,35 @@ fun first_answer f xs =
  * lst2, ..., lstn appended together (order doesn’t matter). Hints: The sample
  * solution is 8 lines. It uses a helper function with an accumulator and uses
  * @. Note all_answers f [] should evaluate to SOME []. *)
+fun all_answers f xs =
+  let
+    fun tick xs acc =
+      case xs
+       of [] => SOME acc
+        | h::t =>
+            case f h
+             of NONE => NONE
+              | SOME v => tick t (v :: acc)
+  in
+    tick xs []
+  end
 
+(* The remaining problems use these type definitions, which are inspired by the
+ * type definitions an ML implementation would use to implement pattern
+ * matching: *)
+
+datatype pattern = Wildcard
+                 | Variable of string
+                 | UnitP
+                 | ConstP of int
+                 | TupleP of pattern list
+                 | ConstructorP of string * pattern
+
+datatype valu = Const of int
+              | Unit
+              | Tuple of valu list
+              | Constructor of string * valu
+
+(* Given valu v and pattern p, either p matches v or not. If it does, the match
+ * produces a list of string * valu pairs; order in the list does not matter.
+ * The rules for matching should be unsurprising: *)
