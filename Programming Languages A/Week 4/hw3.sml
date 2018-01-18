@@ -291,12 +291,7 @@ fun match (v, p) =
      * pattern matches appended together. *)
     | (Tuple xs, TupleP ys) =>
         if List.length xs = List.length ys then
-          foldl (fn (arg, bindings) =>
-            case (match arg, bindings)
-             of (NONE, _) => bindings
-              | (SOME b, NONE) => SOME b
-              | (SOME b, SOME bindings) => SOME (bindings @ b)
-          ) NONE (ListPair.zip (xs, ys))
+          all_answers match (ListPair.zip (xs, ys))
         else
           NONE
 
