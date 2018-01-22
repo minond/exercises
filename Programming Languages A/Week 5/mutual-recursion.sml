@@ -37,3 +37,31 @@ datatype t1 = X
 
      and t2 = tt1 of t1
             | Y
+
+
+(*
+
+  What if we didn't have the `and` keyword and mutual recursion in general? What
+  could we do then? Well, higher-order functions could help.
+
+  Example below. By the time `gg` is defined `ff` is already in the
+  environement, so it can call it. On the other hand, `ff` needs `gg` so we can
+  make this a parameter of `ff`, givins us these type signatures and api:
+
+    val ff = fn : (int -> int) * int -> int
+    val gg = fn : int -> int
+
+    - ff (gg, 10)
+    val it = 11 : int
+
+ *)
+
+fun ff (g, x) =
+  case x
+   of 0 => 1
+    | _ => 1 + g (x - 1)
+
+fun gg (x) =
+  case x
+   of 0 => 1
+    | _ => 1 + ff (gg, x - 1)
