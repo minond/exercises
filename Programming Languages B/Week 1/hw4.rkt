@@ -176,3 +176,28 @@
 
               ; Return value.
               val))))))
+
+#| 11. Define a macro that is used like (while-less e1 do e2) where e1 and e2
+   are expressions and while-less and do are syntax (keywords). The macro
+   should do the following:
+
+   - It evaluates e1 exactly once.
+
+   - It evaluates e2 at least once.
+
+   - It keeps evaluating e2 until and only until the result is not a number
+     less than the result of the evaluation of e1.
+
+   - Assuming evaluation terminates, the result is #t.
+
+   - Assume e1 and e2 produce numbers; your macro can do anything or fail
+     mysteriously otherwise. |#
+(define-syntax while-less
+  (syntax-rules (do)
+    [(while-less e1 do e2)
+     (letrec ([f (lambda ()
+                   (if (> e1 e2)
+                       (f)
+                       #t))])
+
+       (f))]))
