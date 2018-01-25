@@ -13,6 +13,7 @@
 ;; the graphics code, though it is not sophisticated.
 
 (require (lib "graphics.rkt" "graphics"))
+(require "hw4.rkt")
 
 (open-graphics)
 
