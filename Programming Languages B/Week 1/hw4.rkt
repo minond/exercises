@@ -125,5 +125,8 @@
 (define (vector-assoc v vec)
   (letrec ([len (vector-length vec)]
            [f (lambda (i)
-                (cond []
-                      []))])))
+                (cond [(equal? i len) #f]
+                      [(equal? v (car (vector-ref vec i))) (vector-ref vec i)]
+                      [#t (f (+ i 1))]))])
+
+           (f 0)))
