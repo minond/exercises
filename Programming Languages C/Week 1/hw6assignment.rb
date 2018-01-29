@@ -31,9 +31,19 @@
 
 class MyPiece < Piece
   All_My_Pieces = All_Pieces + [
-    rotations([[0, 0], [1, 0], [0, 1], [1, 1], [2, 0]]),
-    rotations([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]]),
-    rotations([[0, 0], [0, -1], [1, -1]]),
+    rotations([
+      [0, 1], [1, 1],
+      [0, 0], [1, 0], [2, 0]
+    ]),
+
+    rotations([
+      [0, 0], [1, 0], [2, 0], [3, 0], [4, 0]
+    ]),
+
+    rotations([
+      [0, 1],
+      [0, 0], [1, 0]
+    ]),
   ]
 
   def self.next_piece (board)
