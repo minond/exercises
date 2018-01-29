@@ -30,19 +30,10 @@
 # falling should behave no differently than hitting it once.
 
 class MyPiece < Piece
-  # All_My_Pieces = All_Pieces + [
-  All_My_Pieces = [
-    # rotations([[0, 0], [], [], [], []]),
-    # [[[0, 0], [0, 1], [1, 1]]],
-    # rotations([[0, 0], [1, 0], [0, 1], [1, 1]]),
-
+  All_My_Pieces = All_Pieces + [
     rotations([[0, 0], [1, 0], [0, 1], [1, 1], [2, 0]]),
     rotations([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]]),
     rotations([[0, 0], [0, -1], [1, -1]]),
-
-    # rotations([[0, 0], [0, 1], [1, 1]])
-    # [[[0, 0], [0, 1], [1, 1]]]
-    # rotations([[0, 0], [1, 0], [0, 1], [1, 1]]),
   ]
 
   def self.next_piece (board)
@@ -53,11 +44,18 @@ end
 class MyBoard < Board
   def initialize (game)
     super
+    @cheating = false
     next_piece
   end
 
   def next_piece
-    @current_block = MyPiece.next_piece(self)
+    if @cheating
+      @current_block = MyPiece.new([[[0, 0]]], self)
+      @cheating = false
+    else
+      @current_block = MyPiece.next_piece(self)
+    end
+
     @current_pos = nil
   end
 
@@ -80,6 +78,13 @@ class MyBoard < Board
     remove_filled
     @delay = [@delay - 2, 80].max
   end
+
+  def cheat
+    unless @score < 100 || @cheating
+      @score -= 100
+      @cheating = true
+    end
+  end
 end
 
 class MyTetris < Tetris
@@ -93,6 +98,7 @@ class MyTetris < Tetris
 
   def key_bindings
     @root.bind('u', proc {@board.rotate_180_degrees})
+    @root.bind('c', proc {@board.cheat})
     super
   end
 end
