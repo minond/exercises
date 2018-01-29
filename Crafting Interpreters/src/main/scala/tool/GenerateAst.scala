@@ -31,7 +31,6 @@ object GenerateAst extends App {
     defineHeader(writer)
     writer.println("")
 
-    defineImports(writer)
     writer.println("")
 
     defineClass(writer, baseName)
@@ -44,10 +43,6 @@ object GenerateAst extends App {
   def defineHeader(writer: PrintWriter) = {
     writer.println("/* AUTO GENERATED - DO NOT EDIT */")
     writer.println("package com.craftinginterpreters.lox")
-  }
-
-  def defineImports(writer: PrintWriter) = {
-    writer.println("import collection.mutable.MutableList")
   }
 
   def defineObject(writer: PrintWriter, baseName: String, types: Array[String]) = {

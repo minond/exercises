@@ -1,7 +1,6 @@
 /* AUTO GENERATED - DO NOT EDIT */
 package com.craftinginterpreters.lox
 
-import collection.mutable.MutableList
 
 abstract class Expr {
   def accept[T](visitor: Expr.Visitor[T]): T

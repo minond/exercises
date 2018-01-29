@@ -26,7 +26,7 @@ class Parser(tokens: MutableList[Token]) {
         case Success(decl) =>
           statements = statements ++ List(decl)
 
-        case Failure(err) =>
+        case Failure(_) =>
           synchronize()
       }
     }
@@ -184,6 +184,8 @@ class Parser(tokens: MutableList[Token]) {
     peek().ttype match {
       case CLASS | FOR | FUN | IF | PRINT | RETURN | VAR | WHILE =>
         return
+
+      case _ =>
     }
 
     advance()

@@ -1,10 +1,17 @@
 .PHONY: build run
 
+SCALAFLAGS = -deprecation \
+			 -Xfatal-warnings \
+			 -Ywarn-unused \
+			 -Ywarn-unused-import \
+			 -Ywarn-dead-code \
+			 -Ywarn-numeric-widen
+
 build:
-	scalac -deprecation src/main/scala/*.scala
+	scalac $(SCALAFLAGS) src/main/scala/*.scala
 
 tools:
-	scalac -deprecation src/main/scala/tool/GenerateAst.scala
+	scalac $(SCALAFLAGS) src/main/scala/tool/GenerateAst.scala
 
 run:
 	scala com.craftinginterpreters.lox.Main
