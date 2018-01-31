@@ -44,10 +44,6 @@
     null
     (cons (apair-e1 es) (mupllist->racketlist (apair-e2 es)))))
 
-  ; (if (or (null? es) (aunit? (car es)))
-  ;   null
-  ;   (cons (car es) (mupllist->racketlist (cdr es)))))
-
 ;; Problem 2
 
 ;; lookup a variable in an environment
@@ -72,7 +68,46 @@
                (int (+ (int-num v1)
                        (int-num v2)))
                (error "MUPL addition applied to non-number")))]
-        ;; CHANGE add more cases here
+
+        ; All values (including closures) evaluate to themselves. For example,
+        ; (eval-exp (int 17)) would return (int 17), not 17.
+        [(int? e) e]
+
+        ; An ifgreater evaluates its first two subexpressions to values v1 and
+        ; v2 respectively. If both values are integers, it evaluates its third
+        ; subexpression if v1 is a strictly greater integer than v2 else it
+        ; evaluates its fourth subexpression.
+        [(ifgreater? e)
+         (let ([v1 (eval-under-env (ifgreater-e1 e) env)]
+               [v2 (eval-under-env (ifgreater-e2 e) env)])
+           (if (and (int? v1)
+                    (int? v2))
+             (if (> (int-num v1) (int-num v2))
+               (eval-under-env (ifgreater-e3 e) env)
+               (eval-under-env (ifgreater-e4 e) env))
+             (error "MUPL ifgreater applied to non-number")))]
+
+        ; Functions are lexically scoped: A function evaluates to a closure
+        ; holding the function and the current environment.
+        [(fun? e) (closure env e)]
+
+        [(call? e) (error "unimplemented call")]
+
+        ; An mlet expression evaluates its first expression to a value v. Then
+        ; it evaluates the second expression to a value, in an environment
+        ; extended to map the name in the mlet expression to v.
+        [(mlet? e)
+         (letrec ([val (eval-under-env (mlet-e e) env)]
+                  [key (mlet-var e)]
+                  [sub (cons (cons key val) env)])
+           (eval-under-env (mlet-body e) sub))]
+
+        [(apair? e) (error "unimplemented apair")]
+        [(fst? e) (error "unimplemented fst")]
+        [(snd? e) (error "unimplemented snd")]
+        [(aunit? e) (error "unimplemented aunit")]
+        [(isaunit? e) (error "unimplemented isaunit")]
+
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
