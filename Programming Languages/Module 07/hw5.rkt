@@ -22,7 +22,31 @@
 
 ;; Problem 1
 
-;; CHANGE (put your solutions here)
+#| 1. Warm-Up:
+
+   (a) Write a Racket function racketlist->mupllist that takes a Racket list
+       (presumably of mupl values but that will not affect your solution) and
+       produces an analogous mupl list with the same elements in the same
+       order.
+
+   (b) Write a Racket function mupllist->racketlist that takes a mupl list
+       (presumably of mupl values but that will not affect your solution) and
+       produces an analogous Racket list (of mupl values) with the same
+       elements in the same order. |#
+
+(define (racketlist->mupllist xs)
+  (if (null? xs)
+    (aunit)
+    (apair (car xs) (racketlist->mupllist (cdr xs)))))
+
+(define (mupllist->racketlist es)
+  (if (not (apair? es))
+    null
+    (cons (apair-e1 es) (mupllist->racketlist (apair-e2 es)))))
+
+  ; (if (or (null? es) (aunit? (car es)))
+  ;   null
+  ;   (cons (car es) (mupllist->racketlist (cdr es)))))
 
 ;; Problem 2
 
