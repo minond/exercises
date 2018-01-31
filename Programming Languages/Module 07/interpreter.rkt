@@ -5,6 +5,7 @@
 (struct const (int) #:transparent)
 (struct negate (e) #:transparent)
 (struct add (e1 e2) #:transparent)
+(struct multiply (e1 e2) #:transparent)
 (struct bool (b) #:transparent)
 (struct eq-num (e1 e2) #:transparent)
 (struct if-then-else (e1 e2 e3) #:transparent)
@@ -25,6 +26,13 @@
            (cond [(not (const? v1)) (error "non-number on left hand side of add expression")]
                  [(not (const? v2)) (error "non-number on right hand side of add expression")]
                  [#t (const (+ (const-int v1) (const-int v2)))]))]
+
+        [(multiply? e)
+         (let ([v1 (eval-exp (multiply-e1 e))]
+               [v2 (eval-exp (multiply-e2 e))])
+           (cond [(not (const? v1)) (error "non-number on left hand side of multiply expression")]
+                 [(not (const? v2)) (error "non-number on right hand side of multiply expression")]
+                 [#t (const (* (const-int v1) (const-int v2)))]))]
 
         [(eq-num? e)
          (let ([v1 (eval-exp (eq-num-e1 e))]
