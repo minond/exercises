@@ -72,6 +72,8 @@
         ; All values (including closures) evaluate to themselves. For example,
         ; (eval-exp (int 17)) would return (int 17), not 17.
         [(int? e) e]
+        [(closure? e) e]
+        [(aunit? e) e]
 
         ; An ifgreater evaluates its first two subexpressions to values v1 and
         ; v2 respectively. If both values are integers, it evaluates its third
@@ -144,8 +146,14 @@
              (apair-e2 val)
              (error "MUPL snd applied to non-apair")))]
 
-        [(aunit? e) (error "unimplemented aunit")]
-        [(isaunit? e) (error "unimplemented isaunit")]
+        ; An isaunit expression evaluates its subexpression. If the result is
+        ; an aunit expression, then the result for the isaunit expression is
+        ; the mupl value (int 1), else the result is the mupl value (int 0).
+        [(isaunit? e)
+         (let ([res (eval-under-env (isaunit-e e) env)])
+           (if (aunit? res)
+             (int 1)
+             (int 0)))]
 
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
