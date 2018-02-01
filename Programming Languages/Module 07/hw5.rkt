@@ -119,9 +119,31 @@
                   [sub (cons (cons key val) env)])
            (eval-under-env (mlet-body e) sub))]
 
-        [(apair? e) (error "unimplemented apair")]
-        [(fst? e) (error "unimplemented fst")]
-        [(snd? e) (error "unimplemented snd")]
+        ; A pair expression evaluates its two subexpressions and produces a
+        ; (new) pair holding the results.
+        [(apair? e)
+         (let ([v1 (eval-under-env (apair-e1 e) env)]
+               [v2 (eval-under-env (apair-e2 e) env)])
+           (apair v1 v2))]
+
+        ; A fst expression evaluates its subexpression. If the result for the
+        ; subexpression is a pair, then the result for the fst expression is
+        ; the e1 field in the pair.
+        [(fst? e)
+         (let ([val (eval-under-env (fst-e e) env)])
+           (if (apair? val)
+             (apair-e1 val)
+             (error "MUPL fst applied to non-apair")))]
+
+        ; A snd expression evaluates its subexpression. If the result for the
+        ; subexpression is a pair, then the result for the snd expression is
+        ; the e2 field in the pair.
+        [(snd? e)
+         (let ([val (eval-under-env (snd-e e) env)])
+           (if (apair? val)
+             (apair-e2 val)
+             (error "MUPL snd applied to non-apair")))]
+
         [(aunit? e) (error "unimplemented aunit")]
         [(isaunit? e) (error "unimplemented isaunit")]
 
