@@ -91,7 +91,24 @@
         ; holding the function and the current environment.
         [(fun? e) (closure env e)]
 
-        [(call? e) (error "unimplemented call")]
+        ; A call evaluates its first and second subexpressions to values. If
+        ; the first is not a closure, it is an error. Else, it evaluates the
+        ; closure’s function’s body in the closure’s environment extended to
+        ; map the function’s name to the closure (unless the name field is #f)
+        ; and the function’s argument-name (i.e., the parameter name) to the
+        ; result of the second subexpression.
+        [(call? e)
+         (let ([fclosure (call-funexp e)]
+               [farg (eval-under-env (call-actual e) env)])
+           (if (not (closure? fclosure))
+             (error "MUPL call applied to non-closure")
+             (letrec ([fenv (closure-env fclosure)]
+                      [ffun (closure-fun fclosure)]
+                      [tmpenv (cons (cons (fun-formal ffun) farg) fenv)]
+                      ; This cons will be '(#f . (closure ...)) whenever we get
+                      ; a (fun #f ...) but I think that's ok.
+                      [runenv (cons (cons (fun-nameopt ffun) fclosure) tmpenv)])
+               (eval-under-env (fun-body ffun) runenv))))]
 
         ; An mlet expression evaluates its first expression to a value v. Then
         ; it evaluates the second expression to a value, in an environment
