@@ -100,7 +100,7 @@
         ; and the function’s argument-name (i.e., the parameter name) to the
         ; result of the second subexpression.
         [(call? e)
-         (let ([fclosure (call-funexp e)]
+         (let ([fclosure (eval-under-env (call-funexp e) env)]
                [farg (eval-under-env (call-actual e) env)])
            (if (not (closure? fclosure))
              (error "MUPL call applied to non-closure")
@@ -199,11 +199,30 @@
 
 ;; Problem 4
 
-(define mupl-map "CHANGE")
+#| (a) Bind to the Racket variable mupl-map a mupl function that acts like map
+   (as we used extensively in ML). Your function should be curried: it should
+   take a mupl function and return a mupl function that takes a mupl list and
+   applies the function to every element of the list returning a new mupl list.
+   Recall a mupl list is aunit or a pair where the second component is a mupl
+   list. |#
+(define mupl-map
+  (fun "mupl-map" "_f" (fun "mupl-map'" "_xs"
+    (ifeq (isaunit (var "_xs")) (int 1)
+          (aunit)
+          (apair
+            (call (var "_f") (fst (var "_xs")))
+            (call (var "mupl-map'") (snd (var "_xs"))))))))
 
+#| Bind to the Racket variable mupl-mapAddN a mupl function that takes an mupl
+   integer i and returns a mupl function that takes a mupl list of mupl
+   integers and returns a new mupl list of mupl integers that adds i to every
+   element of the list. Use mupl-map (a use of mlet is given to you to make
+   this easier). |#
 (define mupl-mapAddN
   (mlet "map" mupl-map
-        "CHANGE (notice map is now in MUPL scope)"))
+        (fun "mupl-mapAddN'" "_i" (fun "mupl-mapAddN''" "_xs"
+          (call (call (var "map") (fun #f "i" (add (var "i") (var "_i"))))
+                (var "_xs"))))))
 
 ;; Challenge Problem
 
