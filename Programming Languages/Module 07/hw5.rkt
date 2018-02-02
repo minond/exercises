@@ -40,7 +40,7 @@
     (apair (car xs) (racketlist->mupllist (cdr xs)))))
 
 (define (mupllist->racketlist es)
-  (if (not (apair? es))
+  (if (aunit? es)
     null
     (cons (apair-e1 es) (mupllist->racketlist (apair-e2 es)))))
 
@@ -100,17 +100,29 @@
         ; and the function’s argument-name (i.e., the parameter name) to the
         ; result of the second subexpression.
         [(call? e)
-         (let ([fclosure (eval-under-env (call-funexp e) env)]
-               [farg (eval-under-env (call-actual e) env)])
-           (if (not (closure? fclosure))
-             (error "MUPL call applied to non-closure")
-             (letrec ([fenv (closure-env fclosure)]
+         (let ([fclosure (eval-under-env (call-funexp e) env)])
+           (if (closure? fclosure)
+             (letrec ([farg (eval-under-env (call-actual e) env)]
+                      [fenv (closure-env fclosure)]
                       [ffun (closure-fun fclosure)]
                       [tmpenv (cons (cons (fun-formal ffun) farg) fenv)]
                       ; This cons will be '(#f . (closure ...)) whenever we get
                       ; a (fun #f ...) but I think that's ok.
                       [runenv (cons (cons (fun-nameopt ffun) fclosure) tmpenv)])
-               (eval-under-env (fun-body ffun) runenv))))]
+               (eval-under-env (fun-body ffun) runenv))
+             (error "MUPL call applied to non-closure")))]
+
+        ; Old version of call evaluation:
+        ; (let ([fclosure (eval-under-env (call-funexp e) env)]
+        ;   (if (not (closure? fclosure))
+        ;     (error "MUPL call applied to non-closure")
+        ;     (letrec ([fenv (closure-env fclosure)]
+        ;              [ffun (closure-fun fclosure)]
+        ;              [tmpenv (cons (cons (fun-formal ffun) farg) fenv)]
+        ;              ; This cons will be '(#f . (closure ...)) whenever we get
+        ;              ; a (fun #f ...) but I think that's ok.
+        ;              [runenv (cons (cons (fun-nameopt ffun) fclosure) tmpenv)])
+        ;       (eval-under-env (fun-body ffun) runenv))))]
 
         ; An mlet expression evaluates its first expression to a value v. Then
         ; it evaluates the second expression to a value, in an environment
@@ -169,7 +181,7 @@
    result, else it evaluates e3 and that is the overall result. Sample
    solution: 1 line. |#
 (define (ifaunit e1 e2 e3)
-  (ifgreater (isaunit e1) (int 1) e2 e3))
+  (ifgreater (isaunit e1) (int 0) e2 e3))
 
 #| Write a Racket function mlet* that takes a Racket list of Racket pairs
    ’((s1 . e1) ... (si . ei) ...(sn . en)) and a final mupl expression en+1.
@@ -206,8 +218,8 @@
    Recall a mupl list is aunit or a pair where the second component is a mupl
    list. |#
 (define mupl-map
-  (fun "mupl-map" "_f" (fun "mupl-map'" "_xs"
-    (ifeq (isaunit (var "_xs")) (int 1)
+  (fun #f "_f" (fun "mupl-map'" "_xs"
+    (ifaunit (var "_xs")
           (aunit)
           (apair
             (call (var "_f") (fst (var "_xs")))
@@ -220,9 +232,8 @@
    this easier). |#
 (define mupl-mapAddN
   (mlet "map" mupl-map
-        (fun "mupl-mapAddN'" "_i" (fun "mupl-mapAddN''" "_xs"
-          (call (call (var "map") (fun #f "i" (add (var "i") (var "_i"))))
-                (var "_xs"))))))
+        (fun #f "_i" (call (var "map")
+                           (fun #f "i" (add (var "i") (var "_i")))))))
 
 ;; Challenge Problem
 
