@@ -1,4 +1,4 @@
-(* University of Washington, Programming Languages, Homework 7, hw7.sml 
+(* University of Washington, Programming Languages, Homework 7, hw7.sml
    (See also Ruby code.)
 *)
 
@@ -7,10 +7,10 @@
 
 (* expressions in a little language for 2D geometry objects
    values: points, lines, vertical lines, line segments
-   other expressions: intersection of two expressions, lets, variables, 
+   other expressions: intersection of two expressions, lets, variables,
                       (shifts added by you)
 *)
-datatype geom_exp = 
+datatype geom_exp =
            NoPoints
 	 | Point of real * real (* represents point (x,y) *)
 	 | Line of real * real (* represents line (slope, intercept) *)
@@ -29,21 +29,21 @@ exception Impossible of string
 
 val epsilon = 0.00001
 
-fun real_close (r1,r2) = 
+fun real_close (r1,r2) =
     (Real.abs (r1 - r2)) < epsilon
 
 (* notice curried *)
-fun real_close_point (x1,y1) (x2,y2) = 
+fun real_close_point (x1,y1) (x2,y2) =
     real_close(x1,x2) andalso real_close(y1,y2)
 
-(* helper function to return the Line or VerticalLine containing 
-   points (x1,y1) and (x2,y2). Actually used only when intersecting 
+(* helper function to return the Line or VerticalLine containing
+   points (x1,y1) and (x2,y2). Actually used only when intersecting
    line segments, but might be generally useful *)
-fun two_points_to_line (x1,y1,x2,y2) = 
+fun two_points_to_line (x1,y1,x2,y2) =
     if real_close(x1,x2)
     then VerticalLine x1
     else
-	let 
+	let
 	    val m = (y2 - y1) / (x2 - x1)
 	    val b = y1 - m * x1
 	in
@@ -57,7 +57,7 @@ fun two_points_to_line (x1,y1,x2,y2) =
  *)
 fun intersect (v1,v2) =
     case (v1,v2) of
-	
+
        (NoPoints, _) => NoPoints (* 5 cases *)
      | (_, NoPoints) => NoPoints (* 4 additional cases *)
 
@@ -78,11 +78,11 @@ fun intersect (v1,v2) =
       | (Line _, Point _) => intersect(v2,v1)
 
       | (Line (m1,b1), Line (m2,b2)) =>
-	if real_close(m1,m2) 
+	if real_close(m1,m2)
 	then (if real_close(b1,b2)
 	      then v1 (* same line *)
 	      else  NoPoints) (* parallel lines do not intersect *)
-	else 
+	else
 	    let (* one-point intersection *)
 		val x = (b2 - b1) / (m1 - m2)
 		val y = m1 * x + b1
@@ -104,16 +104,16 @@ fun intersect (v1,v2) =
 
       | (VerticalLine _, LineSegment seg) => intersect(v2,v1)
 
-      | (LineSegment seg, _) => 
+      | (LineSegment seg, _) =>
 	(* the hard case, actually 4 cases because v2 could be a point,
 	   line, vertical line, or line segment *)
-	(* First compute the intersection of (1) the line containing the segment 
+	(* First compute the intersection of (1) the line containing the segment
            and (2) v2. Then use that result to compute what we need. *)
 	(case intersect(two_points_to_line seg, v2) of
-	    NoPoints => NoPoints 
+	    NoPoints => NoPoints
 	  | Point(x0,y0) => (* see if the point is within the segment bounds *)
 	    (* assumes v1 was properly preprocessed *)
-	    let 
+	    let
 		fun inbetween(v,end1,end2) =
 		    (end1 - epsilon <= v andalso v <= end2 + epsilon)
 		    orelse (end2 - epsilon <= v andalso v <= end1 + epsilon)
@@ -125,9 +125,9 @@ fun intersect (v1,v2) =
 	    end
 	  | Line _ => v1 (* so segment seg is on line v2 *)
 	  | VerticalLine _ => v1 (* so segment seg is on vertical-line v2 *)
-	  | LineSegment seg2 => 
+	  | LineSegment seg2 =>
 	    (* the hard case in the hard case: seg and seg2 are on the same
-               line (or vertical line), but they could be (1) disjoint or 
+               line (or vertical line), but they could be (1) disjoint or
                (2) overlapping or (3) one inside the other or (4) just touching.
 	       And we treat vertical segments differently, so there are 4*2 cases.
 	     *)
@@ -138,7 +138,7 @@ fun intersect (v1,v2) =
 		if real_close(x1start,x1end)
 		then (* the segments are on a vertical line *)
 		    (* let segment a start at or below start of segment b *)
-		    let 
+		    let
 			val ((aXstart,aYstart,aXend,aYend),
 			     (bXstart,bYstart,bXend,bYend)) = if y1start < y2start
 							      then (seg,seg2)
@@ -154,7 +154,7 @@ fun intersect (v1,v2) =
 		    end
 		else (* the segments are on a (non-vertical) line *)
 		    (* let segment a start at or to the left of start of segment b *)
-		    let 
+		    let
 			val ((aXstart,aYstart,aXend,aYend),
 			     (bXstart,bYstart,bXend,bYend)) = if x1start < x2start
 							      then (seg,seg2)
@@ -167,17 +167,17 @@ fun intersect (v1,v2) =
 			else if aXend > bXend
 			then LineSegment(bXstart,bYstart,bXend,bYend) (* b inside a *)
 			else LineSegment(bXstart,bYstart,aXend,aYend) (* overlapping *)
-		    end	
-	    end						
+		    end
+	    end
 	  | _ => raise Impossible "bad result from intersecting with a line")
       | _ => raise Impossible "bad call to intersect: only for shape values"
 
-(* interpreter for our language: 
+(* interpreter for our language:
    * takes a geometry expression and returns a geometry value
    * for simplicity we have the top-level function take an environment,
      (which should be [] for the whole program
    * we assume the expression e has already been "preprocessed" as described
-     in the homework assignment: 
+     in the homework assignment:
          * line segments are not actually points (endpoints not real close)
          * lines segment have left (or, if vertical, bottom) coordinate first
 *)
@@ -189,7 +189,7 @@ fun eval_prog (e,env) =
       | Line _   => e
       | VerticalLine _ => e
       | LineSegment _  => e
-      | Var s => 
+      | Var s =>
 	(case List.find (fn (s2,v) => s=s2) env of
 	     NONE => raise BadProgram("var not found: " ^ s)
 	   | SOME (_,v) => v)

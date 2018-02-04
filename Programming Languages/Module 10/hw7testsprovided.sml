@@ -20,7 +20,7 @@ in
 	else (print "preprocess does not convert a LineSegment to a Point succesfully\n")
 end;
 
-let 
+let
 	val LineSegment(a,b,c,d) = preprocess_prog (LineSegment(3.2,4.1,~3.2,~4.1))
 	val LineSegment(e,f,g,h) = LineSegment(~3.2,~4.1,3.2,4.1)
 in
@@ -30,9 +30,9 @@ in
 end;
 
 (* eval_prog tests with Shift*)
-let 
+let
 	val Point(a,b) = (eval_prog (preprocess_prog (Shift(3.0, 4.0, Point(4.0,4.0))), []))
-	val Point(c,d) = Point(7.0,8.0) 
+	val Point(c,d) = Point(7.0,8.0)
 in
 	if real_equal(a,c) andalso real_equal(b,d)
 	then (print "eval_prog with empty environment worked\n")
@@ -40,9 +40,9 @@ in
 end;
 
 (* Using a Var *)
-let 
+let
 	val Point(a,b) = (eval_prog (Shift(3.0,4.0,Var "a"), [("a",Point(4.0,4.0))]))
-	val Point(c,d) = Point(7.0,8.0) 
+	val Point(c,d) = Point(7.0,8.0)
 in
 	if real_equal(a,c) andalso real_equal(b,d)
 	then (print "eval_prog with 'a' in environment is working properly\n")
@@ -51,9 +51,9 @@ end;
 
 
 (* With Variable Shadowing *)
-let 
+let
 	val Point(a,b) = (eval_prog (Shift(3.0,4.0,Var "a"), [("a",Point(4.0,4.0)),("a",Point(1.0,1.0))]))
-	val Point(c,d) = Point(7.0,8.0) 
+	val Point(c,d) = Point(7.0,8.0)
 in
 	if real_equal(a,c) andalso real_equal(b,d)
 	then (print "eval_prog with shadowing 'a' in environment is working properly\n")
