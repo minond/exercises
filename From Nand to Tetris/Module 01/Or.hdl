@@ -9,8 +9,8 @@ CHIP Or {
     OUT out;
 
     PARTS:
-    Not (in = a, out = notA);
-    Not (in = b, out = notB);
-    And (a = notA, b = notB, out = c);
-    Not (in = c, out = out);
+    Not(in = a, out = notA);
+    Not(in = b, out = notB);
+    And(a = notA, b = notB, out = c);
+    Not(in = c, out = out);
 }
