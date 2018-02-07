@@ -1,7 +1,7 @@
 Dynamic Typing vs. Static Typing
+================================
 
-
-Claim: Dynamic typing is more convenient
+Claim: dynamic typing is more convenient
 ----------------------------------------
 
 Dynamic typing lets you build a heterogeneous list or return a "number or a
@@ -43,7 +43,7 @@ One could argue that static typing is more convenient that dynamic typings
 since it checks for type errors so the programmer doesn't have to.
 
 
-Clain: Static typing prevents useful programs
+Claim: static typing prevents useful programs
 ---------------------------------------------
 
 Any sound static type system forbids programs that do nothing wrong, forcing
@@ -71,7 +71,7 @@ The example above demonstrates two programs, both of which attempt to build
 heterogeneous lists of pairs. Racket allows this but SML does not.
 
 
-Clain: static typing catches bugs earlier
+Claim: static typing catches bugs earlier
 -----------------------------------------
 
 Though static typing catches many simple bugs as soon as compiled. Since such
@@ -100,3 +100,34 @@ compiles but is completely unusable. We should be calling it like so: `((pow 4)
 3)` but if you look closer at the implementation, on line 5 you'll notice that
 there is an internal call that is incorrect. The SML version catches this and
 complains, at compile time, that there is a bug on line 4.
+
+
+Claim: static typing is faster
+------------------------------
+
+The language implementation does not need to store tags/information, which
+takes time and space. And it does not need to check those tags, which takes
+time. And code written by a human does not need to check that it got arguments
+of the correct type and is returning a value of the correct type.
+
+
+Claim: dynamic typing can be fast
+---------------------------------
+
+The language implementation can optimize to remove some unnecessary tags and
+checks.
+
+
+Claim: code reuse is easier with dynamic typing
+-----------------------------------------------
+
+Without a restrictive type system, more code can just be reused with data of
+different types. If you can use cons cells for everything, libraries that work
+on cons cells are useful.
+
+
+Claim: code reuse possible with static typing
+---------------------------------------------
+
+Modern type systems should support reasonable code reuse with features like
+generics and subtyping.

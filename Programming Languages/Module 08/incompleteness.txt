@@ -1,4 +1,5 @@
-Incompleteness:
+Incompleteness
+==============
 
 Almost anything you might like to check statically is undecidable. Any static
 checker cannot do all of: always terminate, always be sound, always be

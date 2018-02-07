@@ -1,4 +1,5 @@
 Weak Typing (C/C++)
+===================
 
 There exists programs that, by definition, must pass static checking but then
 when run can "set the computer on fire". Why?

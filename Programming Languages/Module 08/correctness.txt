@@ -1,4 +1,5 @@
-Correctness:
+Correctness
+===========
 
 Suppose a type system is supposed to prevent X for some X:
 
