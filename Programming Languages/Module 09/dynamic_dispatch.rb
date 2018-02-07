@@ -34,6 +34,9 @@ class ThreeDPoint < Point
   end
 end
 
+# Doesn't override distFromOrigin or distFromOrigin2 but since those methods
+# from the parent class call instance methods (the getter) which dispatches to
+# the sub class.
 class PolarPoint < Point
   def initialize(r, theta)
     @r = r
