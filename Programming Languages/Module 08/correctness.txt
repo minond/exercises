@@ -1,0 +1,18 @@
+Correctness:
+
+Suppose a type system is supposed to prevent X for some X:
+
+Then a type system is _sound_ if it never accepts a program that, when run with
+some input, does X (no false negatives). It asks, "could this program do X?",
+and if the answer is yes, then it must correctly reject in order to be
+considered a sound type system.
+
+And a type system is _complete_ if it never rejects a program that, no matter
+what input it is run with, will not do X (no false positives). It asks, "could
+this program do X?", and if the answer is no, then it must correctly accept in
+order to be considered a complete type system.
+
+
+The goal is usually for a PL type system to be sound (so you can rely on it)
+but not complete. "Fancy features" like generics aimed at "fewer false
+positives"
