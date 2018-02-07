@@ -1,0 +1,6 @@
+Suppose a type system were unsound. What could the PL do?
+
+- Fix it with an updated language definition?
+- Insert dynamic checks as needed to prevent X from happening?
+- Just allow X to happen even if it "tried to stop it"?
+- Worse: allow not just X, but anything to happen if "programmer gets it wrong"
