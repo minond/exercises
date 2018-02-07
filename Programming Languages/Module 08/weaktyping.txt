@@ -1,0 +1,19 @@
+Weak Typing (C/C++)
+
+There exists programs that, by definition, must pass static checking but then
+when run can "set the computer on fire". Why?
+
+- Ease of language implementation: checks are left to the programmer
+- Performance: dynamic checks take time
+- Lower level: compiler does not insert information like array sizes, so it
+  cannot do the checks
+
+Weak typing is a poor name. Really about doing neither static nor dynamic
+checks. A big problem is array bounds, which most PLs check dynamically, C/C++
+allow this operation and let the program access parts of memory that are not
+associated with the array/variable.
+
+Weak typing really means a type system that allows programs for which a correct
+language implementation is allowed to do anything, even something totally
+unrelated to the code in the program - it can run illegal programs and cause
+anything to happen.
