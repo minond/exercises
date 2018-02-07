@@ -1,6 +1,10 @@
 Dynamic Typing vs. Static Typing
 ================================
 
+Let's talk about, convenience, not preventing useful programs, catching bugs
+early, performance, and code reuse.
+
+
 Claim: dynamic typing is more convenient
 ----------------------------------------
 
@@ -131,3 +135,21 @@ Claim: code reuse possible with static typing
 
 Modern type systems should support reasonable code reuse with features like
 generics and subtyping.
+
+
+Claim: dynamic typing is better for prototyping
+-----------------------------------------------
+
+Dynamic code lets you test the part you have written while knowing you're not
+even close to covering all cases. One could argue that static typing is better
+for prototyping since you want to catch those bugs early on and most static
+languages give you ways to easily "fill in the blanks" when it comes to
+covering all types.
+
+
+Claim: static typing is better evolution
+----------------------------------------
+
+When making updates six months from now, it's nice to have a type checker
+assert that this change is not negatively affecting other parts of the code
+base.
