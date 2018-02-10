@@ -56,8 +56,13 @@ CHIP ALU {
     Not16(in = xy, out = xy-not);
 
     // if no == 1 then xy-not else xy
-    Mux16(a = xy, b = xy-not, sel = no, out = out);
+    // if out < 0 then ng = 1
+    Mux16(a = xy, b = xy-not, sel = no, out = out,
+      out[15] = ng, out[0..7] = out-0-7, out[8..15] = out-8-15);
 
     // if out == 0 then zr = 1
-    // if out < 0 then ng = 1
+    Or8Way(in = out-0-7, out = zr-a);
+    Or8Way(in = out-8-15, out = zr-b);
+    Or(a = zr-a, b = zr-b, out = zr-not);
+    Not(in = zr-not, out = zr);
 }
