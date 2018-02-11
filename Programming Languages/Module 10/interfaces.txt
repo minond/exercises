@@ -1,0 +1,6 @@
+Interfaces
+----------
+
+
+Interfaces have little use in a dynamically typed languages. Dynamic typing is
+already much more flexible.
