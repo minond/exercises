@@ -1,0 +1,14 @@
+Double-dispatch "trick"
+-----------------------
+
+`LInt`, `LString`, and `LRational` each define all of `addInt`, `addString`,
+and `addRational`. For example, `LString`'s `addInt` method is for
+concatenating an integer to the string in `self`. We end up with nine total
+methods, one for each case of addition.
+
+`Add`'s `eval` method calls `e1.eval.add e2.eval` which dispatches to `add`
+methods in `LInt`, `LString`, or `LRational` where `e1` is the left hand side
+and `e2` is the right hand side of the expression. `e1` knows what type it is
+but doesn't know what `e2` is, but what it can do is call a method on `e2` that
+tells `e2` how it should handle the argument it got. See `double_dispatch.rb`
+for an example.
