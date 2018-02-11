@@ -17,15 +17,15 @@ class LInt < LExp
   end
 
   def addInt e
-    @i + e.i
+    LInt.new @i + e.i
   end
 
   def addRational e
-    @i + e.r
+    LRational.new @i + e.r
   end
 
   def addString e
-    e.s + @i.to_s
+    LString.new e.s + @i.to_s
   end
 end
 
@@ -45,15 +45,15 @@ class LRational < LExp
   end
 
   def addInt e
-    @r + e.i
+    LInt.new @r + e.i
   end
 
   def addRational e
-    @r + e.r
+    LRational.new @r + e.r
   end
 
   def addString e
-    e.s + @r.to_s
+    LString.new e.s + @r.to_s
   end
 end
 
@@ -73,15 +73,15 @@ class LString < LExp
   end
 
   def addInt e
-    e.i.to_s + @s
+    LInt.new e.i.to_s + @s
   end
 
   def addRational e
-    @s.to_r + e.r
+    LRational.new e.r.to_s + @s
   end
 
   def addString e
-    e.s + @s
+    LString.new e.s + @s
   end
 end
 
@@ -94,7 +94,7 @@ class LAdd < LExp
   end
 
   def eval
-    e1.add e2
+    e1.eval.add e2.eval
   end
 end
 
