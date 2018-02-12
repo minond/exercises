@@ -173,6 +173,47 @@ class Point < GeometryValue
   def preprocess_prog
     self
   end
+
+  def intersect b
+    b.intersectPoint self
+  end
+
+  def intersectPoint p
+    if real_close(@x, p.x) and real_close(@y, p.y)
+      Point.new(@x, @y)
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectLine line
+    if real_close(@y, line.m * @x + line.b)
+      Point.new(@x, @y)
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectVerticalLine vline
+    if real_close(@x, vline.x)
+      Point.new(@x, @y)
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectWithSegmentAsLineResult seg
+    x1 = [seg.x1, seg.x2].min - GeometryExpression::Epsilon
+    x2 = [seg.x1, seg.x2].max + GeometryExpression::Epsilon
+    y1 = [seg.y1, seg.y2].min - GeometryExpression::Epsilon
+    y2 = [seg.y1, seg.y2].max + GeometryExpression::Epsilon
+
+    if @x.between?(x1, x2) and @y.between?(y1, y2)
+      Point.new(@x, @y)
+    else
+     NoPoints.new
+    end
+  end
 end
 
 class Line < GeometryValue
@@ -196,6 +237,36 @@ class Line < GeometryValue
   def preprocess_prog
     self
   end
+
+  def intersect b
+    b.intersectLine self
+  end
+
+  def intersectPoint point
+    point.intersectLine self
+  end
+
+  def intersectLine line
+    if real_close(@m, line.m)
+      if real_close(@b, line.b)
+        Line.new(@m, @b)
+      else
+        NoPoints.new
+      end
+    else
+      x = (line.b - @b) / (@m - line.m)
+      y = @m * x + @b
+      Point.new(x, y)
+    end
+  end
+
+  def intersectVerticalLine vline
+    Point.new(vline.x, @m * vline.x + @b)
+  end
+
+  def intersectWithSegmentAsLineResult seg
+    seg
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -217,6 +288,30 @@ class VerticalLine < GeometryValue
 
   def preprocess_prog
     self
+  end
+
+  def intersect b
+    b.intersectVerticalLine self
+  end
+
+  def intersectPoint point
+    point.intersectVerticalLine self
+  end
+
+  def intersectLine line
+    line.intersectVerticalLine self
+  end
+
+  def intersectVerticalLine vline
+    if real_close(@x, vline.x)
+      VerticalLine.new(@x)
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectWithSegmentAsLineResult seg
+    seg
   end
 end
 
@@ -254,18 +349,99 @@ class LineSegment < GeometryValue
   # LineSegment not meeting this requirement, replace it with a LineSegment
   # with the same endpoints reordered.
   def preprocess_prog
-    if real_close(x1, x2) and real_close(y1, y2)
-      Point.new(x1, y2)
+    if real_close(@x1, @x2) and real_close(@y1, @y2)
+      Point.new(@x1, @y2)
     elsif y2 < y1
-      LineSegment.new(x2, y2, x1, y1)
+      LineSegment.new(@x2, @y2, @x1, @y1)
     else
       self
+    end
+  end
+
+  def intersect b
+    b.intersectLineSegment self
+  end
+
+  def intersectPoint point
+    point.intersectLineSegment self
+  end
+
+  def intersectLine line
+    line.intersectLineSegment self
+  end
+
+  def intersectVerticalLine vline
+    self
+  end
+
+  def intersectWithSegmentAsLineResult seg2
+    tx1 = [@x1, seg2.x1].max
+    tx2 = [@x2, seg2.x2].min
+    ty1 = [@y1, seg2.y1].max
+    ty2 = [@y2, seg2.y2].min
+
+    if tx1 > tx2 or ty1 > ty2
+      NoPoints.new
+    else
+      LineSegment.new(tx1, ty1, tx2, ty2)
     end
   end
 end
 
 # Note: there is no need for getter methods for the non-value classes
 
+# 4. Implement intersection in your Ruby solution following the directions
+# here, in which we require both double dispatch and a separate use of dynamic
+# dispatch for the line-segment case. Remember all the different cases in ML
+# will appear somewhere in the Ruby solution, just arranged very differently.
+#
+#  - Implement preprocess_prog and eval_prog in the Intersect class. This is
+#    not difficult, much like your prior work in the Shift class is not
+#    difficult. This is because every subclass of GeometryValue will have an
+#    intersect method that “knows how to intersect itself” with another
+#    geometry-value passed as an argument.
+#
+#  - Every subclass of GeometryValue needs an intersect method, but these will
+#    be short. The argument is another geometry-value, but we do not know what
+#    kind. So we use double dispatch and call the appropriate method on the
+#    argument passing self to the method. For example, the Point class has an
+#    intersect method that calls intersectPoint with self.
+#
+#  - So methods intersectNoPoints, intersectPoint, intersectLine,
+#    intersectVerticalLine, and intersectLineSegment defined in each of our 5
+#    subclasses of GeometryValue handle the 25 possible intersection
+#    combinations:
+#
+#      - The 9 cases involving NoPoints are done for you. See the GeometryValue
+#        class — there is nothing more you need to do.
+#
+#      - Next do the 9 remaining cases involving combinations that do not
+#        involve LineSegment. You will need to understand double-dispatch to
+#        avoid is_a? and instance_of?. As in the ML code, 3 of these 9 cases
+#        can just use one of the other cases because intersection is
+#        commutative.
+#
+#      - What remains are the 7 cases where one value is a LineSegment and the
+#        other is not NoPoints. These cases are all “done” for you because all
+#        subclasses of GeometryValue in- herit an intersectLineSegment method
+#        that will be correct for all of them. But it calls
+#        intersectWithSegmentAsLineResult, which you need to implement for each
+#        subclass of GeometryValue. Here is how this method should work:
+#
+#          * It takes one argument, which is a line segment. (In ML the
+#            corresponding variable was a real*real*real*real, but here it will
+#            actually be an instance of LineSegment and you can use the getter
+#            methods x1, y1, x2, and y2 as needed.)
+#
+#          * It assumes that self is the intersection of (1) some not-provided
+#            geometry-value and (2) the line (vertical or not) containing the
+#            segment given as an argument.
+#
+#          * It returns the intersection of the not-provided geometry-value and
+#            the segment given as an argument.
+#
+#        Together the 5 intersectWithSegmentAsLineResult methods you write will
+#        implement the same algorithm as on lines 110–169 of the ML code.
 class Intersect < GeometryExpression
   # *add* methods to this class -- do *not* change given code and do not
   # override any methods
@@ -276,6 +452,10 @@ class Intersect < GeometryExpression
 
   def preprocess_prog
     Intersect.new(@e1.preprocess_prog, @e2.preprocess_prog)
+  end
+
+  def eval_prog env
+    @e1.eval_prog(env).intersect(@e2.eval_prog(env))
   end
 end
 
@@ -290,7 +470,7 @@ class Let < GeometryExpression
   end
 
   def eval_prog env
-    @e2.eval_prog ([@s, @e1.eval_prog(env)] + env)
+    @e2.eval_prog((env + []).unshift([@s, @e1.eval_prog(env)]))
   end
 
   def preprocess_prog
