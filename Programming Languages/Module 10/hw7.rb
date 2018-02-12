@@ -162,6 +162,10 @@ class Point < GeometryValue
     @y = y
   end
 
+  def shift x, y
+    Point.new(@x + x, @y + y)
+  end
+
   def eval_prog env
     self
   end
@@ -185,6 +189,10 @@ class Line < GeometryValue
     self
   end
 
+  def shift x, y
+    Line.new(@m, @b + y - @m * x)
+  end
+
   def preprocess_prog
     self
   end
@@ -201,6 +209,10 @@ class VerticalLine < GeometryValue
 
   def eval_prog env
     self
+  end
+
+  def shift x, y
+    VerticalLine.new(@x + x)
   end
 
   def preprocess_prog
@@ -224,6 +236,10 @@ class LineSegment < GeometryValue
 
   def eval_prog env
     self
+  end
+
+  def shift x, y
+    LineSegment.new(@x1 + x, @y1 + y, @x2 + x, @y2 + y)
   end
 
   # No LineSegment anywhere in the expression has endpoints that are the same
