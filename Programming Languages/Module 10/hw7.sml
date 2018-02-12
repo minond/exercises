@@ -198,3 +198,33 @@ fun eval_prog (e,env) =
 (* CHANGE: Add a case for Shift expressions *)
 
 (* CHANGE: Add function preprocess_prog of type geom_exp -> geom_exp *)
+
+(* 1. Implement an SML function preprocess_prog of type geom_exp -> geom_exp
+ * to implement expression preprocessing as defined above. The idea is that
+ * evaluating program e would be done with eval_prog (preprocess_prog e, [])
+ * where the [] is the empty list for the empty environment.
+ *
+ * To simplify the interpreter, we first preprocess expressions. Preprocessing
+ * takes an expression and produces a new, equivalent expression with the
+ * following invariants:
+ *
+ *   - No LineSegment anywhere in the expression has endpoints that are the same
+ *     as (i.e., real close to) each other. Such a line-segment should be
+ *     replaced with the appropriate Point. For example in ML syntax,
+ *     LineSegment(3.2,4.1,3.2,4.1) should be replaced with Point(3.2,4.1).
+ *
+ *   - Every LineSegment has its first endpoint (the first two real values in
+ *     SML) to the left (lower x-value) of the second endpoint. If the
+ *     x-coordinates of the two endpoints are the same (real close), then the
+ *     LineSegment has its first endpoint below (lower y-value) the second
+ *     endpoint. For any LineSegment not meeting this requirement, replace it
+ *     with a LineSegment with the same endpoints reordered. *)
+fun preprocess_prog gx =
+  case gx
+   of LineSegment (x1, y1, x2, y2) =>
+        (* Same endpoints? Or do we need to flip the values? *)
+        (case (real_close (x1, x2), real_close (y1, y2), y2 < y1)
+         of (true, true, _) => Point (x1, y1)
+          | (true, _, true) => LineSegment (x2, y2, x1, y1)
+          | _ => gx)
+    | _ => gx
