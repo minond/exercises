@@ -256,12 +256,15 @@ fun eval_prog (e,env) =
  *     LineSegment has its first endpoint below (lower y-value) the second
  *     endpoint. For any LineSegment not meeting this requirement, replace it
  *     with a LineSegment with the same endpoints reordered. *)
-fun preprocess_prog gx =
-  case gx
+fun preprocess_prog e =
+  case e
    of LineSegment (x1, y1, x2, y2) =>
         (* Same endpoints? Or do we need to flip the values? *)
         (case (real_close (x1, x2), real_close (y1, y2), y2 < y1)
          of (true, true, _) => Point (x1, y1)
           | (true, _, true) => LineSegment (x2, y2, x1, y1)
-          | _ => gx)
-    | _ => gx
+          | _ => e)
+    | Intersect (e1, e2) => Intersect (preprocess_prog e1, preprocess_prog e2)
+    | Let (s, e1, e2) => Let (s, preprocess_prog e1, preprocess_prog e2)
+    | Shift (x, y, e) => Shift (x, y, preprocess_prog e)
+    | _ => e
