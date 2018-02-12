@@ -25,6 +25,48 @@
 # Note: For eval_prog, represent environments as arrays of 2-element arrays
 # as described in the assignment
 
+# 3. Complete the Ruby implementation except for intersection, which means skip
+# for now additions to the Intersect class and, more importantly, methods
+# related to intersection in other classes. Do not modify the code given to
+# you. Follow this approach:
+#
+#  - Every subclass of GeometryExpression should have a preprocess_prog method
+#    that takes no arguments and returns the geometry object that is the result
+#    of preprocessing self. To avoid mutation, return a new instance of the
+#    same class unless it is trivial to determine that self is already an
+#    appropriate result.
+#
+#  - Every subclass of GeometryExpression should have an eval_prog method that
+#    takes one argu- ment, the environment, which you should represent as an
+#    array whose elements are two-element arrays: a Ruby string (the variable
+#    name) in index 0 and an object that is a value in our language in index 1.
+#    As in any interpreter, pass the appropriate environment when evaluating
+#    subexpres- sions. (This is fairly easy since we do not have closures.) To
+#    make sure you handle both scope and shadowing correctly:
+#
+#    - Do not ever mutate an environment; create a new environment as needed
+#      instead. Be careful what methods you use on arrays to avoid mutation.
+#
+#    - The eval_prog method in Var is given to you. Make sure the environments
+#      you create work correctly with this definition.
+#
+#    The result of eval_prog is the result of “evaluating the expression
+#    represented by self,” so, as we expect with OOP style, the cases of ML’s
+#    eval_prog are spread among our classes, just like with preprocess_prog.
+#
+#  - Every subclass of GeometryValue should have a shift method that takes two
+#    arguments dx and dy and returns the result of shifting self by dx and dy.
+#    In other words, all values in the language “know how to shift themselves
+#    to create new objects.” Hence the eval_prog method in the Shift class
+#    should be very short.
+#
+#  - Remember you should not use any method like is_a?, instance_of?, class,
+#    etc.
+#
+#  - Analogous to SML, an overall programe would be evaluated via
+#    e.preprocess_prog.eval_prog [] (notice we use an array for the
+#    environment).
+
 class GeometryExpression
   # do *not* change this class definition
   Epsilon = 0.00001
@@ -114,9 +156,14 @@ class Point < GeometryValue
   # Note: You may want a private helper method like the local
   # helper function inbetween in the ML code
   attr_reader :x, :y
+
   def initialize(x,y)
     @x = x
     @y = y
+  end
+
+  def preprocess_prog
+    self
   end
 end
 
@@ -128,6 +175,10 @@ class Line < GeometryValue
     @m = m
     @b = b
   end
+
+  def preprocess_prog
+    self
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -136,6 +187,10 @@ class VerticalLine < GeometryValue
   attr_reader :x
   def initialize x
     @x = x
+  end
+
+  def preprocess_prog
+    self
   end
 end
 
@@ -152,6 +207,27 @@ class LineSegment < GeometryValue
     @x2 = x2
     @y2 = y2
   end
+
+  # No LineSegment anywhere in the expression has endpoints that are the same
+  # as (i.e., real close to) each other. Such a line-segment should be replaced
+  # with the appropriate Point. For example in ML syntax,
+  # LineSegment(3.2,4.1,3.2,4.1) should be replaced with Point(3.2,4.1).
+  #
+  # Every LineSegment has its first endpoint (the first two real values in SML)
+  # to the left (lower x-value) of the second endpoint. If the x-coordinates of
+  # the two endpoints are the same (real close), then the LineSegment has its
+  # first endpoint below (lower y-value) the second endpoint. For any
+  # LineSegment not meeting this requirement, replace it with a LineSegment
+  # with the same endpoints reordered.
+  def preprocess_prog
+    if real_close(x1, x2) and real_close(y1, y2)
+      Point.new(x1, y2)
+    elsif y2 < y1
+      LineSegment.new(x2, y2, x1, y1)
+    else
+      self
+    end
+  end
 end
 
 # Note: there is no need for getter methods for the non-value classes
@@ -163,6 +239,10 @@ class Intersect < GeometryExpression
     @e1 = e1
     @e2 = e2
   end
+
+  def preprocess_prog
+    Intersect.new(@e1.preprocess_prog, @e2.preprocess_prog)
+  end
 end
 
 class Let < GeometryExpression
@@ -173,6 +253,10 @@ class Let < GeometryExpression
     @s = s
     @e1 = e1
     @e2 = e2
+  end
+
+  def preprocess_prog
+    Let.new(@s, @e1.preprocess_prog, @e2.preprocess_prog)
   end
 end
 
@@ -187,6 +271,10 @@ class Var < GeometryExpression
     raise "undefined variable" if pr.nil?
     pr[1]
   end
+
+  def preprocess_prog
+    self
+  end
 end
 
 class Shift < GeometryExpression
@@ -196,5 +284,9 @@ class Shift < GeometryExpression
     @dx = dx
     @dy = dy
     @e = e
+  end
+
+  def preprocess_prog
+    Shift.new(@dx, @dy, @e.preprocess_prog)
   end
 end
