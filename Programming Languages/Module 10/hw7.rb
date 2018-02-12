@@ -162,6 +162,10 @@ class Point < GeometryValue
     @y = y
   end
 
+  def eval_prog env
+    self
+  end
+
   def preprocess_prog
     self
   end
@@ -171,9 +175,14 @@ class Line < GeometryValue
   # *add* methods to this class -- do *not* change given code and do not
   # override any methods
   attr_reader :m, :b
+
   def initialize(m,b)
     @m = m
     @b = b
+  end
+
+  def eval_prog env
+    self
   end
 
   def preprocess_prog
@@ -185,8 +194,13 @@ class VerticalLine < GeometryValue
   # *add* methods to this class -- do *not* change given code and do not
   # override any methods
   attr_reader :x
+
   def initialize x
     @x = x
+  end
+
+  def eval_prog env
+    self
   end
 
   def preprocess_prog
@@ -206,6 +220,10 @@ class LineSegment < GeometryValue
     @y1 = y1
     @x2 = x2
     @y2 = y2
+  end
+
+  def eval_prog env
+    self
   end
 
   # No LineSegment anywhere in the expression has endpoints that are the same
@@ -255,6 +273,10 @@ class Let < GeometryExpression
     @e2 = e2
   end
 
+  def eval_prog env
+    @e2.eval_prog ([@s, @e1.eval_prog(env)] + env)
+  end
+
   def preprocess_prog
     Let.new(@s, @e1.preprocess_prog, @e2.preprocess_prog)
   end
@@ -266,6 +288,7 @@ class Var < GeometryExpression
   def initialize s
     @s = s
   end
+
   def eval_prog env # remember: do not change this method
     pr = env.assoc @s
     raise "undefined variable" if pr.nil?
@@ -284,6 +307,10 @@ class Shift < GeometryExpression
     @dx = dx
     @dy = dy
     @e = e
+  end
+
+  def eval_prog env
+    @e.eval_prog(env).shift(@dx, @dy)
   end
 
   def preprocess_prog
