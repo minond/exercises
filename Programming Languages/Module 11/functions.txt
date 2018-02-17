@@ -2,6 +2,8 @@ Function Subtyping
 ------------------
 
 
+### Return types
+
 Given this code in a made up language (a mix of Elm and SML):
 
     fun distMoved -> ({x : real, y : real} -> {x : real, y : real})
@@ -38,7 +40,109 @@ covariant.
     then fn{'c -> 'a} <: fn{'c -> 'b}
 
 
-Resources on covariance and contravariance:
+### Argument types
 
-  - https://docs.scala-lang.org/tour/variances.html
-  - https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
+Given this code in our original language:
+
+    fun distMoved -> ({x : real, y : real} -> {x : real, y : real})
+                  -> {x : real, y : real}
+    fun distMoved (f, p) =
+      let
+        val p2 : {x : real, y : real} = f p
+        val dx : real = p2.x - p.x
+        val dy : real = p2.y - p.y
+      in
+        Math.sqrt(dx*dx + dy*dy)
+      end
+
+    fun flipIfGreen -> {x : real, y : real, color : string}
+                    -> {x : real, y : real}
+    fun flipIfGreen p =
+      if p.color = "green"
+      then { x = ~p.x, y = ~p.y }
+      then { x = p.x, y = p.y }
+
+    val d = distMoved(flipIfGreen, { x = 3.0, y = 4.0 })
+
+
+Argument type of `flipIfGreen` is `{x : real, y : real, color : string}` but it
+is called with a `{x : real, y : real}`. This is unsound and should not type
+check because we're giving `flipIfGreen` a supertype of what it needs.
+Functions can return a basetype or a subtype of the basetype. But they cannot
+take a subtype and be given a basetype.
+
+    if 'a <: 'b
+    then fn{'a -> 'c} NOT(<:) fn{'b -> 'c}
+
+
+The opposite is ok. A function can take a basetype and be given a subtype. This
+is because a function can assume "less than it nees to" about its arguments.
+Argument types are contravariant.
+
+    given 'b <: 'a
+    then fn{'a -> 'c} <: fn{'b -> 'c}
+
+
+Given this code:
+
+    fun distMoved -> ({x : real, y : real} -> {x : real, y : real})
+                  -> {x : real, y : real}
+    fun distMoved (f, p) =
+      let
+        val p2 : {x : real, y : real} = f p
+        val dx : real = p2.x - p.x
+        val dy : real = p2.y - p.y
+      in
+        Math.sqrt(dx*dx + dy*dy)
+      end
+
+    fun flipXSetY0 -> {x : real}
+                   -> {x : real, y : real}
+    fun flipXSetY0 p =
+      { x = ~p.x
+      , y = 0.0
+      }
+
+    val d = distMoved(flipXSetY0, { x = 3.0, y = 2.0 })
+
+
+This works because `flipXSetY0` is given a supertype of what it actually needs.
+Function argument contravariance and return type covariant let us treat a
+function's subtype senatics the same way we would when deciding if we can pass
+a value of a function. Subtypes are ok substitutions for supertypes - always.
+
+
+### Return types
+
+All together now:
+
+    fun distMoved -> ({x : real, y : real} -> {x : real, y : real})
+                  -> {x : real, y : real}
+    fun distMoved (f, p) =
+      let
+        val p2 : {x : real, y : real} = f p
+        val dx : real = p2.x - p.x
+        val dy : real = p2.y - p.y
+      in
+        Math.sqrt(dx*dx + dy*dy)
+      end
+
+    fun flipXMakeGreen -> {x : real}
+                       -> {x : real, y : real, color : string}
+    fun flipXMakeGreen p =
+      { x = ~p.x
+      , y = 0.0
+      , color = "green"
+      }
+
+    val d = distMoved(flipXMakeGreen, { x = 3.0, y = 2.0 })
+
+
+`flipXMakeGreen` is given a subtype of the argument type it asks for, which is
+ok. And it returns a subtype of the return type.
+
+
+### Resources
+
+- https://docs.scala-lang.org/tour/variances.html
+- https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
