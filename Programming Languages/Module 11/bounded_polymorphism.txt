@@ -1,0 +1,28 @@
+Bounded Polymorphism
+--------------------
+
+
+What is we want both generics and subtyping? Well we can have it, and it is
+something called bounded polymorphism.
+
+Example in Java: a method that takes a list of points and a circle (represented
+as a center point and a radius) and returns a new list of points with just the
+points that lit within the circle:
+
+    public List<Point> inCircle(List<Point> pts, Point center, double r);
+
+
+Now what if we wanted to use `inCircle` with `List<ColoPoint>`? This almost
+works but it fails to pass the subtyping rules since `inCircle` creates and
+returns a `List<Point>`, which could technically include `Point` instances
+making this method unusable with a `List<ColoPoint>`. What is our method had
+this signature instead:
+
+    public List<T> inCircle(List<T> pts, Point center, double r);
+
+
+This woudln't work either since now we could use the method with a list of
+anything and therefore cannot rely on having a `Point` or something like it in
+the implementation. What we need is some sort of way to declare `T <: Point`:
+
+    public <T extends Point> List<T> inCircle(List<T> pts, Point center, double r);
