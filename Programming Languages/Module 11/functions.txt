@@ -141,6 +141,10 @@ All together now:
 `flipXMakeGreen` is given a subtype of the argument type it asks for, which is
 ok. And it returns a subtype of the return type.
 
+    given t3 <: t1
+    and   t2 <: t4
+    then  t1->t2 <: t3->t4
+
 
 ### Resources
 
