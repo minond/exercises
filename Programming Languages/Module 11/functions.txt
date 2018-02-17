@@ -1,0 +1,44 @@
+Function Subtyping
+------------------
+
+
+Given this code in a made up language (a mix of Elm and SML):
+
+    fun distMoved -> ({x : real, y : real} -> {x : real, y : real})
+                  -> {x : real, y : real}
+                  -> {x : real, y : real}
+    fun distMoved (f, p) =
+      let
+        val p2 : {x : real, y : real} = f p
+        val dx : real = p2.x - p.x
+        val dy : real = p2.y - p.y
+      in
+        Math.sqrt(dx*dx + dy*dy)
+      end
+
+
+    fun flipGreen -> {x : real, y : real}
+                  -> {x : real, y : real, color : string}
+    fun flipGreen p =
+      { x = ~p.x
+      , y = ~p.y
+      , color = "green"
+      }
+
+
+    val d = distMoved(flipGreen, { x = 3.0, y = 4.0 })
+
+
+The return type of `flipGreen` is `{ x : real, y : real, color : string }`, but
+`distMoved` expects a return type of `{ x : real, y : real }`. This works
+because functions can return more than they need to. Return types are
+covariant.
+
+    if 'a <: 'b
+    then fn{'c -> 'a} <: fn{'c -> 'b}
+
+
+Resources on covariance and contravariance:
+
+  - https://docs.scala-lang.org/tour/variances.html
+  - https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
