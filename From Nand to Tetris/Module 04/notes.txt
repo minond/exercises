@@ -1,0 +1,9 @@
+Addressing Modes
+----------------
+
+| Type        | Example           | Description              |
++-------------+-------------------+--------------------------+
+| Register    | Add R1, R2        | R2       ← R2 + R1       |
+| Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
+| Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
+| Immediate   | Add 73, R1        | R1       ← R1 + 73       |
