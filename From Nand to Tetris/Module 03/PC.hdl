@@ -12,13 +12,11 @@ CHIP PC {
 
     PARTS:
     Inc16(in = value, out = incVal);
-    Mux16(a = false, b = incVal, sel = inc, out = updatedVal1);
+    Mux16(a = incVal, b = in, sel = load, out = incOrLoadVal);
+    Mux16(a = incOrLoadVal, b = false, sel = reset, out = update);
 
     Or(a = load, b = reset, out = loadOrReset);
     Or(a = loadOrReset, b = inc, out = doUpdate);
-
-    Mux16(a = updatedVal1, b = in, sel = load, out = updatedVal2);
-    Mux16(a = updatedVal2, b = false, sel = reset, out = update);
 
     Register(in = update, load = doUpdate, out = value);
     Or16(a = value, b = value, out = out);
