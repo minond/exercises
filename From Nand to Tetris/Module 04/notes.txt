@@ -14,12 +14,12 @@ Architecture
 Addressing Modes
 ----------------
 
-| Type        | Example           | Description              |
-|-------------|-------------------|--------------------------|
-| Register    | Add R1, R2        | R2       ← R2 + R1       |
-| Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
-| Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
-| Immediate   | Add 73, R1        | R1       ← R1 + 73       |
+    | Type        | Example           | Description              |
+    |-------------|-------------------|--------------------------|
+    | Register    | Add R1, R2        | R2       ← R2 + R1       |
+    | Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
+    | Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
+    | Immediate   | Add 73, R1        | R1       ← R1 + 73       |
 
 
 
@@ -158,55 +158,80 @@ Example 6:
 Binary representations
 ----------------------
 
-| Instruction   | Op code | Example                                        |
-|---------------|---------|------------------------------------------------|
-| A-instruction | 0       | 0  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n |
-| C-instruction | 1       | 1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3 |
+    | Instruction   | Op code | Example                                        |
+    |---------------|---------|------------------------------------------------|
+    | A-instruction | 0       | 0  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n |
+    | C-instruction | 1       | 1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3 |
 
 
-| Comparison    | c1  c2  c3  c4  c5  c6 |
-|---------------|------------------------|
-|   0   |       |  1   0   1   0   1   0 |
-|   1   |       |  1   1   1   1   1   1 |
-|  -1   |       |  1   1   1   0   1   0 |
-|   D   |       |  0   0   1   1   0   0 |
-|   A   |   M   |  1   1   0   0   0   0 |
-|  !D   |       |  0   0   1   1   0   1 |
-|  !A   |  !M   |  1   1   0   0   0   1 |
-|  -D   |       |  0   0   1   1   1   1 |
-|  -A   |  -M   |  1   1   0   0   1   1 |
-|  D+1  |       |  0   1   1   1   1   1 |
-|  A+1  |  M+1  |  1   1   0   1   1   1 |
-|  D-1  |       |  0   0   1   1   1   0 |
-|  A-1  |  M-1  |  1   1   0   0   1   0 |
-|  D+A  |  D+M  |  0   0   0   0   1   0 |
-|  D-A  |  D-M  |  0   1   0   0   1   1 |
-|  A-D  |  M-D  |  0   0   0   1   1   1 |
-|  D&A  |  D&M  |  0   0   0   0   0   0 |
-|  D|A  |  D|M  |  0   1   0   1   0   1 |
-|---------------|------------------------|
-|  a=0  |  a=1  |                        |
+    | Comparison    | c1  c2  c3  c4  c5  c6 |
+    |---------------|------------------------|
+    |   0   |       |  1   0   1   0   1   0 |
+    |   1   |       |  1   1   1   1   1   1 |
+    |  -1   |       |  1   1   1   0   1   0 |
+    |   D   |       |  0   0   1   1   0   0 |
+    |   A   |   M   |  1   1   0   0   0   0 |
+    |  !D   |       |  0   0   1   1   0   1 |
+    |  !A   |  !M   |  1   1   0   0   0   1 |
+    |  -D   |       |  0   0   1   1   1   1 |
+    |  -A   |  -M   |  1   1   0   0   1   1 |
+    |  D+1  |       |  0   1   1   1   1   1 |
+    |  A+1  |  M+1  |  1   1   0   1   1   1 |
+    |  D-1  |       |  0   0   1   1   1   0 |
+    |  A-1  |  M-1  |  1   1   0   0   1   0 |
+    |  D+A  |  D+M  |  0   0   0   0   1   0 |
+    |  D-A  |  D-M  |  0   1   0   0   1   1 |
+    |  A-D  |  M-D  |  0   0   0   1   1   1 |
+    |  D&A  |  D&M  |  0   0   0   0   0   0 |
+    |  D|A  |  D|M  |  0   1   0   1   0   1 |
+    |---------------|------------------------|
+    |  a=0  |  a=1  |                        |
 
 
-| Destination | d1  d2  d3 | Description                        |
-|-------------|------------|------------------------------------|
-| null        |  0   0   0 | The value is not stored            |
-| M           |  0   0   1 | RAM[A]                             |
-| D           |  0   1   0 | D register                         |
-| MD          |  0   1   1 | RAM[A] and D register              |
-| A           |  1   0   0 | A register                         |
-| AM          |  1   0   1 | A register and RAM[A]              |
-| AD          |  1   1   0 | A register and D register          |
-| AMD         |  1   1   1 | A register, RAM[A], and D register |
+    | Destination | d1  d2  d3 | Description                        |
+    |-------------|------------|------------------------------------|
+    | null        |  0   0   0 | The value is not stored            |
+    | M           |  0   0   1 | RAM[A]                             |
+    | D           |  0   1   0 | D register                         |
+    | MD          |  0   1   1 | RAM[A] and D register              |
+    | A           |  1   0   0 | A register                         |
+    | AM          |  1   0   1 | A register and RAM[A]              |
+    | AD          |  1   1   0 | A register and D register          |
+    | AMD         |  1   1   1 | A register, RAM[A], and D register |
 
 
-| Jump | j1  j2  j3 | Description        |
-|------|------------|--------------------|
-| null |  0   0   0 | No jump            |
-| JGT  |  0   0   1 | if out>0 jump      |
-| JEQ  |  0   1   0 | if out=0 jump      |
-| JGE  |  0   1   1 | if out>=0 jump     |
-| JLT  |  1   0   0 | if out<0 jump      |
-| JNE  |  1   0   1 | if out!=0 jump     |
-| JLE  |  1   1   0 | if out<=0 jump     |
-| JMP  |  1   1   1 | Unconditional jump |
+    | Jump | j1  j2  j3 | Description        |
+    |------|------------|--------------------|
+    | null |  0   0   0 | No jump            |
+    | JGT  |  0   0   1 | if out>0 jump      |
+    | JEQ  |  0   1   0 | if out=0 jump      |
+    | JGE  |  0   1   1 | if out>=0 jump     |
+    | JLT  |  1   0   0 | if out<0 jump      |
+    | JNE  |  1   0   1 | if out!=0 jump     |
+    | JLE  |  1   1   0 | if out<=0 jump     |
+    | JMP  |  1   1   1 | Unconditional jump |
+
+
+Screen output
+-------------
+
+Display unit is 256 x 512 and is black and white. Two methods of accessing the
+pixels are available:
+
+    word = Screen[32*row + col/16]
+    word = RAM[16384 + 32*row + col/16]
+
+    bit  = word[col%16]
+
+
+Note that 16384 is a constant offset where the screen memory is found in RAM.
+Accessing the bit in 4th row column number 55 would go like this:
+
+    word = Screen[32*4 + 55/16]
+    word = Screen[128 + 3]
+    word = Screen[131]
+    bit  = word[55%16]
+    bit  = word[7]
+
+This gets the 131st word in the Screen buffer then the 7th bit in that word. Or
+Screen[131], 7th bit.
