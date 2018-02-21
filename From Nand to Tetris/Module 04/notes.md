@@ -1,0 +1,154 @@
+Architecture
+------------
+
+      +-------+                +-------+            +-------+
+      |       |                |       |  >>>>>>>>  |       |
+      |       |  >>>>>>>>>>>>  |       |  Data Out  |       |
+      |  ROM  |  Instructions  |  CPU  |            |  ROM  |
+      |       |                |       |  <<<<<<<<  |       |
+      |       |                |       |  Data In   |       |
+      +-------+                +-------+            +-------+
+
+
+
+Addressing Modes
+----------------
+
+| Type        | Example           | Description              |
++-------------+-------------------+--------------------------+
+| Register    | Add R1, R2        | R2       ← R2 + R1       |
+| Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
+| Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
+| Immediate   | Add 73, R1        | R1       ← R1 + 73       |
+
+
+
+Registers
+---------
+
+- D, 16-bit value, lives in the CPU
+- A, 16-bit value, lives in the CPU, the "address" or "addressing" register.
+- M, 16-bit value, represents the 16-bit RAM register addressed by A
+
+
+
+The A-instruction
+-----------------
+
+Syntax is `@value`, where _value_ is either:
+- a non-negative decimal constant
+- a symbol (letter) referring to such a constant
+
+Semantics: sets the A register to _value_ then RAM[A] becomes the selected RAM
+register.
+
+Example 1:
+
+    @21
+
+This sets the A register to 21 and RAM[21] becomes the selected RAM register.
+
+
+Example 2:
+
+    @100
+    M = -1
+
+This sets RAM[100] to -1 by first setting the A register to 100, which in turn
+makes the M register point to RAM[100], so setting that to a new value results
+in the memory it points to being updated.
+
+
+Example 3:
+
+    0000000000000001
+    ^
+    op code
+
+
+A-instructions are prepresented in binary as any number that has the most
+significat bit set to `0`. For example, the code above is the equivelant to
+`@1`.
+
+
+
+The C-instruction
+-----------------
+
+Syntax is `dest = comp ; jump` where both _dest_ and _jump_ are optional.
+
+Valid computations include:
+  - 0, 1, -1
+  - D, A, M
+  - -D, -A, -M
+  - !D, !A, !M
+  - D+1, A+1, M+1
+  - D-1, A-1, M-1
+  - D+A, D+M, A-D, M-D
+  - D&A, D&M
+  - D|A, D|M
+
+Valid desinations include:
+  - null, M, D, MD, A, AM, AD, AMD
+      where M is RAM[A] and AM, AD, AMD is a notation for storing the same
+      value in multiple locations
+
+Valid jumps include:
+  - null, JGT, JEQ, JLT, JNE, JLE, JMP
+      where `if ((result of computation) (jump type, eq, <, >, etc.) 0)` then
+      jump to execute the instruction in ROM[A].
+
+Example 1:
+
+    // Set the D register to -1
+    D=-1
+
+
+Example 2:
+
+    // Set RAM[300] to the value of the D register minus 1
+    @300
+    M=D-1
+
+
+Example 3:
+
+    // If (D-1==0) then jump to execute the instruction
+    // stored in ROM[56]
+    @56
+    D-1;JEQ
+
+
+Example 4:
+
+    // An unconditional jump, always jumps to ROM[A] which in this case is set
+    // to 1
+    @1
+    0;JMP
+
+Example 5:
+
+                  computation             jump
+                  |                       |
+          v-----------------v          v------v
+    1 1 1 a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    ^ ^ ^                     ^------^
+    | | |                         |
+    | | ignored                   destination
+    | |
+    | ignored
+    |
+    op code
+
+
+Example 6:
+
+    // 1. The first line sets the A register to 1.
+    // 2. The second line computes A-1, which is 0.
+    // 3. It then stores this computation in the M register, which is RAM[1] (The
+    //    value of the A register is still 1).
+    // 4. The JEQ jump directive checks whether the computation is equal to 0.
+    // 5. This is true, so the next instruction will be the value stored in the A
+    //    register, which is 1.
+    @1
+    M=A-1;JEQ
