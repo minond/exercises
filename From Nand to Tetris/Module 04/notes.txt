@@ -15,7 +15,7 @@ Addressing Modes
 ----------------
 
 | Type        | Example           | Description              |
-+-------------+-------------------+--------------------------+
+|-------------|-------------------|--------------------------|
 | Register    | Add R1, R2        | R2       ← R2 + R1       |
 | Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
 | Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
@@ -59,6 +59,18 @@ makes the M register point to RAM[100], so setting that to a new value results
 in the memory it points to being updated.
 
 
+Example 3:
+
+    0000000000000001
+    ^
+    op code
+
+
+A-instructions are prepresented in binary as any number that has the most
+significat bit set to `0`. For example, the code above is the equivelant to
+`@1`.
+
+
 
 The C-instruction
 -----------------
@@ -83,19 +95,23 @@ Valid desinations include:
 
 Valid jumps include:
   - null, JGT, JEQ, JLT, JNE, JLE, JMP
-      where `if ((result of computation) (jump type, eq, <, >, etc.) 0)` then
+      where "if ((result of computation) (jump type, eq, <, >, etc.) 0)" then
       jump to execute the instruction in ROM[A].
 
-Examples:
+Example 1:
 
     // Set the D register to -1
     D=-1
 
 
+Example 2:
+
     // Set RAM[300] to the value of the D register minus 1
     @300
     M=D-1
 
+
+Example 3:
 
     // If (D-1==0) then jump to execute the instruction
     // stored in ROM[56]
@@ -103,21 +119,89 @@ Examples:
     D-1;JEQ
 
 
+Example 4:
+
     // An unconditional jump, always jumps to ROM[A] which in this case is set
     // to 1
     @1
     0;JMP
 
+Example 5:
 
-The instruction set below does the following:
-  1. The first line sets the A register to 1.
-  2. The second line computes A-1, which is 0.
-  3. It then stores this computation in the M register, which is RAM[1] (The
-     value of the A register is still 1).
-  4. The JEQ jump directive checks whether the computation is equal to 0.
-  5. This is true, so the next instruction will be the value stored in the A
-     register, which is 1.
+                  computation             jump
+                  |                       |
+          v-----------------v          v------v
+    1 1 1 a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    ^ ^ ^                     ^------^
+    | | |                         |
+    | | ignored                   destination
+    | |
+    | ignored
+    |
+    op code
 
 
+Example 6:
+
+    // 1. The first line sets the A register to 1.
+    // 2. The second line computes A-1, which is 0.
+    // 3. It then stores this computation in the M register, which is RAM[1] (The
+    //    value of the A register is still 1).
+    // 4. The JEQ jump directive checks whether the computation is equal to 0.
+    // 5. This is true, so the next instruction will be the value stored in the A
+    //    register, which is 1.
     @1
     M=A-1;JEQ
+
+
+
+Binary representations
+----------------------
+
+| Instruction   | Op code | Example                                        |
+|---------------|---------|------------------------------------------------|
+| A-instruction | 0       | 0  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n |
+| C-instruction | 1       | 1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3 |
+
+| Comparison    | c1  c2  c3  c4  c5  c6 |
+|---------------|------------------------|
+|   0   |       |  1   0   1   0   1   0 |
+|   1   |       |  1   1   1   1   1   1 |
+|  -1   |       |  1   1   1   0   1   0 |
+|   D   |       |  0   0   1   1   0   0 |
+|   A   |   M   |  1   1   0   0   0   0 |
+|  !D   |       |  0   0   1   1   0   1 |
+|  !A   |  !M   |  1   1   0   0   0   1 |
+|  -D   |       |  0   0   1   1   1   1 |
+|  -A   |  -M   |  1   1   0   0   1   1 |
+|  D+1  |       |  0   1   1   1   1   1 |
+|  A+1  |  M+1  |  1   1   0   1   1   1 |
+|  D-1  |       |  0   0   1   1   1   0 |
+|  A-1  |  M-1  |  1   1   0   0   1   0 |
+|  D+A  |  D+M  |  0   0   0   0   1   0 |
+|  D-A  |  D-M  |  0   1   0   0   1   1 |
+|  A-D  |  M-D  |  0   0   0   1   1   1 |
+|  D&A  |  D&M  |  0   0   0   0   0   0 |
+|  D|A  |  D|M  |  0   1   0   1   0   1 |
+
+| Destination | d1  d2  d3 | Description                        |
+|-------------|------------|------------------------------------|
+| null        |  0   0   0 | The value is not stored            |
+| M           |  0   0   1 | RAM[A]                             |
+| D           |  0   1   0 | D register                         |
+| MD          |  0   1   1 | RAM[A] and D register              |
+| A           |  1   0   0 | A register                         |
+| AM          |  1   0   1 | A register and RAM[A]              |
+| AD          |  1   1   0 | A register and D register          |
+| AMD         |  1   1   1 | A register, RAM[A], and D register |
+
+| Jump | j1  j2  j3 | Description        |
+|------|------------|--------------------|
+| null |  0   0   0 | No jump            |
+| JGT  |  0   0   1 | if out>0 jump      |
+| JEQ  |  0   1   0 | if out=0 jump      |
+| JGE  |  0   1   1 | if out>=0 jump     |
+| JLT  |  1   0   0 | if out<0 jump      |
+| JNE  |  1   0   1 | if out!=0 jump     |
+| JLE  |  1   1   0 | if out<=0 jump     |
+| JMP  |  1   1   1 | Unconditional jump |
