@@ -163,6 +163,7 @@ Binary representations
 | A-instruction | 0       | 0  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n |
 | C-instruction | 1       | 1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3 |
 
+
 | Comparison    | c1  c2  c3  c4  c5  c6 |
 |---------------|------------------------|
 |   0   |       |  1   0   1   0   1   0 |
@@ -183,6 +184,9 @@ Binary representations
 |  A-D  |  M-D  |  0   0   0   1   1   1 |
 |  D&A  |  D&M  |  0   0   0   0   0   0 |
 |  D|A  |  D|M  |  0   1   0   1   0   1 |
+|---------------|------------------------|
+|  a=0  |  a=1  |                        |
+
 
 | Destination | d1  d2  d3 | Description                        |
 |-------------|------------|------------------------------------|
@@ -194,6 +198,7 @@ Binary representations
 | AM          |  1   0   1 | A register and RAM[A]              |
 | AD          |  1   1   0 | A register and D register          |
 | AMD         |  1   1   1 | A register, RAM[A], and D register |
+
 
 | Jump | j1  j2  j3 | Description        |
 |------|------------|--------------------|
