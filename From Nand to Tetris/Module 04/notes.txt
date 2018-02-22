@@ -27,8 +27,19 @@ Registers
 ---------
 
 - D, 16-bit value
-- A, 16-bit value, represents the value set by an A-Instructions
-- M, 16-bit value, represents the memory address set by an A-instruction
+- A, 16-bit value, represents the value set by an A-instructions. A is the
+  literal value set by an A-instruction.
+- M, 16-bit value, represents the memory address set by an A-instruction. M is
+  a pointer to the memory address set by an A-instruction.
+
+
+Symbols
+-------
+
+- R0 .. R15 are aliases for 0 .. 15, used to make a distinction between
+  register and numbers.
+- SCREEN is 16384
+- KBD is 24576
 
 
 The A-instruction
@@ -74,7 +85,12 @@ significat bit set to `0`. For example, the code above is the equivelant to
 The C-instruction
 -----------------
 
-Syntax is `dest = comp ; jump` where both _dest_ and _jump_ are optional.
+Syntax is `dest = comp ; jump` where both _dest_ and _jump_ are optional. Jump
+instructions will run some condition (not always) and then jump to the line
+number stored in register A. Here's an infinite loop:
+
+    1: @1
+    2: 0;JMP
 
 Valid computations include:
   - 0, 1, -1
@@ -177,6 +193,41 @@ Example 9:
     @17
     D=M
 
+
+Example 10:
+
+    // RAM[17]=0
+    @17
+    M=0
+
+
+Example 11:
+
+    // RAM[17]=10
+    @10
+    D=A
+    @17
+    M=D
+
+
+Example 12:
+
+    // RAM[17]=RAM[3]
+    @3
+    D=M
+    @17
+    M=D
+
+
+Example 13:
+
+    // RAM[2]=RAM[0]+RAM[1]
+    @R0
+    D=M
+    @R1
+    D=D+M
+    @R2
+    M=D
 
 
 Binary representations
