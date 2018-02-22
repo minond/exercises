@@ -26,10 +26,9 @@ Addressing Modes
 Registers
 ---------
 
-- D, 16-bit value, lives in the CPU
-- A, 16-bit value, lives in the CPU, the "address" or "addressing" register.
-- M, 16-bit value, represents the 16-bit RAM register addressed by A
-
+- D, 16-bit value
+- A, 16-bit value, represents the value set by an A-Instructions
+- M, 16-bit value, represents the memory address set by an A-instruction
 
 
 The A-instruction
@@ -154,6 +153,31 @@ Example 6:
     M=A-1;JEQ
 
 
+Example 7:
+
+    // Setting register to 10. No direct way to do this, so we set register A
+    // to 10 with an A-instruction and then use a C-instruction to set register
+    // D to register A.
+    @10
+    D=A
+
+
+Example 8:
+
+    // D++
+    D=D+1
+
+
+Example 9:
+
+    // D=RAM[17]. Again, no direct way of goind this, so we set register M to
+    // 17 with an A-instruction and then use a C-instruction to set register D
+    // to the memory value that is pointed to by the value stored in register
+    // M.
+    @17
+    D=M
+
+
 
 Binary representations
 ----------------------
@@ -235,3 +259,10 @@ Accessing the bit in 4th row column number 55 would go like this:
 
 This gets the 131st word in the Screen buffer then the 7th bit in that word. Or
 Screen[131], 7th bit.
+
+
+Keyboard input
+--------------
+
+Keyboard input is represented in 16 bits. There is a `Keyboard` chip and the
+memory offset is 24576, so `RAM[24576]`.
