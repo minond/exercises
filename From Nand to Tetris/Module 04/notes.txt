@@ -317,3 +317,52 @@ Keyboard input
 
 Keyboard input is represented in 16 bits. There is a `Keyboard` chip and the
 memory offset is 24576, so `RAM[24576]`.
+
+
+Branching
+---------
+
+Here's a program that sets R1 to 1 if R0 is greater than 0 or to 0 if it is
+less than or equal to 0:
+
+    // if R0>0
+    // then R1=1
+    // else R1=0
+    00: @R0
+    01: D=M       // Loads the value of R0 into D so we can do a jump and comp
+
+    02: @8
+    03: D; JGT    // Jumps to line 8 if D>0
+
+    04: @R1       // Otherwise load register 1
+    05: M=0       // And set its value to 0
+    06: @10
+    07: 0; JMP    // Then jump to line 10 since we're done
+
+    08: @R1       // Then load register 1
+    09: M=1       // And set its value to 1
+
+    10: @10       // Goto 11
+    11: 0; JMP    // Goto 10
+
+
+Here is the same code but using labels
+
+        @R0
+        D=M
+
+        @POSITIVE
+        D; JGT
+
+        @R1
+        M=0
+        @END
+        0; JMP
+
+    (POSITIVE)
+        @R1
+        M=1
+
+    (END)
+        @10
+        0; JMP
