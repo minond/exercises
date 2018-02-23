@@ -450,3 +450,64 @@ Iterations
     (END)
       @END
       0;JMP
+
+
+
+    // arr = 100
+    // n = 10
+    // for (i = 0; i < n; i++) {
+    //   arr[i] = -1
+    // }
+
+      @100
+      D=A
+      @arr
+      M=D       // arr = 100
+
+      @10
+      D=A
+      @n
+      M=D       // n = 10
+
+      @i
+      M=0       // i = 0
+
+    (LOOP)
+      @i
+      D=M
+      @n
+      D=D-M
+      @END
+      D; JGE    // if (i < n) then goto END
+
+      @i
+      D=M
+      @arr
+      A=M+D
+      M=-1      // arr[i] = -1
+
+      @i
+      M=M+1     // i++
+
+      @LOOP
+      0;JMP
+
+    (END)
+      @END
+      0;JMP
+
+
+Here `arr` is a pointer, since the value it stores it a pointer to a space in
+memory. Setting the A register lets us do pointer arithmetic, `A=1`, points to
+address space `1`, or:
+
+    @arr
+    D=M
+    @indexSize
+    A=D+M
+
+We first get the address of `arr` by loading it and storing that value in the D
+register. Then load the offset size which we can later access using the M
+register. With these two registers we can now set the A register to D+M which
+will result in moving ahead in memory by the indexSize starting at the
+beginning of the array, so now we're pointing to the second item in the array.
