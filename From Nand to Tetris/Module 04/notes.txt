@@ -502,7 +502,7 @@ memory. Setting the A register lets us do pointer arithmetic, `A=1`, points to
 address space `1`, or:
 
     @arr
-    D=M
+    D=A
     @indexSize
     A=D+M
 
