@@ -399,3 +399,54 @@ Example using variables:
 Variables look just like labels. Any symbol that has no corresponding label is
 a variable. Variables are allocated to the RAM from address 16 (where Rn
 registers end) onward.
+
+
+Iterations
+----------
+
+    // n = R0
+    // i = 1
+    // sum = 0
+    // LOOP:
+    // if i > n goto STOP
+    // sum = sum + i
+    // goto LOOP
+    // STOP
+    // R1 = sum
+
+      @R0
+      D=M
+      @n
+      M=D           // n = R0
+
+      @i
+      M=1           // i = 1
+
+      @sum
+      M=0           // sum = 0
+
+    (LOOP)
+      @i
+      D=M
+      @n
+      D=M-D
+      @STOP
+      D; JLT        // if i > n goto STOP
+
+      @i
+      D=M
+      @sum
+      M=M+D         // sum = sum + i
+
+      @LOOP
+      0;JMP         // goto LOOP
+
+    (STOP)
+      @sum
+      D=M
+      @R1
+      M=D           // R1 = sum
+
+    (END)
+      @END
+      0;JMP
