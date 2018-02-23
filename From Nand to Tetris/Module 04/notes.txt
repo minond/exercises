@@ -319,8 +319,8 @@ Keyboard input is represented in 16 bits. There is a `Keyboard` chip and the
 memory offset is 24576, so `RAM[24576]`.
 
 
-Branching
----------
+Branching and Labels
+--------------------
 
 Here's a program that sets R1 to 1 if R0 is greater than 0 or to 0 if it is
 less than or equal to 0:
@@ -366,3 +366,36 @@ Here is the same code but using labels
     (END)
         @10
         0; JMP
+
+
+Variables
+---------
+
+Example using variables:
+
+    // temp = R1
+    // R1 = R0
+    // R0 = temp
+
+      @R1
+      D=M
+      @temp
+      M=D     // temp = R1
+
+      @R0
+      D=M
+      @R1
+      M=D     // R1 = R0
+
+      @temp
+      D=M
+      @R0
+      M=D     // R0 = temp
+
+    (END)
+      @END
+      0;JMP
+
+Variables look just like labels. Any symbol that has no corresponding label is
+a variable. Variables are allocated to the RAM from address 16 (where Rn
+registers end) onward.
