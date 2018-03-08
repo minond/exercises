@@ -43,7 +43,7 @@ CHIP CPU {
     Not(in = instruction[15], out = aInstruction);
     Not(in = aInstruction, out = cInstruction);
 
-    And(a = aInstruction, b = instruction[5], out = hasDestination);
+    And(a = cInstruction, b = instruction[5], out = hasDestination);
     Mux16(a = instruction, b = outALU, sel = hasDestination, out = inA);
     Or(a = aInstruction, b = hasDestination, out = loadA);
     ARegister(in = inA, load = loadA, out = outA);
@@ -56,8 +56,8 @@ CHIP CPU {
     Or16(a = outALU, b = false, out = outM);
 
     And(a = cInstruction, b = instruction[4], out = loadD);
-    DRegister(in = outALU, load = loadD, out = rhsData);
-    Mux16(a = outA, b = inM, sel = instruction[12], out = lhsData);
+    DRegister(in = outALU, load = loadD, out = lhsData);
+    Mux16(a = outA, b = inM, sel = instruction[12], out = rhsData);
 
     ALU(x = lhsData, y = rhsData,
         zx = instruction[11], nx = instruction[10],
@@ -66,7 +66,7 @@ CHIP CPU {
         zr = isZero, ng = isNegative, out = outALU);
 
     // Addressing pc output
-
+    //
     // | Jump | j1  j2  j3 | Description        |
     // |------|------------|--------------------|
     // | null |  0   0   0 | No jump            |
@@ -77,31 +77,31 @@ CHIP CPU {
     // | JNE  |  1   0   1 | if out!=0 jump     |
     // | JLE  |  1   1   0 | if out<=0 jump     |
     // | JMP  |  1   1   1 | Unconditional jump |
-    Or(a = false, b = instruction[0], out = j3);
-    Or(a = false, b = instruction[1], out = j2);
-    Or(a = false, b = instruction[2], out = j1);
-    DMux8Way(in = true, sel[0] = j1, sel[1] = j2, sel[2] = j3,
-        a = nojmp, b = jgt, c = jeq, d = jge, e = jlt, f = jne, g = jle, h = jmp);
 
-    Not(in = isNegative, out = isNegativeNot);
-    Not(in = isZero, out = isZeroNot);
-    And(a = isNegativeNot, b = isZeroNot, out = isPositive);
-    Or(a = isZero, b = isNegative, out = isZeroOrNegative);
-    Or(a = isZero, b = isPositive, out = isZeroOrPositive);
+    Or(a = isZero, b = isNegative, out = isZeroOrNeg);
+    Not(in = isZeroOrNeg, out = isPositive);
 
-    And(a = jgt, b = isPositive, out = jgtOk);
-    And(a = jeq, b = isZero, out = jeqOk);
-    And(a = jge, b = isZeroOrPositive, out = jgeOk);
-    And(a = jlt, b = isNegative, out = jltOk);
-    And(a = jne, b = isZeroNot, out = jneOk);
-    And(a = jle, b = isZeroOrNegative, out = jleOk);
-    And(a = jmp, b = true, out = jmpOk);
+    And(a = instruction[0], b = isPositive, out = jgt);
+    And(a = instruction[1], b = isZero, out = jeq);
+    And(a = instruction[2], b = isNegative, out = jlt);
 
-    Or8Way(out = jpm,
-        in[0] = jgtOk, in[1] = jeqOk, in[2] = jgeOk, in[3] = jltOk,
-        in[4] = jneOk, in[5] = jleOk, in[6] = jmpOk, in[7] = false);
 
-    And(a = cInstruction, b = jmp, out = loadPC);
+    // Not(in = jeq, out = jne);
+    // Or(a = jeq, b = jgt, out = jge);
+    // Or(a = jeq, b = jlt, out = jle);
+    Or8Way(
+      out = jumps,
+      in[0] = jgt,
+      in[1] = jeq,
+      in[2] = jlt,
+      in[3] = false,
+      in[4] = false,
+      in[5] = false,
+      in[6] = false,
+      in[7] = false
+    );
+
+    And(a = cInstruction, b = jumps, out = loadPC);
     Not(in = loadPC, out = incPC);
     PC(in = outA, load = loadPC, inc = incPC, reset = reset,
         out[0..14] = pc);
