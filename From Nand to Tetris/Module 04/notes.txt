@@ -4,7 +4,7 @@ Architecture
       +-------+                +-------+            +-------+
       |       |                |       |  >>>>>>>>  |       |
       |       |  >>>>>>>>>>>>  |       |  Data Out  |       |
-      |  ROM  |  Instructions  |  CPU  |            |  ROM  |
+      |  ROM  |  Instructions  |  CPU  |            |  RAM  |
       |       |                |       |  <<<<<<<<  |       |
       |       |                |       |  Data In   |       |
       +-------+                +-------+            +-------+
