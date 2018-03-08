@@ -97,10 +97,11 @@ CHIP CPU {
     And(a = jle, b = isZeroOrNegative, out = jleOk);
     And(a = jmp, b = true, out = jmpOk);
 
-    Or8Way(out = loadPC,
+    Or8Way(out = jpm,
         in[0] = jgtOk, in[1] = jeqOk, in[2] = jgeOk, in[3] = jltOk,
         in[4] = jneOk, in[5] = jleOk, in[6] = jmpOk, in[7] = false);
 
+    And(a = cInstruction, b = jmp, out = loadPC);
     Not(in = loadPC, out = incPC);
     PC(in = outA, load = loadPC, inc = incPC, reset = reset,
         out[0..14] = pc);
