@@ -28,6 +28,11 @@ type statement interface {
 	binary() string
 }
 
+type label struct {
+	err error
+	val token
+}
+
 type ainstruction struct {
 	err error
 	val token
@@ -125,6 +130,10 @@ func parse(tokens []token) []statement {
 	return p.parse()
 }
 
+func (l label) binary() string {
+	return ""
+}
+
 func (i ainstruction) binary() string {
 	return ""
 }
@@ -137,12 +146,37 @@ func (p parser) parse() []statement {
 
 		if curr.id == atToken {
 			stmt = append(stmt, p.ainstruction())
+		} else if curr.id == oparenToken {
+			stmt = append(stmt, p.label())
+		} else {
+			p.eat()
 		}
-
-		p.eat()
 	}
 
 	return stmt
+}
+
+func (p *parser) label() label {
+	p.eat()
+	val, err := p.expect(idToken)
+
+	if err != nil {
+		return label{err: err, val: val}
+	}
+
+	_, err = p.expect(cparenToken)
+
+	if err != nil {
+		return label{err: err, val: val}
+	}
+
+	_, err = p.expect(eolToken, eofToken)
+
+	if err != nil {
+		return label{err: err, val: val}
+	}
+
+	return label{err: nil, val: val}
 }
 
 func (p *parser) ainstruction() ainstruction {
