@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 )
 
@@ -23,6 +24,7 @@ const (
 	atToken     tokenId = "at"
 	bitToken    tokenId = "bit"
 	cparenToken tokenId = "cparen"
+	eofToken    tokenId = "eof"
 	eolToken    tokenId = "eol"
 	eqToken     tokenId = "eq"
 	errToken    tokenId = "err"
@@ -35,6 +37,10 @@ const (
 	orToken     tokenId = "or"
 	plusToken   tokenId = "plus"
 	scolonToken tokenId = "scolon"
+
+	eofRn    = rune(0)
+	fslashRn = rune('/')
+	nlRn     = rune('\n')
 )
 
 var (
@@ -53,6 +59,9 @@ var (
 		rune('\n'): nlToken,
 		rune('|'):  orToken,
 	}
+
+	idFn = or(unicode.IsDigit, unicode.IsLetter, is(rune('_')))
+	nlFn = is(nlRn)
 )
 
 func main() {
@@ -94,50 +103,34 @@ D=D+A
 }
 
 func scan(source string) []token {
-	s := scanner{chars: []rune(source)}
+	s := scanner{chars: []rune(strings.TrimSpace(source))}
+	s.chars = append(s.chars, rune(0))
 	return s.scan()
 }
 
 func (s scanner) scan() []token {
 	var tokens []token
-	idfn := or(unicode.IsDigit, unicode.IsLetter, is(rune('_')))
 
 	for !s.done() {
 		curr := s.curr()
 
-		if unicode.IsSpace(curr) {
+		if curr == nlRn {
+			tokens = append(tokens, tok(eolToken, "<eol>", s.pos))
 			s.consume()
-			continue
+		} else if curr == eofRn {
+			tokens = append(tokens, tok(eofToken, "<eof>", s.pos))
+			s.consume()
 		} else if id, ok := runeToks[curr]; ok {
-			lexeme := string(curr)
-
-			if id == nlToken {
-				lexeme = "<nl>"
-			}
-
-			tokens = append(tokens, token{
-				pos:    s.pos,
-				id:     id,
-				lexeme: lexeme,
-			})
-
+			tokens = append(tokens, tok(id, string(curr), s.pos))
 			s.consume()
-		} else if curr == rune('/') && s.peek() == rune('/') {
-			s.takeUntil(func(r rune) bool {
-				return r == rune('\n')
-			})
-		} else if lexeme := s.takeWhile(idfn); len(lexeme) > 0 {
-			tokens = append(tokens, token{
-				pos:    s.pos,
-				id:     idToken,
-				lexeme: lexeme,
-			})
+		} else if curr == fslashRn && s.peek() == fslashRn {
+			s.takeUntil(nlFn)
+		} else if lexeme := s.takeWhile(idFn); len(lexeme) > 0 {
+			tokens = append(tokens, tok(idToken, lexeme, s.pos))
+		} else if unicode.IsSpace(curr) {
+			s.takeWhile(unicode.IsSpace)
 		} else {
-			tokens = append(tokens, token{
-				pos:    s.pos,
-				id:     errToken,
-				lexeme: string(curr),
-			})
+			tokens = append(tokens, tok(errToken, string(curr), s.pos))
 			s.consume()
 		}
 	}
@@ -215,5 +208,13 @@ func or(fs ...func(rune) bool) func(rune) bool {
 func is(v rune) func(rune) bool {
 	return func(r rune) bool {
 		return r == v
+	}
+}
+
+func tok(id tokenId, lexeme string, pos int) token {
+	return token{
+		id:     id,
+		lexeme: lexeme,
+		pos:    pos,
 	}
 }
