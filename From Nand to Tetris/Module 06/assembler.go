@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -13,7 +14,7 @@ type assembler struct {
 	stmt []statement
 	next int
 	addr map[string]int
-	lbls map[string]int
+	jump map[string]int
 }
 
 type scanner struct {
@@ -100,7 +101,7 @@ var (
 		rune('|'): orToken,
 	}
 
-	symbolAddrs = map[string]int{
+	addrs = map[string]int{
 		"SP":     0,
 		"LCL":    1,
 		"ARG":    2,
@@ -126,6 +127,57 @@ var (
 		"KBD":    24576,
 	}
 
+	dests = map[string]int{
+		"M":   1,
+		"D":   2,
+		"MD":  3,
+		"A":   4,
+		"AM":  5,
+		"AD":  6,
+		"AMD": 7,
+	}
+
+	jumps = map[string]int{
+		"JGT": 1,
+		"JEQ": 2,
+		"JGE": 3,
+		"JLT": 4,
+		"JNE": 5,
+		"JLE": 6,
+		"JMP": 7,
+	}
+
+	comps = map[string]int{
+		"0":   42,
+		"1":   63,
+		"-1":  58,
+		"D":   12,
+		"A":   48,
+		"M":   48,
+		"!D":  13,
+		"!A":  51,
+		"!M":  51,
+		"-D":  15,
+		"-A":  51,
+		"-M":  51,
+		"D+1": 31,
+		"A+1": 55,
+		"M+1": 55,
+		"D-1": 14,
+		"A-1": 50,
+		"M-1": 50,
+		"D+A": 2,
+		"D+M": 2,
+		"D-A": 19,
+		"D-M": 19,
+		"A-D": 7,
+		"M-D": 7,
+		"D&A": 0,
+		"D&M": 0,
+		"D|A": 21,
+		"D|M": 21,
+	}
+
 	numFn = or(unicode.IsDigit)
 	nlFn  = is(nlRn)
 	idFn  = or(unicode.IsDigit, unicode.IsLetter,
@@ -134,13 +186,33 @@ var (
 
 func main() {
 	instruction := assemble(parse(scan(`
-
-@s
-@s
-@s
-@a
-
-	`)))
+   @0
+   D=M
+   @INFINITE_LOOP
+   D;JLE
+   @counter
+   M=D
+   @SCREEN
+   D=A
+   @address
+   M=D
+(LOOP)
+   @address
+   A=M
+   M=-1
+   @address
+   D=M
+   @32
+   D=D+A
+   @address
+   M=D
+   @counter
+   MD=M-1
+   @LOOP
+   D;JGT
+(INFINITE_LOOP)
+   @INFINITE_LOOP
+   0;JMP`)))
 
 	for _, s := range instruction {
 		fmt.Println(s)
@@ -156,23 +228,34 @@ func main() {
 func assemble(stmt []statement) []string {
 	a := assembler{stmt: stmt}
 	a.next = 16
-	a.addr = symbolAddrs
+	a.addr = addrs
+	a.jump = make(map[string]int)
 	return a.assemble()
 }
 
 func (a assembler) assemble() []string {
 	var buff []string
 
-	for i, s := range a.stmt {
-		switch v := s.(type) {
+	// Jump labels
+	for i := 0; i < len(a.stmt); i++ {
+		switch v := a.stmt[i].(type) {
 		case label:
-			// XXX Fix offset issue
-			a.lbls[v.val.lexeme] = i
+			a.jump[v.val.lexeme] = i
+			a.stmt = append(a.stmt[:i], a.stmt[i+1:]...)
+		}
+	}
 
+	// Variable labels
+	for _, s := range a.stmt {
+		switch v := s.(type) {
 		case ainstruction:
 			switch v.val.id {
 			case idToken:
-				a.address(v.val.lexeme)
+				_, jump := a.jump[v.val.lexeme]
+
+				if !jump {
+					a.address(v.val.lexeme)
+				}
 			}
 		}
 	}
@@ -191,6 +274,44 @@ func (a assembler) assemble() []string {
 
 			buff = append(buff, fmt.Sprintf("0%0+15s",
 				strconv.FormatInt(int64(addr), 2)))
+
+		case cinstruction:
+			a := 0
+			c := 0
+			d := 0
+			j := 0
+
+			comp := fmt.Sprintf("%s", v.comp)
+
+			if n, ok := comps[comp]; ok {
+				c = n
+			}
+
+			if strings.Contains(comp, "M") {
+				a = 1
+			}
+
+			if v.dest == nil {
+				d = 0
+			} else if n, ok := dests[v.dest.lexeme]; ok {
+				d = n
+			} else {
+				d = 0
+			}
+
+			if v.jump == nil {
+				j = 0
+			} else if n, ok := dests[v.jump.lexeme]; ok {
+				j = n
+			} else {
+				j = 0
+			}
+
+			buff = append(buff, fmt.Sprintf("111%s%0+6s%0+3s%0+3s",
+				strconv.FormatInt(int64(a), 2),
+				strconv.FormatInt(int64(c), 2),
+				strconv.FormatInt(int64(d), 2),
+				strconv.FormatInt(int64(j), 2)))
 		}
 	}
 
@@ -198,6 +319,12 @@ func (a assembler) assemble() []string {
 }
 
 func (a *assembler) address(id string) int {
+	line, jump := a.jump[id]
+
+	if jump {
+		return line
+	}
+
 	addr, known := a.addr[id]
 
 	if !known {
