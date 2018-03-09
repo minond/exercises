@@ -2,11 +2,12 @@ Grammar
 -------
 
 ```ebnf
-program      = { statement } ;
+program      = { [ statement ] [ comment ] } ;
 statement    = label
              | ainstruction
              | cinstruction ;
 
+comment      = "//" TEXT
 label        = "(" IDENTIFIERS ")" ;
 ainstruction = "@" IDENTIFIERS ;
 cinstruction = [ destination "=" ] computation [ ";" jump ] ;
