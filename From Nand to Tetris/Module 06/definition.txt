@@ -13,7 +13,7 @@ cinstruction = [ destination "=" ] computation [ ";" jump ] ;
 
 computation  = bitconstant
              | regconstant
-             | uniop regconstant
+             | uniop ( regconstant | bitconstant )
              | regconstant binop ( regconstant | bitconstant ) ;
 
 regconstant  = "A" | "D" | "M"

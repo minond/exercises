@@ -85,54 +85,20 @@ var (
 		rune(')'): cparenToken,
 		rune('+'): plusToken,
 		rune('-'): minusToken,
-		rune('0'): bitToken,
-		rune('1'): bitToken,
 		rune(';'): scolonToken,
 		rune('='): eqToken,
 		rune('@'): atToken,
 		rune('|'): orToken,
 	}
 
-	idFn = or(unicode.IsDigit, unicode.IsLetter, is(rune('_')))
-	nlFn = is(nlRn)
+	numFn = or(unicode.IsDigit)
+	nlFn  = is(nlRn)
+	idFn  = or(unicode.IsDigit, unicode.IsLetter,
+		is(rune('_')), is(rune('.')), is(rune('$')))
 )
 
 func main() {
-	source := `
-
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/06/max/Max.asm
-
-// Computes R2 = max(R0, R1)  (R0,R1,R2 refer to RAM[0],RAM[1],RAM[2])
-
-   @R0
-   D=M              // D = first number
-   @R1
-   D=D-M            // D = first number - second number
-   @OUTPUT_FIRST
-   D;JGT            // if D>0 (first is greater) goto output_first
-   @R1
-   D=M              // D = second number
-   @OUTPUT_D
-   0;JMP            // goto output_d
-(OUTPUT_FIRST)
-   @R0
-   D=M              // D = first number
-(OUTPUT_D)
-   @R2
-   M=D              // M[2] = D (greatest number)
-(INFINITE_LOOP)
-   @INFINITE_LOOP
-   0;JMP            // infinite loop
-D=D+A
-@0
-
-
-`
-
-	stmt := parse(scan(source))
+	stmt := parse(scan("@32"))
 
 	for _, s := range stmt {
 		fmt.Println(s)
@@ -211,7 +177,17 @@ func (i ainstruction) error() error {
 }
 
 func (c computation) String() string {
-	return "XXX"
+	if c.bit != nil {
+		return c.bit.lexeme
+	} else if c.reg != nil {
+		return c.reg.lexeme
+	} else if c.lhs != nil && c.rhs != nil && c.op != nil {
+		return fmt.Sprintf("%s%s%s", c.lhs, c.op.lexeme, c.rhs)
+	} else if c.rhs != nil && c.op != nil {
+		return fmt.Sprintf("%s%s", c.op, c.rhs)
+	} else {
+		return ""
+	}
 }
 
 func (p parser) parse() []statement {
@@ -233,8 +209,8 @@ func (p parser) parse() []statement {
 }
 
 func (p *parser) cinstruction() cinstruction {
-	eq := p.peek()
 	ci := cinstruction{}
+	eq := p.peek()
 
 	if eq.id == eqToken {
 		dest, err := p.expect(idToken)
@@ -249,9 +225,12 @@ func (p *parser) cinstruction() cinstruction {
 		ci.dest = &dest
 	}
 
-	// XXX parse computation
-	for !p.done() && p.curr().id != eolToken && p.curr().id != eofToken && p.curr().id != scolonToken {
-		p.eat()
+	comp, err := p.computation()
+	ci.comp = comp
+
+	if err != nil {
+		ci.err = err
+		return ci
 	}
 
 	if p.is(scolonToken) {
@@ -267,7 +246,7 @@ func (p *parser) cinstruction() cinstruction {
 		ci.jump = &jump
 	}
 
-	_, err := p.expect(eolToken, eofToken)
+	_, err = p.expect(eolToken, eofToken)
 
 	if err != nil {
 		ci.err = err
@@ -275,6 +254,56 @@ func (p *parser) cinstruction() cinstruction {
 	}
 
 	return ci
+}
+
+func (p *parser) computation() (computation, error) {
+	c := computation{}
+
+	if p.is(notToken, minusToken) {
+		// Binary operation
+		op := p.curr()
+		c.op = &op
+		p.eat()
+
+		if p.is(bitToken) {
+			bit := p.curr()
+			c.bit = &bit
+			p.eat()
+		} else if p.is(idToken) {
+			reg := p.curr()
+			c.reg = &reg
+			p.eat()
+		} else {
+			_, err := p.expect(bitToken, idToken)
+			return c, err
+		}
+	} else if p.is(bitToken) {
+		// Single bit value
+		bit := p.curr()
+		c.bit = &bit
+		p.eat()
+	} else if p.is(idToken) {
+		// Either a single register value or a binary operation
+		reg := p.curr()
+		p.eat()
+
+		if p.is(minusToken, plusToken, andToken, orToken) {
+			op := p.curr()
+			p.eat()
+
+			rhs, err := p.computation()
+
+			c.op = &op
+			c.lhs = &computation{reg: &reg}
+			c.rhs = &rhs
+
+			return c, err
+		} else {
+			c.reg = &reg
+		}
+	}
+
+	return c, nil
 }
 
 func (p *parser) label() label {
@@ -406,6 +435,12 @@ func (s scanner) scan() []token {
 		} else if curr == fslashRn && s.peek() == fslashRn {
 			s.takeUntil(nlFn)
 			tokens = append(tokens, tok(eolToken, "<eol>", s.pos))
+		} else if lexeme := s.takeWhile(numFn); len(lexeme) > 0 {
+			if lexeme == "0" || lexeme == "1" {
+				tokens = append(tokens, tok(bitToken, lexeme, s.pos))
+			} else {
+				tokens = append(tokens, tok(numToken, lexeme, s.pos))
+			}
 		} else if lexeme := s.takeWhile(idFn); len(lexeme) > 0 {
 			tokens = append(tokens, tok(idToken, lexeme, s.pos))
 		} else if unicode.IsSpace(curr) {
