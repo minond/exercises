@@ -25,12 +25,28 @@ type token struct {
 }
 
 type statement interface {
+	error() error
 	binary() string
 }
 
 type label struct {
 	err error
 	val token
+}
+
+type computation struct {
+	bit *token
+	reg *token
+	op  *token
+	lhs *computation
+	rhs *computation
+}
+
+type cinstruction struct {
+	err  error
+	dest *token
+	comp computation
+	jump *token
 }
 
 type ainstruction struct {
@@ -134,8 +150,24 @@ func (l label) binary() string {
 	return ""
 }
 
+func (l label) error() error {
+	return l.err
+}
+
+func (i cinstruction) binary() string {
+	return ""
+}
+
+func (i cinstruction) error() error {
+	return i.err
+}
+
 func (i ainstruction) binary() string {
 	return ""
+}
+
+func (i ainstruction) error() error {
+	return i.err
 }
 
 func (p parser) parse() []statement {
@@ -145,10 +177,108 @@ func (p parser) parse() []statement {
 		curr := p.curr()
 
 		if curr.id == atToken {
-			stmt = append(stmt, p.ainstruction())
+			stmt = append(stmt, p.skipCheck(p.ainstruction()))
 		} else if curr.id == oparenToken {
-			stmt = append(stmt, p.label())
+			stmt = append(stmt, p.skipCheck(p.label()))
 		} else {
+			stmt = append(stmt, p.skipCheck(p.cinstruction()))
+		}
+	}
+
+	return stmt
+}
+
+func (p *parser) cinstruction() cinstruction {
+	eq := p.peek()
+	ci := cinstruction{}
+
+	if eq.id == eqToken {
+		dest, err := p.expect(idToken)
+		// Eat the equals sign
+		p.eat()
+
+		if err != nil {
+			ci.err = err
+			return ci
+		}
+
+		ci.dest = &dest
+	}
+
+	// XXX parse computation
+	for !p.done() && p.curr().id != eolToken && p.curr().id != eofToken && p.curr().id != scolonToken {
+		p.eat()
+	}
+
+	if p.is(scolonToken) {
+		// Eat semicolon
+		p.eat()
+		jump, err := p.expect(idToken)
+
+		if err != nil {
+			ci.err = err
+			return ci
+		}
+
+		ci.jump = &jump
+	}
+
+	_, err := p.expect(eolToken, eofToken)
+
+	if err != nil {
+		ci.err = err
+		return ci
+	}
+
+	return ci
+}
+
+func (p *parser) label() label {
+	// Eat the opening paren
+	p.eat()
+	val, err := p.expect(idToken)
+
+	if err != nil {
+		return label{err: err}
+	}
+
+	_, err = p.expect(cparenToken)
+
+	if err != nil {
+		return label{err: err}
+	}
+
+	_, err = p.expect(eolToken, eofToken)
+
+	if err != nil {
+		return label{err: err}
+	}
+
+	return label{err: nil, val: val}
+}
+
+func (p *parser) ainstruction() ainstruction {
+	// Eat the at-sign
+	p.eat()
+	val, err := p.expect(idToken, numToken, bitToken)
+
+	if err != nil {
+		return ainstruction{err: err}
+	}
+
+	_, err = p.expect(eolToken, eofToken)
+
+	if err != nil {
+		return ainstruction{err: err}
+	}
+
+	return ainstruction{err: nil, val: val}
+}
+
+func (p *parser) skipCheck(stmt statement) statement {
+	if stmt.error() != nil {
+		// Error on last parse, eat until end of current line
+		for !p.done() && !p.is(eolToken, eofToken) {
 			p.eat()
 		}
 	}
@@ -156,44 +286,16 @@ func (p parser) parse() []statement {
 	return stmt
 }
 
-func (p *parser) label() label {
-	p.eat()
-	val, err := p.expect(idToken)
+func (p *parser) is(ids ...tokenId) bool {
+	curr := p.curr()
 
-	if err != nil {
-		return label{err: err, val: val}
+	for _, id := range ids {
+		if id == curr.id {
+			return true
+		}
 	}
 
-	_, err = p.expect(cparenToken)
-
-	if err != nil {
-		return label{err: err, val: val}
-	}
-
-	_, err = p.expect(eolToken, eofToken)
-
-	if err != nil {
-		return label{err: err, val: val}
-	}
-
-	return label{err: nil, val: val}
-}
-
-func (p *parser) ainstruction() ainstruction {
-	p.eat()
-	val, err := p.expect(idToken, numToken, bitToken)
-
-	if err != nil {
-		return ainstruction{err: err, val: val}
-	}
-
-	_, err = p.expect(eolToken, eofToken)
-
-	if err != nil {
-		return ainstruction{err: err, val: val}
-	}
-
-	return ainstruction{err: nil, val: val}
+	return false
 }
 
 func (p *parser) expect(ids ...tokenId) (token, error) {
@@ -208,6 +310,14 @@ func (p *parser) expect(ids ...tokenId) (token, error) {
 
 	return token{}, fmt.Errorf("Expecting one of %v but found %s instead.",
 		ids, curr.id)
+}
+
+func (p parser) peek() token {
+	if p.pos+1 >= len(p.tokens) {
+		return p.tokens[p.pos]
+	} else {
+		return p.tokens[p.pos+1]
+	}
 }
 
 func (p parser) curr() token {
