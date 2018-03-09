@@ -288,7 +288,7 @@ func (a assembler) assemble() []string {
 
 			if v.jump == nil {
 				j = 0
-			} else if n, ok := dests[v.jump.lexeme]; ok {
+			} else if n, ok := jumps[v.jump.lexeme]; ok {
 				j = n
 			} else {
 				j = 0
