@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 )
 
@@ -168,10 +167,22 @@ func (l label) error() error {
 }
 
 func (i cinstruction) String() string {
+	buff := ""
+
+	if i.dest != nil {
+		buff += fmt.Sprintf("%s=", i.dest.lexeme)
+	}
+
+	buff += fmt.Sprintf("%s", i.comp)
+
+	if i.jump != nil {
+		buff += fmt.Sprintf(";%s", i.jump.lexeme)
+	}
+
 	if i.err != nil {
-		return fmt.Sprintf("    XXX // ERROR: %s", i.err)
+		return fmt.Sprintf("    %s // ERROR: %s", buff, i.err)
 	} else {
-		return fmt.Sprintf("    XXX")
+		return fmt.Sprintf("    %s", buff)
 	}
 }
 
@@ -199,15 +210,19 @@ func (i ainstruction) error() error {
 	return i.err
 }
 
+func (c computation) String() string {
+	return "XXX"
+}
+
 func (p parser) parse() []statement {
 	var stmt []statement
 
 	for !p.done() {
-		curr := p.curr()
-
-		if curr.id == atToken {
+		if p.is(eolToken, eofToken) {
+			p.eat()
+		} else if p.is(atToken) {
 			stmt = append(stmt, p.skipCheck(p.ainstruction()))
-		} else if curr.id == oparenToken {
+		} else if p.is(oparenToken) {
 			stmt = append(stmt, p.skipCheck(p.label()))
 		} else {
 			stmt = append(stmt, p.skipCheck(p.cinstruction()))
@@ -368,7 +383,7 @@ func (p parser) done() bool {
  *****************************************************************************/
 
 func scan(source string) []token {
-	s := scanner{chars: []rune(strings.TrimSpace(source))}
+	s := scanner{chars: []rune(source)}
 	s.chars = append(s.chars, rune(0))
 	return s.scan()
 }
