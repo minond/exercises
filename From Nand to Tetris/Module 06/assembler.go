@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -84,6 +86,7 @@ const (
 
 	eofRn    = rune(0)
 	fslashRn = rune('/')
+	rcRn     = rune('\r')
 	nlRn     = rune('\n')
 )
 
@@ -185,34 +188,18 @@ var (
 )
 
 func main() {
-	instruction := assemble(parse(scan(`
-   @0
-   D=M
-   @INFINITE_LOOP
-   D;JLE
-   @counter
-   M=D
-   @SCREEN
-   D=A
-   @address
-   M=D
-(LOOP)
-   @address
-   A=M
-   M=-1
-   @address
-   D=M
-   @32
-   D=D+A
-   @address
-   M=D
-   @counter
-   MD=M-1
-   @LOOP
-   D;JGT
-(INFINITE_LOOP)
-   @INFINITE_LOOP
-   0;JMP`)))
+	if len(os.Args) < 2 {
+		return
+	}
+
+	file := os.Args[1]
+	text, err := ioutil.ReadFile(file)
+
+	if err != nil {
+		panic(err)
+	}
+
+	instruction := assemble(parse(scan(string(text))))
 
 	for _, s := range instruction {
 		fmt.Println(s)
@@ -656,6 +643,9 @@ func (s scanner) scan() []token {
 
 		if curr == nlRn {
 			tokens = append(tokens, tok(eolToken, "<eol>", s.pos))
+			s.eat()
+		} else if curr == rcRn {
+			tokens = append(tokens, tok(eofToken, "<eol>", s.pos))
 			s.eat()
 		} else if curr == eofRn {
 			tokens = append(tokens, tok(eofToken, "<eof>", s.pos))
