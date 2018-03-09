@@ -27,6 +27,7 @@ type token struct {
 type statement interface {
 	error() error
 	binary() string
+	String() string
 }
 
 type label struct {
@@ -132,7 +133,11 @@ D=D+A
 
 `
 
-	fmt.Println(parse(scan(source)))
+	stmt := parse(scan(source))
+
+	for _, s := range stmt {
+		fmt.Println(s)
+	}
 }
 
 /******************************************************************************
@@ -146,6 +151,14 @@ func parse(tokens []token) []statement {
 	return p.parse()
 }
 
+func (l label) String() string {
+	if l.err != nil {
+		return fmt.Sprintf("(%s) // ERROR: %s", l.val.lexeme, l.err)
+	} else {
+		return fmt.Sprintf("(%s)", l.val.lexeme)
+	}
+}
+
 func (l label) binary() string {
 	return ""
 }
@@ -154,12 +167,28 @@ func (l label) error() error {
 	return l.err
 }
 
+func (i cinstruction) String() string {
+	if i.err != nil {
+		return fmt.Sprintf("    XXX // ERROR: %s", i.err)
+	} else {
+		return fmt.Sprintf("    XXX")
+	}
+}
+
 func (i cinstruction) binary() string {
 	return ""
 }
 
 func (i cinstruction) error() error {
 	return i.err
+}
+
+func (i ainstruction) String() string {
+	if i.err != nil {
+		return fmt.Sprintf("    @%s // ERROR: %s", i.val.lexeme, i.err)
+	} else {
+		return fmt.Sprintf("    @%s", i.val.lexeme)
+	}
 }
 
 func (i ainstruction) binary() string {
@@ -308,7 +337,7 @@ func (p *parser) expect(ids ...tokenId) (token, error) {
 		}
 	}
 
-	return token{}, fmt.Errorf("Expecting one of %v but found %s instead.",
+	return token{}, fmt.Errorf("Expecting one of %v but found [%s] instead.",
 		ids, curr.id)
 }
 
@@ -361,6 +390,7 @@ func (s scanner) scan() []token {
 			s.eat()
 		} else if curr == fslashRn && s.peek() == fslashRn {
 			s.takeUntil(nlFn)
+			tokens = append(tokens, tok(eolToken, "<eol>", s.pos))
 		} else if lexeme := s.takeWhile(idFn); len(lexeme) > 0 {
 			tokens = append(tokens, tok(idToken, lexeme, s.pos))
 		} else if unicode.IsSpace(curr) {
