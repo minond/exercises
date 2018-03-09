@@ -2,10 +2,19 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"unicode"
 )
 
 type tokenId string
+
+type assembler struct {
+	pos  int
+	stmt []statement
+	next int
+	addr map[string]int
+	lbls map[string]int
+}
 
 type scanner struct {
 	pos   int
@@ -91,6 +100,32 @@ var (
 		rune('|'): orToken,
 	}
 
+	symbolAddrs = map[string]int{
+		"SP":     0,
+		"LCL":    1,
+		"ARG":    2,
+		"THIS":   3,
+		"THAT":   4,
+		"R0":     0,
+		"R1":     1,
+		"R2":     2,
+		"R3":     3,
+		"R4":     4,
+		"R5":     5,
+		"R6":     6,
+		"R7":     7,
+		"R8":     8,
+		"R9":     9,
+		"R10":    10,
+		"R11":    11,
+		"R12":    12,
+		"R13":    13,
+		"R14":    14,
+		"R15":    15,
+		"SCREEN": 16384,
+		"KBD":    24576,
+	}
+
 	numFn = or(unicode.IsDigit)
 	nlFn  = is(nlRn)
 	idFn  = or(unicode.IsDigit, unicode.IsLetter,
@@ -98,11 +133,80 @@ var (
 )
 
 func main() {
-	stmt := parse(scan("@32"))
+	instruction := assemble(parse(scan(`
 
-	for _, s := range stmt {
+@s
+@s
+@s
+@a
+
+	`)))
+
+	for _, s := range instruction {
 		fmt.Println(s)
 	}
+}
+
+/******************************************************************************
+ *
+ * Parser
+ *
+ *****************************************************************************/
+
+func assemble(stmt []statement) []string {
+	a := assembler{stmt: stmt}
+	a.next = 16
+	a.addr = symbolAddrs
+	return a.assemble()
+}
+
+func (a assembler) assemble() []string {
+	var buff []string
+
+	for i, s := range a.stmt {
+		switch v := s.(type) {
+		case label:
+			// XXX Fix offset issue
+			a.lbls[v.val.lexeme] = i
+
+		case ainstruction:
+			switch v.val.id {
+			case idToken:
+				a.address(v.val.lexeme)
+			}
+		}
+	}
+
+	for _, s := range a.stmt {
+		switch v := s.(type) {
+		case ainstruction:
+			var addr int
+
+			switch v.val.id {
+			case numToken:
+				addr, _ = strconv.Atoi(v.val.lexeme)
+			case idToken:
+				addr = a.address(v.val.lexeme)
+			}
+
+			buff = append(buff, fmt.Sprintf("0%0+15s",
+				strconv.FormatInt(int64(addr), 2)))
+		}
+	}
+
+	return buff
+}
+
+func (a *assembler) address(id string) int {
+	addr, known := a.addr[id]
+
+	if !known {
+		addr = a.next
+		a.addr[id] = addr
+		a.next += 1
+	}
+
+	return addr
 }
 
 /******************************************************************************
