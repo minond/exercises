@@ -675,6 +675,7 @@ func (s scanner) scan() []token {
 			tokens = append(tokens, tok(idToken, lexeme, s.pos))
 		} else if unicode.IsSpace(curr) {
 			s.takeWhile(unicode.IsSpace)
+			tokens = append(tokens, tok(eolToken, "<eol>", s.pos))
 		} else {
 			tokens = append(tokens, tok(errToken, string(curr), s.pos))
 			s.eat()
