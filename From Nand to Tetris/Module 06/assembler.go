@@ -158,8 +158,8 @@ var (
 		"A":   48,
 		"M":   48,
 		"!D":  13,
-		"!A":  51,
-		"!M":  51,
+		"!A":  49,
+		"!M":  49,
 		"-D":  15,
 		"-A":  51,
 		"-M":  51,
@@ -189,6 +189,7 @@ var (
 
 func main() {
 	if len(os.Args) < 2 {
+		fmt.Printf("Usage: %s file.asm\n", os.Args[0])
 		return
 	}
 
@@ -222,13 +223,15 @@ func assemble(stmt []statement) []string {
 
 func (a assembler) assemble() []string {
 	var buff []string
+	var stmt []statement
 
 	// Jump labels
-	for i := 0; i < len(a.stmt); i++ {
-		switch v := a.stmt[i].(type) {
+	for _, s := range a.stmt {
+		switch v := s.(type) {
 		case label:
-			a.jump[v.val.lexeme] = i
-			a.stmt = append(a.stmt[:i], a.stmt[i+1:]...)
+			a.jump[v.val.lexeme] = len(stmt)
+		default:
+			stmt = append(stmt, s)
 		}
 	}
 
@@ -254,6 +257,8 @@ func (a assembler) assemble() []string {
 
 			switch v.val.id {
 			case numToken:
+				addr, _ = strconv.Atoi(v.val.lexeme)
+			case bitToken:
 				addr, _ = strconv.Atoi(v.val.lexeme)
 			case idToken:
 				addr = a.address(v.val.lexeme)
@@ -395,14 +400,18 @@ func (i ainstruction) error() error {
 }
 
 func (c computation) String() string {
-	if c.bit != nil {
+	if c.lhs != nil && c.rhs != nil && c.op != nil {
+		return fmt.Sprintf("%s%s%s", c.lhs, c.op.lexeme, c.rhs)
+	} else if c.rhs != nil && c.op != nil {
+		return fmt.Sprintf("%s%s", c.op.lexeme, c.rhs)
+	} else if c.bit != nil && c.op != nil {
+		return fmt.Sprintf("%s%s", c.op.lexeme, c.bit.lexeme)
+	} else if c.reg != nil && c.op != nil {
+		return fmt.Sprintf("%s%s", c.op.lexeme, c.reg.lexeme)
+	} else if c.bit != nil {
 		return c.bit.lexeme
 	} else if c.reg != nil {
 		return c.reg.lexeme
-	} else if c.lhs != nil && c.rhs != nil && c.op != nil {
-		return fmt.Sprintf("%s%s%s", c.lhs, c.op.lexeme, c.rhs)
-	} else if c.rhs != nil && c.op != nil {
-		return fmt.Sprintf("%s%s", c.op, c.rhs)
 	} else {
 		return ""
 	}
