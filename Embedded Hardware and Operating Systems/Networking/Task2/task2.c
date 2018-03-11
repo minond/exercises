@@ -7,10 +7,12 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"
+#include "sys/node-id.h"
 
 #include <stdio.h>
 
 #define CHANNEL 135
+#define MSG_LEN 36
 
 static void recv(struct multihop_conn *, const rimeaddr_t *, const rimeaddr_t *,
                  uint8_t hops);
@@ -24,7 +26,9 @@ PROCESS(task2, "Simulate multihop (Rime) in Cooja.");
 AUTOSTART_PROCESSES(&task2);
 
 PROCESS_THREAD(task2, ev, data) {
+  char buff[MSG_LEN];
   static struct etimer timer;
+  rimeaddr_t to = {{1, 0}};
 
   PROCESS_EXITHANDLER(multihop_close(&multihop);)
   PROCESS_BEGIN();
@@ -32,15 +36,12 @@ PROCESS_THREAD(task2, ev, data) {
   multihop_open(&multihop, CHANNEL, &callbacks);
 
   while (1) {
-    rimeaddr_t to;
-    to.u8[0] = 1;
-    to.u8[1] = 0;
-
     etimer_set(&timer, CLOCK_SECOND * 5 + random_rand());
 
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
 
-    packetbuf_copyfrom("Marcos", 6);
+    sprintf(buff, "NodeId[%d]", node_id);
+    packetbuf_copyfrom(buff, MSG_LEN);
     multihop_send(&multihop, &to);
   }
 
