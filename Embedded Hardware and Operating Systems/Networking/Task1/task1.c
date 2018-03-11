@@ -12,12 +12,13 @@
 
 #include <stdio.h>
 
-PROCESS(task1, "Simulate broadcast (Rime) in Cooja.");
-AUTOSTART_PROCESSES(&task1);
-
 static void broadcast_recv(struct broadcast_conn *, const rimeaddr_t *);
+
 static struct broadcast_conn broadcast;
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
+
+PROCESS(task1, "Simulate broadcast (Rime) in Cooja.");
+AUTOSTART_PROCESSES(&task1);
 
 PROCESS_THREAD(task1, ev, data) {
   static struct etimer timer;
