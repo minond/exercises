@@ -1,0 +1,4 @@
+# Observations
+
+A simple network made up of four motes, all of which broadcast a message to all
+other motes on a timer (evtimer) and when the mote button is clicked (evbtn).
