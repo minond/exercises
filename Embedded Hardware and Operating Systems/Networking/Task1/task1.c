@@ -6,11 +6,12 @@
  */
 
 #include "contiki.h"
-#include "net/rime.h"
 #include "random.h"
+#include "net/rime.h"
+// #include "net/rime/trickle.h"
 
 #include "dev/button-sensor.h"
-#include "dev/leds.h"
+// #include "dev/leds.h"
 
 #include <stdio.h>
 
@@ -28,12 +29,20 @@ PROCESS_THREAD(task1, ev, data) {
   PROCESS_BEGIN();
 
   broadcast_open(&broadcast, 129, &broadcast_call);
+  SENSORS_ACTIVATE(button_sensor);
 
   while (1) {
     etimer_set(&timer, CLOCK_SECOND*4 + random_rand() % (CLOCK_SECOND*4));
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
 
-    packetbuf_copyfrom("Hi", 2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer) ||
+      (ev == sensors_event && data == &button_sensor));
+
+    if (ev == sensors_event) {
+      packetbuf_copyfrom("evbtn", 5);
+    } else {
+      packetbuf_copyfrom("evtimer", 7);
+    }
+
     broadcast_send(&broadcast);
     printf("Sent broadcast message\n");
   }
