@@ -8,10 +8,7 @@
 #include "contiki.h"
 #include "random.h"
 #include "net/rime.h"
-// #include "net/rime/trickle.h"
-
 #include "dev/button-sensor.h"
-// #include "dev/leds.h"
 
 #include <stdio.h>
 
