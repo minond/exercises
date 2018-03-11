@@ -6,16 +6,16 @@
  */
 
 #include "contiki.h"
-#include "random.h"
-#include "net/rime.h"
 #include "dev/button-sensor.h"
+#include "net/rime.h"
+#include "random.h"
 
 #include <stdio.h>
 
 PROCESS(task1, "Simulate broadcast (Rime) in Cooja.");
 AUTOSTART_PROCESSES(&task1);
 
-static void broadcast_recv(struct broadcast_conn*, const rimeaddr_t*);
+static void broadcast_recv(struct broadcast_conn *, const rimeaddr_t *);
 static struct broadcast_conn broadcast;
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 
@@ -29,10 +29,10 @@ PROCESS_THREAD(task1, ev, data) {
   SENSORS_ACTIVATE(button_sensor);
 
   while (1) {
-    etimer_set(&timer, CLOCK_SECOND*4 + random_rand() % (CLOCK_SECOND*4));
+    etimer_set(&timer, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
 
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer) ||
-      (ev == sensors_event && data == &button_sensor));
+                             (ev == sensors_event && data == &button_sensor));
 
     if (ev == sensors_event) {
       packetbuf_copyfrom("evbtn", 5);
@@ -47,7 +47,8 @@ PROCESS_THREAD(task1, ev, data) {
   PROCESS_END();
 }
 
-static void broadcast_recv(struct broadcast_conn *conn, const rimeaddr_t *from) {
-  printf("Received broadcast message from %d.%d: '%s'\n",
-    from->u8[0], from->u8[1], (char*) packetbuf_dataptr());
+static void broadcast_recv(struct broadcast_conn *conn,
+                           const rimeaddr_t *from) {
+  printf("Received broadcast message from %d.%d: '%s'\n", from->u8[0],
+         from->u8[1], (char *)packetbuf_dataptr());
 }
