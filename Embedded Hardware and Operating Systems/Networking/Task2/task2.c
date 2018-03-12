@@ -15,11 +15,15 @@
 
 #define CHANNEL 135
 #define MSG_LEN 36
+#define NEIGHBOR_TTL 60 * CLOCK_SECOND
 #define MAX_NEIGHBORS 15
 
 struct neighbor_t {
   rimeaddr_t addr;
+  struct ctimer ttl;
 };
+
+static void drop(void *);
 
 static void save(struct announcement *, const rimeaddr_t *, uint16_t, uint16_t);
 
@@ -64,6 +68,14 @@ PROCESS_THREAD(task2, ev, data) {
   PROCESS_END();
 }
 
+static void drop(void *obj) {
+  struct neighbor_t *neighbor = obj;
+
+  printf("Removing neighbor %d.%d\n", neighbor->addr.u8[0], neighbor->addr.u8[1]);
+  list_remove(neighbors, neighbor);
+  memb_free(&neighbor_mem, neighbor);
+}
+
 static void save(struct announcement *ann, const rimeaddr_t *from, uint16_t id,
                  uint16_t val) {
   printf("Received announcement from %d.%d\n", from->u8[0], from->u8[1]);
@@ -73,6 +85,7 @@ static void save(struct announcement *ann, const rimeaddr_t *from, uint16_t id,
 
   if (neighbor != NULL) {
     rimeaddr_copy(&neighbor->addr, from);
+    ctimer_set(&neighbor->ttl, NEIGHBOR_TTL, drop, neighbor);
     list_add(neighbors, neighbor);
     printf("Saved neighbor %d.%d\n", from->u8[0], from->u8[1]);
   } else {
