@@ -1,0 +1,14 @@
+# Note
+
+I think there is something I do not understand about this assignment's
+requirements. The way I read this instruction "Simulate trickle (Rime) in
+Cooja. Modify an etimer value in the code with different values, 10 power of
+(-20) * CLOCK_SECOND, ..." is to place (10^-20)CLOCK_SECOND (where `^` is an
+exponent operator and not xor) as the etimer's interval, which is impossible
+because a timer's interval is just an `unsigned short` which is not able to
+hold the result of that calculation. I will instead use x, 2x, and 10x where x
+is `CLOCK_SECOND` as my intervals.
+
+# Observations
+
+The lower the interval the more messages that are sent.
