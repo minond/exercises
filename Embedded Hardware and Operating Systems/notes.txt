@@ -419,3 +419,34 @@ stack. API:
 
 Over-the-air-programming is a simple protocol in which a binary is sent to a
 node to be ran as a program.
+
+
+##  Contiki confugiration
+
++--------------------------+-------------------+
+| Contiki stack layer      | Value in Contiki  |
++--------------------------+-------------------+
+| Network layer            | rime_driver       |
+| MAC layer                | nullmac_driver    |
+| RDC                      | nullrdc_driver    |
+| Framer                   | framer_nullmac    |
+| Radio                    | nullradio_driver  |
++--------------------------+-------------------+
+
++--------------------------+-------------------+
+| RDC driver configuration | Value in Contiki  |
++--------------------------+-------------------+
+| ContikiMAC               | contikimac_driver |
+| Null_RDC                 | nullrdc_driver    |
+| LPP                      | lpp_driver        |
+| X-MAC                    | xmac_driver       |
+| CX-MAC                   | cxmac_driver      |
++--------------------------+-------------------+
+
+    // calc_energest.c
+    cpu = energest_type_time(ENERGEST_TYPE_CPU);
+    lpm = energest_type_time(ENERGEST_TYPE_LPM);
+    transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+    listen = energest_type_time(ENERGEST_TYPE_LISTEN);
+    time = cpu + lpm;
+    radio = transmit + listen;
