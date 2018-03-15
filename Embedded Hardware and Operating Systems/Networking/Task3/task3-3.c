@@ -27,7 +27,7 @@ PROCESS_THREAD(task3_3, ev, data) {
   PROCESS_EXITHANDLER(trickle_close(&trickle);)
   PROCESS_BEGIN();
 
-  trickle_open(&trickle, 10*CLOCK_SECOND, 145, &callbacks);
+  trickle_open(&trickle, 10 * CLOCK_SECOND, 145, &callbacks);
   SENSORS_ACTIVATE(button_sensor);
 
   while (1) {
