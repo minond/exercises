@@ -21,7 +21,7 @@ static void recv(struct broadcast_conn *, const rimeaddr_t *);
 static const struct broadcast_callbacks callbacks = {recv};
 static struct broadcast_conn broadcast;
 
-PROCESS(cmac_4hz, "Powertrace ContikiMAC 4Hz Channel Check Rate");
+PROCESS(cmac_4hz, "Powertrace CSMA 8Hz Channel Check Rate");
 AUTOSTART_PROCESSES(&cmac_4hz);
 
 PROCESS_THREAD(cmac_4hz, ev, data) {
