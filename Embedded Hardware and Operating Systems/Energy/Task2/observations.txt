@@ -1,0 +1,14 @@
+# Data
+
++----------+------------+------------+----------------+--------------+
+| Driver   | CPU ticks  | Lpm ticks  | Transmit ticks | Listen ticks |
++----------+------------+------------+----------------+--------------+
+| LLP      | 366322     | 3457114    | 21985          | 305360       |
+| Null_RDC | 217786     | 3946339    | 226            | 3756800      |
+| X-MAC    | 297285     | 4207700    | 9622           | 217463       |
++----------+------------+------------+----------------+--------------+
+
+# Observations
+
+Null_RDC consumes the most energy while listening. X-MAC consumes the least
+amount of energy while listening.

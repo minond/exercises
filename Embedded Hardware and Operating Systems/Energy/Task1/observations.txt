@@ -1,0 +1,14 @@
+# Data
+
++-------+------------+------------+----------------+--------------+
+| Hertz | CPU ticks  | Lpm ticks  | Transmit ticks | Listen ticks |
++-------+------------+------------+----------------+--------------+
+| 16Hz  | 264320     | 4393307    | 9767           | 57276        |
+| 8Hz   | 262846     | 3913850    | 17386          | 28702        |
+| 4Hz   | 295913     | 3865900    | 27970          | 19412        |
++-------+------------+------------+----------------+--------------+
+
+# Observations
+
+The higher the check rate the more energy is used to listen for messages (or
+while listening) but on average everything else decreases in power usage.
