@@ -21,10 +21,10 @@ static void recv(struct broadcast_conn *, const rimeaddr_t *);
 static const struct broadcast_callbacks callbacks = {recv};
 static struct broadcast_conn broadcast;
 
-PROCESS(cmac_4hz, "Powertrace ContikiMAC 16Hz Channel Check Rate");
-AUTOSTART_PROCESSES(&cmac_4hz);
+PROCESS(cmac_16hz, "Powertrace ContikiMAC 16Hz Channel Check Rate");
+AUTOSTART_PROCESSES(&cmac_16hz);
 
-PROCESS_THREAD(cmac_4hz, ev, data) {
+PROCESS_THREAD(cmac_16hz, ev, data) {
   static struct etimer et;
   unsigned long last_cpu, last_lpm, last_tra, last_lis, curr_cpu, curr_lpm,
       curr_tra, curr_lis;
