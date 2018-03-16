@@ -41,7 +41,7 @@ PROCESS_THREAD(cmac_4hz, ev, data) {
   broadcast_open(&broadcast, 129, &callbacks);
 
   while (1) {
-    etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
+    etimer_set(&et, CLOCK_SECOND * 10 + random_rand() % (CLOCK_SECOND * 4));
 
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
@@ -53,6 +53,9 @@ PROCESS_THREAD(cmac_4hz, ev, data) {
     curr_lpm = energest_type_time(ENERGEST_TYPE_LPM);
     curr_tra = energest_type_time(ENERGEST_TYPE_TRANSMIT);
     curr_lis = energest_type_time(ENERGEST_TYPE_LISTEN);
+
+    printf("Usage: cpu %lu, lpm %lu, transmit %lu, listen %lu\n", curr_cpu,
+           curr_lpm, curr_tra, curr_lis);
 
     printf("Deltas: cpu %lu, lpm %lu, transmit %lu, listen %lu\n",
            curr_cpu - last_cpu, curr_lpm - last_lpm, curr_tra - last_tra,
@@ -68,6 +71,6 @@ PROCESS_THREAD(cmac_4hz, ev, data) {
 }
 
 static void recv(struct broadcast_conn *c, const rimeaddr_t *from) {
-  printf("broadcast message received from %d.%d: '%s'\n", from->u8[0],
+  printf("Received broadcast message from %d.%d: '%s'\n", from->u8[0],
          from->u8[1], (char *)packetbuf_dataptr());
 }
