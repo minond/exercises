@@ -18,6 +18,12 @@ PROCESS(task_3, "Task 3");
 AUTOSTART_PROCESSES(&task_3);
 
 PROCESS_THREAD(task_3, ev, data) {
+  unsigned long cpu, lpm, transmit, listen;
+
+  char msg[] =
+      "Powertrace: cpu %lu, lpm %lu, transmit %lu, listen %lu, time %lu, radio "
+      "%lu\n";
+
   PROCESS_EXITHANDLER(unicast_close(&conn);)
   PROCESS_BEGIN();
 
@@ -32,6 +38,12 @@ PROCESS_THREAD(task_3, ev, data) {
     etimer_set(&et, CLOCK_SECOND);
 
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+    cpu = energest_type_time(ENERGEST_TYPE_CPU);
+    lpm = energest_type_time(ENERGEST_TYPE_LPM);
+    transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+    listen = energest_type_time(ENERGEST_TYPE_LISTEN);
+    printf(msg, cpu, lpm, transmit, listen, cpu + lpm, transmit + listen);
 
     packetbuf_copyfrom("Hello", 6);
 
@@ -55,6 +67,6 @@ static void sent(struct unicast_conn *c, int status, int num_tx) {
     return;
   }
 
-  printf("unicast message sent to %d.%d: status %d num_tx %d\n", dest->u8[0],
+  printf("Unicast message sent to %d.%d: status %d num_tx %d\n", dest->u8[0],
          dest->u8[1], status, num_tx);
 }
