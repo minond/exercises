@@ -21,7 +21,6 @@ PROCESS_THREAD(task_3, ev, data) {
   PROCESS_EXITHANDLER(unicast_close(&conn);)
   PROCESS_BEGIN();
 
-  powertrace_start(CLOCK_SECOND * 2);
   unicast_open(&conn, 146, &callbacks);
 
   while (1) {
@@ -36,7 +35,7 @@ PROCESS_THREAD(task_3, ev, data) {
 
     packetbuf_copyfrom("Hello", 6);
 
-    if (!rimeaddr_cmp(&addr, &linkaddr_node_addr)) {
+    if (!rimeaddr_cmp(&addr, &rimeaddr_node_addr)) {
       unicast_send(&conn, &addr);
       printf("Unicast message sent\n");
     }
@@ -50,9 +49,9 @@ static void recv(struct unicast_conn *c, const rimeaddr_t *from) {
 }
 
 static void sent(struct unicast_conn *c, int status, int num_tx) {
-  const linkaddr_t *dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
+  const rimeaddr_t *dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
 
-  if (linkaddr_cmp(dest, &rimeaddr_null)) {
+  if (rimeaddr_cmp(dest, &rimeaddr_null)) {
     return;
   }
 
