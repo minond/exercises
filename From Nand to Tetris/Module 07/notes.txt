@@ -1,0 +1,30 @@
+Memory Segments
+---------------
+
+- Argument
+- Local
+- Static
+- Constant, just the numbers 0 .. n
+- This
+- That
+- Temp
+- Pointer
+
+
+Commands
+--------
+
+- push <segment> <value>
+- pop <segment> <value>
+
+
+Examples:
+
+    push constant 17
+    pop local 2
+    pop static 5
+    push argument 3
+
+    // let local 2 = argument 1
+    push argument 1
+    pop local 2
