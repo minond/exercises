@@ -1,38 +1,19 @@
 // https://docs.scala-lang.org/tour/lower-type-bounds.html
-// An upper type bound `T <: A` says that type `T` refers to a subtype of type
-// `A`.
+// A lower type bound declares a type as a supertype of another type. If we
+// have `B >: A` we're saying that type parameter `B` or the abstract type `B`
+// refers to a supertype of type `A`. In most cases, `A` will be the type
+// parameter of the class and `B` will be the type parameter of a method
 
-abstract class Animal {
-  def name: String
+trait Node[+B] {
+  def prepend(elem: B): Node[B]
 }
 
-abstract class Pet extends Animal
-
-class Cat extends Pet {
-  override def name = "Cat"
+case class ListNode[+B](h: B, t: Node[B]) extends Node[B] {
+  def prepend(elem: B): ListNode[B] = ListNode(elem, this)
+  def head: B = h
+  def tail: Node[B] = t
 }
 
-class Dog extends Pet {
-  override def name = "Dog"
-}
-
-class Lion extends Animal {
-  override def name = "Lion"
-}
-
-class PetContainer[P <: Pet](p: P) {
-  def pet: P = p
-}
-
-val dogContainer = new PetContainer[Dog](new Dog)
-val catContainer = new PetContainer[Cat](new Cat)
-
-// The next line will not compile and results in the following error:
-//
-//     error: type arguments [this.Lion] do not conform to class PetContainer's
-//     type parameter bounds [P <: this.Pet]
-//
-// This is because PetContainer.pet is of type `P` which is declared as
-// `P <: Pet`, meaning that P has to be a subtype of Pet. If `P` instead were
-// `P <: Animal`, then PetContainer[Lion] would work.
-val lionContainer = new PetContainer[Lion](new Lion)
+// case class Nil[+B]() extends Node[B] {
+//   def prepend(elem: B): ListNode[B] = ListNode(elem, this)
+// }
