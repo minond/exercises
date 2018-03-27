@@ -1,5 +1,4 @@
 // https://docs.scala-lang.org/tour/classes.html
-
 // Getters and setters
 case class Coordinates(
     bounds: Int,
