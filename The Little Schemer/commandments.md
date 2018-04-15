@@ -65,9 +65,9 @@ Use help functions to abstract from representations.
 
 ### The Ninth Commandment
 
-_TODO_
+Abstract common patterns with a new function.
 
 
 ### The Tenth Commandment
 
-_TODO_
+Build functions to collect more than one value at a time.
