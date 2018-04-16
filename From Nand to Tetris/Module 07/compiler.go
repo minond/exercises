@@ -1,12 +1,24 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"unicode"
 )
 
 type tokenid int
 type segment int
+
+type parser struct {
+	tokens []token
+	pos    int
+}
+
+type tokenizer struct {
+	chars []rune
+	pos   int
+}
 
 type token struct {
 	id   tokenid
@@ -28,6 +40,11 @@ type popStmt struct {
 	val int
 }
 
+type errStmt struct {
+	token token
+	error error
+}
+
 type addStmt struct{}
 type andStmt struct{}
 type eqStmt struct{}
@@ -39,13 +56,13 @@ type orStmt struct{}
 type subStmt struct{}
 
 const (
-	constantMem segment = iota
+	argumentMem segment = iota
+	constantMem
 	localMem
-	argumentMem
-	thisMem
-	thatMem
-	tempMem
 	staticMem
+	tempMem
+	thatMem
+	thisMem
 )
 
 const (
@@ -55,98 +72,126 @@ const (
 	popToken
 	addToken
 	andToken
+	argumentToken
+	constantToken
 	eqToken
 	gtToken
+	localToken
 	ltToken
 	negToken
 	notToken
 	orToken
-	subToken
-	constantToken
-	localToken
-	argumentToken
-	thisToken
-	thatToken
-	tempToken
 	staticToken
+	subToken
+	tempToken
+	thatToken
+	thisToken
 )
 
 const (
-	nlRn     = rune('\n')
-	nilRn    = rune(0)
 	fslashRn = rune('/')
+	nilRn    = rune(0)
+	nlRn     = rune('\n')
 )
 
 var (
+	segmentsMap = map[tokenid]segment{
+		argumentToken: argumentMem,
+		constantToken: constantMem,
+		localToken:    localMem,
+		staticToken:   staticMem,
+		tempToken:     tempMem,
+		thatToken:     thatMem,
+		thisToken:     thisMem,
+	}
+
 	tokensMap = map[string]tokenid{
-		"push":     pushToken,
-		"pop":      popToken,
 		"add":      addToken,
 		"and":      andToken,
+		"argument": argumentToken,
+		"constant": constantToken,
 		"eq":       eqToken,
 		"gt":       gtToken,
+		"local":    localToken,
 		"lt":       ltToken,
 		"neg":      negToken,
 		"not":      notToken,
 		"or":       orToken,
-		"sub":      subToken,
-		"constant": constantToken,
-		"local":    localToken,
-		"argument": argumentToken,
-		"this":     thisToken,
-		"that":     thatToken,
-		"temp":     tempToken,
+		"pop":      popToken,
+		"push":     pushToken,
 		"static":   staticToken,
+		"sub":      subToken,
+		"temp":     tempToken,
+		"that":     thatToken,
+		"this":     thisToken,
+	}
+
+	tokensPopMem = []tokenid{
+		argumentToken,
+		constantToken,
+		localToken,
+		staticToken,
+		tempToken,
+		thatToken,
+		thisToken,
+	}
+
+	tokensPushMem = []tokenid{
+		argumentToken,
+		localToken,
+		staticToken,
+		tempToken,
+		thatToken,
+		thisToken,
 	}
 )
 
-func (pushStmt) asm() string {
-	return ""
+func (pushStmt) asm() []string {
+	return []string{}
 }
 
-func (popStmt) asm() string {
-	return ""
+func (popStmt) asm() []string {
+	return []string{}
 }
 
-func (addStmt) asm() string {
-	return ""
+func (addStmt) asm() []string {
+	return []string{}
 }
 
-func (andStmt) asm() string {
-	return ""
+func (andStmt) asm() []string {
+	return []string{}
 }
 
-func (eqStmt) asm() string {
-	return ""
+func (eqStmt) asm() []string {
+	return []string{}
 }
 
-func (gtStmt) asm() string {
-	return ""
+func (gtStmt) asm() []string {
+	return []string{}
 }
 
-func (ltStmt) asm() string {
-	return ""
+func (ltStmt) asm() []string {
+	return []string{}
 }
 
-func (negStmt) asm() string {
-	return ""
+func (negStmt) asm() []string {
+	return []string{}
 }
 
-func (notStmt) asm() string {
-	return ""
+func (notStmt) asm() []string {
+	return []string{}
 }
 
-func (orStmt) asm() string {
-	return ""
+func (orStmt) asm() []string {
+	return []string{}
 }
 
-func (subStmt) asm() string {
-	return ""
+func (subStmt) asm() []string {
+	return []string{}
 }
 
-type tokenizer struct {
-	chars []rune
-	pos   int
+func (errStmt) asm() []string {
+	return []string{}
 }
 
 func (t tokenizer) run() (tokens []token) {
@@ -240,9 +285,156 @@ func (t *tokenizer) eatUntil(f func(rune) bool) (buff []rune) {
 	return buff
 }
 
+func (p parser) run() (statements []statement, ok bool) {
+	ok = true
+
+	for !p.done() {
+		switch p.eat().id {
+		case pushToken:
+			statements = append(statements, p.parsePushPop(tokensPushMem))
+		case popToken:
+			statements = append(statements, p.parsePushPop(tokensPopMem))
+		case addToken:
+			statements = append(statements, addStmt{})
+		case andToken:
+			statements = append(statements, addStmt{})
+		case eqToken:
+			statements = append(statements, eqStmt{})
+		case gtToken:
+			statements = append(statements, gtStmt{})
+		case ltToken:
+			statements = append(statements, ltStmt{})
+		case negToken:
+			statements = append(statements, negStmt{})
+		case notToken:
+			statements = append(statements, notStmt{})
+		case orToken:
+			statements = append(statements, orStmt{})
+		case subToken:
+			statements = append(statements, subStmt{})
+
+		case errToken:
+			p.eatLine()
+			ok = false
+			statements = append(statements, errStmt{
+				token: p.prev(),
+				error: errors.New("Invalid token."),
+			})
+
+		default:
+			p.eatLine()
+			ok = false
+			statements = append(statements, errStmt{
+				token: p.prev(),
+				error: errors.New("Unexpected token."),
+			})
+		}
+	}
+
+	return statements, ok
+}
+
+func (p *parser) parsePushPop(memTokens []tokenid) statement {
+	segTok, err := p.expect(memTokens...)
+
+	if err != nil {
+		p.eatLine()
+		return errStmt{
+			token: p.curr(),
+			error: err,
+		}
+	}
+
+	str, err := p.expect(numToken)
+
+	if err != nil {
+		p.eatLine()
+		return errStmt{
+			token: p.curr(),
+			error: err,
+		}
+	}
+
+	if str.val == nil {
+		p.eatLine()
+		return errStmt{
+			token: str,
+			error: errors.New("Expecting a number value."),
+		}
+	}
+
+	num, err := strconv.Atoi(*str.val)
+
+	if err != nil {
+		p.eatLine()
+		return errStmt{
+			token: str,
+			error: fmt.Errorf("Unable to convert %s to a number.", *str.val),
+		}
+	}
+
+	seg, ok := segmentsMap[segTok.id]
+
+	if !ok {
+		p.eatLine()
+		return errStmt{
+			token: segTok,
+			error: fmt.Errorf("Expecting %q but found %s instead.",
+				tokensPushMem, segTok.id),
+		}
+	}
+
+	return pushStmt{
+		seg: seg,
+		val: num,
+	}
+}
+
+func (p parser) done() bool {
+	return p.pos >= len(p.tokens)
+}
+
+func (p *parser) eat() token {
+	next := p.tokens[p.pos]
+	p.pos += 1
+	return next
+}
+
+func (p *parser) eatLine() {
+	line := p.eat().line
+	for line != 0 && !p.done() && p.curr().line == line {
+		p.eat()
+	}
+}
+
+func (p parser) curr() token {
+	return p.tokens[p.pos]
+}
+
+func (p parser) prev() token {
+	return p.tokens[p.pos-1]
+}
+
+func (p parser) expect(ids ...tokenid) (token, error) {
+	curr := p.curr()
+	for _, id := range ids {
+		if curr.id == id {
+			return curr, nil
+		}
+	}
+
+	return token{}, fmt.Errorf("Expecting (one of) %q but found %s instead.",
+		ids, curr.id)
+}
+
 func tokenize(src string) []token {
 	toks := tokenizer{chars: []rune(src)}
 	return toks.run()
+}
+
+func parse(tokens []token) ([]statement, bool) {
+	parse := parser{tokens: tokens}
+	return parse.run()
 }
 
 func main() {
@@ -276,8 +468,11 @@ push this 6
 push this 6
 add
 sub
-puh temp 6
+push temp 6
 add`
 
-	fmt.Println(tokenize(sample))
+	statements, ok := parse(tokenize(sample))
+	fmt.Println(ok)
+	fmt.Println(len(statements))
+	fmt.Println(statements)
 }
