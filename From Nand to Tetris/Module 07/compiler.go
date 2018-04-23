@@ -379,7 +379,7 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 		p.eatLine()
 		return errStmt{
 			token: segTok,
-			error: fmt.Errorf("Expecting %q but found %s instead.",
+			error: fmt.Errorf("Expecting %q but found %d instead.",
 				tokensPushMem, segTok.id),
 		}
 	}
@@ -423,7 +423,7 @@ func (p parser) expect(ids ...tokenid) (token, error) {
 		}
 	}
 
-	return token{}, fmt.Errorf("Expecting (one of) %q but found %s instead.",
+	return token{}, fmt.Errorf("Expecting (one of) %q but found %d instead.",
 		ids, curr.id)
 }
 
