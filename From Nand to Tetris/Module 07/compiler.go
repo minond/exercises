@@ -129,7 +129,6 @@ var (
 
 	tokensPopMem = []tokenid{
 		argumentToken,
-		constantToken,
 		localToken,
 		staticToken,
 		tempToken,
@@ -139,6 +138,7 @@ var (
 
 	tokensPushMem = []tokenid{
 		argumentToken,
+		constantToken,
 		localToken,
 		staticToken,
 		tempToken,
