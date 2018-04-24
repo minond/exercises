@@ -577,9 +577,8 @@ sub
 push temp 6
 add`
 
-	statements, ok := parse(tokenize(sample))
-	fmt.Println(ok)
-	fmt.Println(len(statements))
-	fmt.Println(statements)
-	fmt.Println(compile(statements))
+	statements, _ := parse(tokenize(sample))
+	for i, v := range compile(statements) {
+		fmt.Printf("%03d - %s\n", i, v)
+	}
 }
