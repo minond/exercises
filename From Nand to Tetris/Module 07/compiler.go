@@ -235,7 +235,7 @@ func (s pushStmt) asm() []string {
 
 func (s popStmt) asm() []string {
 	return []string{
-		fmt.Sprintf("; pop %s %s", s.seg, s.val),
+		fmt.Sprintf("; pop %s %d", s.seg, s.val),
 	}
 }
 
