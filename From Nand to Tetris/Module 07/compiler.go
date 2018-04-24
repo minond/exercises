@@ -67,6 +67,7 @@ const (
 
 const (
 	errToken tokenid = iota
+	eolToken
 	numToken
 	pushToken
 	popToken
