@@ -233,48 +233,52 @@ func (s pushStmt) asm() []string {
 	}
 }
 
-func (popStmt) asm() []string {
-	return []string{}
+func (s popStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; pop %s %s", s.seg, s.val),
+	}
 }
 
 func (addStmt) asm() []string {
-	return []string{}
+	return []string{"; add"}
 }
 
 func (andStmt) asm() []string {
-	return []string{}
+	return []string{"; and"}
 }
 
 func (eqStmt) asm() []string {
-	return []string{}
+	return []string{"; eq"}
 }
 
 func (gtStmt) asm() []string {
-	return []string{}
+	return []string{"; gt"}
 }
 
 func (ltStmt) asm() []string {
-	return []string{}
+	return []string{"; lt"}
 }
 
 func (negStmt) asm() []string {
-	return []string{}
+	return []string{"; neg"}
 }
 
 func (notStmt) asm() []string {
-	return []string{}
+	return []string{"; not"}
 }
 
 func (orStmt) asm() []string {
-	return []string{}
+	return []string{"; or"}
 }
 
 func (subStmt) asm() []string {
-	return []string{}
+	return []string{"; sub"}
 }
 
-func (errStmt) asm() []string {
-	return []string{}
+func (s errStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; Error: %v, %s\n", s.error, s.token),
+	}
 }
 
 func (t tokenizer) run() (tokens []token) {
