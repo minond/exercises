@@ -405,7 +405,7 @@ func (p parser) run() (statements []statement, ok bool) {
 			ok = false
 			statements = append(statements, errStmt{
 				token: p.prev(),
-				error: errors.New("Invalid token."),
+				error: errors.New("invalid token"),
 			})
 
 		default:
@@ -413,7 +413,7 @@ func (p parser) run() (statements []statement, ok bool) {
 			ok = false
 			statements = append(statements, errStmt{
 				token: p.prev(),
-				error: errors.New("Unexpected token."),
+				error: errors.New("unexpected token"),
 			})
 		}
 	}
@@ -446,7 +446,7 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 		p.eatLine()
 		return errStmt{
 			token: str,
-			error: errors.New("Expecting a number value."),
+			error: errors.New("expecting a number value"),
 		}
 	}
 
@@ -456,7 +456,7 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 		p.eatLine()
 		return errStmt{
 			token: str,
-			error: fmt.Errorf("Unable to convert %s to a number.", *str.val),
+			error: fmt.Errorf("unable to convert %s to a number", *str.val),
 		}
 	}
 
@@ -466,7 +466,7 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 		p.eatLine()
 		return errStmt{
 			token: segTok,
-			error: fmt.Errorf("Expecting %q but found %d instead.",
+			error: fmt.Errorf("expecting %v but found [%s] instead",
 				tokensPushMem, segTok.id),
 		}
 	}
@@ -510,7 +510,7 @@ func (p parser) expect(ids ...tokenid) (token, error) {
 		}
 	}
 
-	return token{}, fmt.Errorf("Expecting (one of) %q but found %d instead.",
+	return token{}, fmt.Errorf("expecting %v but found [%s] instead",
 		ids, curr.id)
 }
 
