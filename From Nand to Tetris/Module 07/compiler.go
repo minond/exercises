@@ -437,6 +437,13 @@ func parse(tokens []token) ([]statement, bool) {
 	return parse.run()
 }
 
+func compile(stmts []statement) (code []string) {
+	for _, stmt := range stmts {
+		code = append(code, stmt.asm()...)
+	}
+	return
+}
+
 func main() {
 	sample := `
 // This file is part of www.nand2tetris.org
@@ -475,4 +482,5 @@ add`
 	fmt.Println(ok)
 	fmt.Println(len(statements))
 	fmt.Println(statements)
+	fmt.Println(compile(statements))
 }
