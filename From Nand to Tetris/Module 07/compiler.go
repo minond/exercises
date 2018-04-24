@@ -147,8 +147,90 @@ var (
 	}
 )
 
-func (pushStmt) asm() []string {
-	return []string{}
+func (t token) String() string {
+	if t.id == eolToken {
+		return "EOL"
+	} else if t.val == nil || *t.val == "" {
+		return fmt.Sprintf("%s on line %d", t.id, t.line)
+	} else {
+		return fmt.Sprintf(`%s ("%s") on line %d`, t.id, *t.val, t.line)
+	}
+}
+
+func (id tokenid) String() string {
+	switch id {
+	case errToken:
+		return "error"
+	case numToken:
+		return "number"
+	case pushToken:
+		return "push"
+	case popToken:
+		return "pop"
+	case addToken:
+		return "add"
+	case andToken:
+		return "and"
+	case argumentToken:
+		return "argument"
+	case constantToken:
+		return "constant"
+	case eqToken:
+		return "eq"
+	case gtToken:
+		return "gt"
+	case localToken:
+		return "local"
+	case ltToken:
+		return "lt"
+	case negToken:
+		return "neg"
+	case notToken:
+		return "not"
+	case orToken:
+		return "or"
+	case staticToken:
+		return "static"
+	case subToken:
+		return "sub"
+	case tempToken:
+		return "temp"
+	case thatToken:
+		return "that"
+	case thisToken:
+		return "this"
+	case eolToken:
+		return "EOL"
+	default:
+		panic(fmt.Sprintf("invalid token id: %d", id))
+	}
+}
+
+func (s segment) String() string {
+	switch s {
+	case argumentMem:
+		return "argument"
+	case constantMem:
+		return "constant"
+	case localMem:
+		return "local"
+	case staticMem:
+		return "static"
+	case tempMem:
+		return "temp"
+	case thatMem:
+		return "that"
+	case thisMem:
+		return "this"
+	default:
+		panic(fmt.Sprintf("invalid segment id: %d", s))
+	}
+}
+
+func (s pushStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; push %s %d", s.seg, s.val),
+	}
 }
 
 func (popStmt) asm() []string {
