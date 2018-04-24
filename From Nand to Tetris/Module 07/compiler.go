@@ -482,12 +482,19 @@ func (p parser) done() bool {
 }
 
 func (p *parser) eat() token {
+	if p.done() {
+		return token{eolToken, -1, nil}
+	}
+
 	next := p.tokens[p.pos]
 	p.pos += 1
 	return next
 }
 
 func (p *parser) eatLine() {
+	if p.done() {
+		return
+	}
 	line := p.eat().line
 	for line != 0 && !p.done() && p.curr().line == line {
 		p.eat()
@@ -495,17 +502,22 @@ func (p *parser) eatLine() {
 }
 
 func (p parser) curr() token {
-	return p.tokens[p.pos]
+	if p.done() {
+		return token{eolToken, -1, nil}
+	} else {
+		return p.tokens[p.pos]
+	}
 }
 
 func (p parser) prev() token {
 	return p.tokens[p.pos-1]
 }
 
-func (p parser) expect(ids ...tokenid) (token, error) {
+func (p *parser) expect(ids ...tokenid) (token, error) {
 	curr := p.curr()
 	for _, id := range ids {
 		if curr.id == id {
+			p.eat()
 			return curr, nil
 		}
 	}
