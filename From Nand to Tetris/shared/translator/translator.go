@@ -31,29 +31,32 @@ type statement interface {
 }
 
 type pushStmt struct {
-	seg segment
-	val int
+	seg  segment
+	val  int
+	line int
 }
 
 type popStmt struct {
-	seg segment
-	val int
+	seg  segment
+	val  int
+	line int
 }
 
 type errStmt struct {
 	token token
 	error error
+	line  int
 }
 
-type addStmt struct{}
-type andStmt struct{}
-type eqStmt struct{}
-type gtStmt struct{}
-type ltStmt struct{}
-type negStmt struct{}
-type notStmt struct{}
-type orStmt struct{}
-type subStmt struct{}
+type addStmt struct{ line int }
+type andStmt struct{ line int }
+type eqStmt struct{ line int }
+type gtStmt struct{ line int }
+type ltStmt struct{ line int }
+type negStmt struct{ line int }
+type notStmt struct{ line int }
+type orStmt struct{ line int }
+type subStmt struct{ line int }
 
 const (
 	argumentMem segment = iota
@@ -229,50 +232,73 @@ func (s segment) String() string {
 
 func (s pushStmt) asm() []string {
 	return []string{
-		fmt.Sprintf("; push %s %d", s.seg, s.val),
+		fmt.Sprintf("; line %03d: push %s %d", s.line, s.seg, s.val),
 	}
 }
 
 func (s popStmt) asm() []string {
 	return []string{
-		fmt.Sprintf("; pop %s %d", s.seg, s.val),
+		fmt.Sprintf("; line %03d: pop %s %d", s.line, s.seg, s.val),
 	}
 }
 
-func (addStmt) asm() []string {
-	return []string{"; add"}
+func (s addStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: add", s.line),
+	}
 }
 
-func (andStmt) asm() []string {
-	return []string{"; and"}
+func (s andStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: and", s.line),
+	}
 }
 
-func (eqStmt) asm() []string {
-	return []string{"; eq"}
+func (s eqStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: eq", s.line),
+	}
 }
 
-func (gtStmt) asm() []string {
-	return []string{"; gt"}
+func (s gtStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: gt", s.line),
+	}
 }
 
-func (ltStmt) asm() []string {
-	return []string{"; lt"}
+func (s ltStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: lt", s.line),
+	}
 }
 
-func (negStmt) asm() []string {
-	return []string{"; neg"}
+func (s negStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: neg", s.line),
+	}
 }
 
-func (notStmt) asm() []string {
-	return []string{"; not"}
+func (s notStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: not", s.line),
+	}
 }
 
-func (orStmt) asm() []string {
-	return []string{"; or"}
+func (s orStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: or", s.line),
+	}
 }
 
-func (subStmt) asm() []string {
-	return []string{"; sub"}
+func (s subStmt) asm() []string {
+	return []string{
+		fmt.Sprintf("; line %03d: sub", s.line),
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"@SP",   // Load top of stack
+		"M=M-1", // And point to previous memory cell
+		"M=D-M", // Subtract D from value in M
+	}
 }
 
 func (s errStmt) asm() []string {
@@ -382,38 +408,42 @@ func (p parser) run() (statements []statement, ok bool) {
 		case popToken:
 			statements = append(statements, p.parsePushPop(tokensPopMem))
 		case addToken:
-			statements = append(statements, addStmt{})
+			statements = append(statements, addStmt{p.prev().line})
 		case andToken:
-			statements = append(statements, addStmt{})
+			statements = append(statements, addStmt{p.prev().line})
 		case eqToken:
-			statements = append(statements, eqStmt{})
+			statements = append(statements, eqStmt{p.prev().line})
 		case gtToken:
-			statements = append(statements, gtStmt{})
+			statements = append(statements, gtStmt{p.prev().line})
 		case ltToken:
-			statements = append(statements, ltStmt{})
+			statements = append(statements, ltStmt{p.prev().line})
 		case negToken:
-			statements = append(statements, negStmt{})
+			statements = append(statements, negStmt{p.prev().line})
 		case notToken:
-			statements = append(statements, notStmt{})
+			statements = append(statements, notStmt{p.prev().line})
 		case orToken:
-			statements = append(statements, orStmt{})
+			statements = append(statements, orStmt{p.prev().line})
 		case subToken:
-			statements = append(statements, subStmt{})
+			statements = append(statements, subStmt{p.prev().line})
 
 		case errToken:
+			line := p.prev().line
 			p.eatLine()
 			ok = false
 			statements = append(statements, errStmt{
 				token: p.prev(),
 				error: errors.New("invalid token"),
+				line:  line,
 			})
 
 		default:
+			line := p.prev().line
 			p.eatLine()
 			ok = false
 			statements = append(statements, errStmt{
 				token: p.prev(),
 				error: errors.New("unexpected token"),
+				line:  line,
 			})
 		}
 	}
@@ -472,8 +502,9 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 	}
 
 	return pushStmt{
-		seg: seg,
-		val: num,
+		seg:  seg,
+		val:  num,
+		line: segTok.line,
 	}
 }
 
@@ -578,7 +609,7 @@ push temp 6
 add`
 
 	statements, _ := parse(tokenize(sample))
-	for i, v := range compile(statements) {
-		fmt.Printf("%03d - %s\n", i, v)
+	for _, line := range compile(statements) {
+		fmt.Println(line)
 	}
 }
