@@ -404,9 +404,9 @@ func (p parser) run() (statements []statement, ok bool) {
 	for !p.done() {
 		switch p.eat().id {
 		case pushToken:
-			statements = append(statements, p.parsePushPop(tokensPushMem))
+			statements = append(statements, p.parsePushPop(true, tokensPushMem))
 		case popToken:
-			statements = append(statements, p.parsePushPop(tokensPopMem))
+			statements = append(statements, p.parsePushPop(false, tokensPopMem))
 		case addToken:
 			statements = append(statements, addStmt{p.prev().line})
 		case andToken:
@@ -451,7 +451,7 @@ func (p parser) run() (statements []statement, ok bool) {
 	return statements, ok
 }
 
-func (p *parser) parsePushPop(memTokens []tokenid) statement {
+func (p *parser) parsePushPop(isPush bool, memTokens []tokenid) statement {
 	segTok, err := p.expect(memTokens...)
 
 	if err != nil {
@@ -501,10 +501,18 @@ func (p *parser) parsePushPop(memTokens []tokenid) statement {
 		}
 	}
 
-	return pushStmt{
-		seg:  seg,
-		val:  num,
-		line: segTok.line,
+	if isPush {
+		return pushStmt{
+			seg:  seg,
+			val:  num,
+			line: segTok.line,
+		}
+	} else {
+		return popStmt{
+			seg:  seg,
+			val:  num,
+			line: segTok.line,
+		}
 	}
 }
 
