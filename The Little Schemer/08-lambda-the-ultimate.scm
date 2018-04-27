@@ -88,3 +88,25 @@
 (debug '(even? 2))
 (debug '(even? 3))
 (debug '(evens-only* '((9 1 2 8) 3 10 ((9 9) 7 6) 2)))
+
+; What does (multirember&co a lat f) do? It looks at every atom of the lat
+; to see whether it is eq? to a. Those atoms that are not are collected in one
+; list ls1; the others for which the answer is true are collected in a second
+; list ls2. Finally, it determines the value of (f ls1 ls2).
+(define multirember&co
+  (lambda (x xs f)
+    (cond
+      ((null? xs) (f '() '()))
+      ((eq? x (car xs))
+       (multirember&co x (cdr xs)
+                       (lambda (ls1 ls2)
+                         (f ls1
+                            (cons (car xs) ls2)))))
+      (#t
+       (multirember&co x (cdr xs)
+                       (lambda (ls1 ls2)
+                         (f (cons (car xs) ls1)
+                            ls2)))))))
+
+(debug '(multirember&co 'tuna '(strawberries tuna and swordfish)
+                        (lambda (x y) (length x))))
