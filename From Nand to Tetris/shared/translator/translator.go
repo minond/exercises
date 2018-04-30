@@ -99,6 +99,16 @@ const (
 )
 
 var (
+	currId = 0
+
+	spDec = []string{
+		"@SP",   // Load top of stack
+		"A=M",   // Save the address
+		"D=A-1", // Decrement the address by 1
+		"@SP",   // Reload top of stack
+		"M=D",   // Set memory value to D
+	}
+
 	segmentsMap = map[tokenid]segment{
 		argumentToken: argumentMem,
 		constantToken: constantMem,
@@ -243,14 +253,13 @@ func (s popStmt) asm() []string {
 }
 
 func (s addStmt) asm() []string {
-	return []string{
+	return append([]string{
 		fmt.Sprintf("; line %03d: add", s.line),
 		"@SP",   // Load top of stack
 		"D=M",   // Into D
-		"@SP",   // Load top of stack
-		"A=A-1", // Point to previous memory cell
-		"M=D+M", // Subtract D from value in M
-	}
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+		"M=D+M", // Subtract D from value in SP-1
+	}, spDec...)
 }
 
 func (s andStmt) asm() []string {
@@ -260,21 +269,93 @@ func (s andStmt) asm() []string {
 }
 
 func (s eqStmt) asm() []string {
-	return []string{
+	id := nextId()
+	return append([]string{
 		fmt.Sprintf("; line %03d: eq", s.line),
-	}
+		fmt.Sprintf("; id: %d", id),
+
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+		"D=D+M", // Subtract D from value in D
+
+		fmt.Sprintf("@EQ.%d", id),
+		"D; JEQ", // Jump to EQ if D=0
+
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=0",   // Set it to 0
+
+		fmt.Sprintf("@DONE.%d", id),
+		"0; JMP", // Go to DONE
+
+		fmt.Sprintf("(EQ.%d)", id),
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=1",   // Set it to 1
+
+		fmt.Sprintf("(DONE.%d)", id),
+	}, spDec...)
 }
 
 func (s gtStmt) asm() []string {
-	return []string{
+	id := nextId()
+	return append([]string{
 		fmt.Sprintf("; line %03d: gt", s.line),
-	}
+		fmt.Sprintf("; id: %d", id),
+
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+		"D=D+M", // Subtract D from value in D
+
+		fmt.Sprintf("@GT.%d", id),
+		"D; JGT", // Jump to GT if D>0
+
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=0",   // Set it to 0
+
+		fmt.Sprintf("@DONE.%d", id),
+		"0; JMP", // Go to DONE
+
+		fmt.Sprintf("(GT.%d)", id),
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=1",   // Set it to 1
+
+		fmt.Sprintf("(DONE.%d)", id),
+	}, spDec...)
 }
 
 func (s ltStmt) asm() []string {
-	return []string{
+	id := nextId()
+	return append([]string{
 		fmt.Sprintf("; line %03d: lt", s.line),
-	}
+		fmt.Sprintf("; id: %d", id),
+
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+		"D=D+M", // Subtract D from value in D
+
+		fmt.Sprintf("@LT.%d", id),
+		"D; JLT", // Jump to LT if D<0
+
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=0",   // Set it to 0
+
+		fmt.Sprintf("@DONE.%d", id),
+		"0; JMP", // Go to DONE
+
+		fmt.Sprintf("(LT.%d)", id),
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=1",   // Set it to 1
+
+		fmt.Sprintf("(DONE.%d)", id),
+	}, spDec...)
 }
 
 func (s negStmt) asm() []string {
@@ -296,19 +377,22 @@ func (s orStmt) asm() []string {
 }
 
 func (s subStmt) asm() []string {
-	return []string{
+	return append([]string{
 		fmt.Sprintf("; line %03d: sub", s.line),
 		"@SP",   // Load top of stack
 		"D=M",   // Into D
-		"@SP",   // Load top of stack
-		"A=A-1", // Point to previous memory cell
-		"M=D-M", // Subtract D from value in M
-	}
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+		"M=D-M", // Subtract D from value in SP-1
+	}, spDec...)
 }
 
 func (s errStmt) asm() []string {
+	id := nextId()
 	return []string{
 		fmt.Sprintf("; Error: %v, %s\n", s.error, s.token),
+		fmt.Sprintf("(ERROR.%d)", id),
+		fmt.Sprintf("@ERROR.%d", id),
+		"0; JMP",
 	}
 }
 
@@ -587,6 +671,11 @@ func compile(stmts []statement) (code []string) {
 	return
 }
 
+func nextId() int {
+	currId++
+	return currId
+}
+
 func main() {
 	sample := `
 // This file is part of www.nand2tetris.org
@@ -618,6 +707,7 @@ push this 6
 push this 6
 add
 sub
+eq
 push temp 6
 add`
 
