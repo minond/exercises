@@ -232,6 +232,29 @@ Example 13:
     M=D
 
 
+Example 14:
+
+    // D=10
+    @10
+    D=A
+
+
+Example 15:
+
+    // D=RAM[17]
+    @17
+    D=M
+
+
+Example 16:
+
+    // RAM[11]=10
+    @10
+    D=A
+    A=D+1
+    M=D
+
+
 Binary representations
 ----------------------
 

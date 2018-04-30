@@ -245,6 +245,11 @@ func (s popStmt) asm() []string {
 func (s addStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: add", s.line),
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"@SP",   // Load top of stack
+		"A=A-1", // Point to previous memory cell
+		"M=D+M", // Subtract D from value in M
 	}
 }
 
@@ -296,7 +301,7 @@ func (s subStmt) asm() []string {
 		"@SP",   // Load top of stack
 		"D=M",   // Into D
 		"@SP",   // Load top of stack
-		"M=M-1", // And point to previous memory cell
+		"A=A-1", // Point to previous memory cell
 		"M=D-M", // Subtract D from value in M
 	}
 }
