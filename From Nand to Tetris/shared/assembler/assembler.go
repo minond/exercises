@@ -9,7 +9,7 @@ import (
 	"unicode"
 )
 
-type tokenId string
+type tokenID string
 
 type assembler struct {
 	pos  int
@@ -30,7 +30,7 @@ type parser struct {
 }
 
 type token struct {
-	id     tokenId
+	id     tokenID
 	lexeme string
 	pos    int
 }
@@ -67,22 +67,22 @@ type ainstruction struct {
 }
 
 const (
-	andToken    tokenId = "and"
-	atToken     tokenId = "at"
-	bitToken    tokenId = "bit"
-	cparenToken tokenId = "cparen"
-	eofToken    tokenId = "eof"
-	eolToken    tokenId = "eol"
-	eqToken     tokenId = "eq"
-	errToken    tokenId = "err"
-	idToken     tokenId = "id"
-	minusToken  tokenId = "minus"
-	notToken    tokenId = "not"
-	numToken    tokenId = "num"
-	oparenToken tokenId = "oparen"
-	orToken     tokenId = "or"
-	plusToken   tokenId = "plus"
-	scolonToken tokenId = "scolon"
+	andToken    tokenID = "and"
+	atToken     tokenID = "at"
+	bitToken    tokenID = "bit"
+	cparenToken tokenID = "cparen"
+	eofToken    tokenID = "eof"
+	eolToken    tokenID = "eol"
+	eqToken     tokenID = "eq"
+	errToken    tokenID = "err"
+	idToken     tokenID = "id"
+	minusToken  tokenID = "minus"
+	notToken    tokenID = "not"
+	numToken    tokenID = "num"
+	oparenToken tokenID = "oparen"
+	orToken     tokenID = "or"
+	plusToken   tokenID = "plus"
+	scolonToken tokenID = "scolon"
 
 	eofRn    = rune(0)
 	fslashRn = rune('/')
@@ -91,7 +91,7 @@ const (
 )
 
 var (
-	runeToks = map[rune]tokenId{
+	runeToks = map[rune]tokenID{
 		rune('!'): notToken,
 		rune('&'): andToken,
 		rune('('): oparenToken,
@@ -322,7 +322,7 @@ func (a *assembler) address(id string) int {
 	if !known {
 		addr = a.next
 		a.addr[id] = addr
-		a.next += 1
+		a.next++
 	}
 
 	return addr
@@ -342,9 +342,9 @@ func parse(tokens []token) []statement {
 func (l label) String() string {
 	if l.err != nil {
 		return fmt.Sprintf("(%s) // ERROR: %s", l.val.lexeme, l.err)
-	} else {
-		return fmt.Sprintf("(%s)", l.val.lexeme)
 	}
+
+	return fmt.Sprintf("(%s)", l.val.lexeme)
 }
 
 func (l label) binary() string {
@@ -370,9 +370,9 @@ func (i cinstruction) String() string {
 
 	if i.err != nil {
 		return fmt.Sprintf("    %s // ERROR: %s", buff, i.err)
-	} else {
-		return fmt.Sprintf("    %s", buff)
 	}
+
+	return fmt.Sprintf("    %s", buff)
 }
 
 func (i cinstruction) binary() string {
@@ -386,9 +386,9 @@ func (i cinstruction) error() error {
 func (i ainstruction) String() string {
 	if i.err != nil {
 		return fmt.Sprintf("    @%s // ERROR: %s", i.val.lexeme, i.err)
-	} else {
-		return fmt.Sprintf("    @%s", i.val.lexeme)
 	}
+
+	return fmt.Sprintf("    @%s", i.val.lexeme)
 }
 
 func (i ainstruction) binary() string {
@@ -412,9 +412,9 @@ func (c computation) String() string {
 		return c.bit.lexeme
 	} else if c.reg != nil {
 		return c.reg.lexeme
-	} else {
-		return ""
 	}
+
+	return ""
 }
 
 func (p parser) parse() []statement {
@@ -525,9 +525,9 @@ func (p *parser) computation() (computation, error) {
 			c.rhs = &rhs
 
 			return c, err
-		} else {
-			c.reg = &reg
 		}
+
+		c.reg = &reg
 	}
 
 	return c, nil
@@ -586,7 +586,7 @@ func (p *parser) skipCheck(stmt statement) statement {
 	return stmt
 }
 
-func (p *parser) is(ids ...tokenId) bool {
+func (p *parser) is(ids ...tokenID) bool {
 	curr := p.curr()
 
 	for _, id := range ids {
@@ -598,7 +598,7 @@ func (p *parser) is(ids ...tokenId) bool {
 	return false
 }
 
-func (p *parser) expect(ids ...tokenId) (token, error) {
+func (p *parser) expect(ids ...tokenID) (token, error) {
 	curr := p.curr()
 
 	for _, id := range ids {
@@ -608,16 +608,16 @@ func (p *parser) expect(ids ...tokenId) (token, error) {
 		}
 	}
 
-	return token{}, fmt.Errorf("Expecting one of %v but found [%s] instead.",
+	return token{}, fmt.Errorf("expecting one of %v but found [%s] instead",
 		ids, curr.id)
 }
 
 func (p parser) peek() token {
 	if p.pos+1 >= len(p.tokens) {
 		return p.tokens[p.pos]
-	} else {
-		return p.tokens[p.pos+1]
 	}
+
+	return p.tokens[p.pos+1]
 }
 
 func (p parser) curr() token {
@@ -625,7 +625,7 @@ func (p parser) curr() token {
 }
 
 func (p *parser) eat() {
-	p.pos += 1
+	p.pos++
 }
 
 func (p parser) done() bool {
@@ -692,21 +692,21 @@ func (s scanner) done() bool {
 func (s scanner) curr() rune {
 	if s.done() {
 		return rune(0)
-	} else {
-		return s.chars[s.pos]
 	}
+
+	return s.chars[s.pos]
 }
 
 func (s scanner) peek() rune {
 	if s.pos+1 >= len(s.chars) {
 		return rune(0)
-	} else {
-		return s.chars[s.pos+1]
 	}
+
+	return s.chars[s.pos+1]
 }
 
 func (s *scanner) eat() {
-	s.pos += 1
+	s.pos++
 }
 
 func (s *scanner) takeWhile(f func(rune) bool) string {
@@ -758,7 +758,7 @@ func is(v rune) func(rune) bool {
 	}
 }
 
-func tok(id tokenId, lexeme string, pos int) token {
+func tok(id tokenID, lexeme string, pos int) token {
 	return token{
 		id:     id,
 		lexeme: lexeme,

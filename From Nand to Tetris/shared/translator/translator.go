@@ -99,7 +99,7 @@ const (
 )
 
 var (
-	currId = 0
+	currID = 0
 
 	segmentsMap = map[tokenid]segment{
 		argumentToken: argumentMem,
@@ -270,19 +270,19 @@ func (s andStmt) asm() []string {
 }
 
 func (s eqStmt) asm() []string {
-	id := nextId()
+	id := nextID()
 	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JEQ", header)
 }
 
 func (s gtStmt) asm() []string {
-	id := nextId()
+	id := nextID()
 	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JGT", header)
 }
 
 func (s ltStmt) asm() []string {
-	id := nextId()
+	id := nextID()
 	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JLT", header)
 }
@@ -308,7 +308,7 @@ func (s subStmt) asm() []string {
 }
 
 func (s errStmt) asm() []string {
-	id := nextId()
+	id := nextID()
 	return []string{
 		comment("Error: %v, %s\n", s.error, s.token),
 		fmt.Sprintf("(ERROR.%d)", id),
@@ -325,7 +325,7 @@ func (t tokenizer) run() (tokens []token) {
 
 	for !t.done() {
 		if t.curr() == nlRn {
-			line += 1
+			line++
 			t.eat()
 			continue
 		} else if t.curr() == nilRn {
@@ -369,9 +369,9 @@ func (t tokenizer) curr() rune {
 func (t tokenizer) peek() rune {
 	if t.pos+1 < len(t.chars) {
 		return t.chars[t.pos+1]
-	} else {
-		return rune(0)
 	}
+
+	return rune(0)
 }
 
 func (t tokenizer) done() bool {
@@ -380,7 +380,7 @@ func (t tokenizer) done() bool {
 
 func (t *tokenizer) eat() rune {
 	next := t.chars[t.pos]
-	t.pos += 1
+	t.pos++
 	return next
 }
 
@@ -517,12 +517,12 @@ func (p *parser) parsePushPop(isPush bool, memTokens []tokenid) statement {
 			val:  num,
 			line: segTok.line,
 		}
-	} else {
-		return popStmt{
-			seg:  seg,
-			val:  num,
-			line: segTok.line,
-		}
+	}
+
+	return popStmt{
+		seg:  seg,
+		val:  num,
+		line: segTok.line,
 	}
 }
 
@@ -536,7 +536,7 @@ func (p *parser) eat() token {
 	}
 
 	next := p.tokens[p.pos]
-	p.pos += 1
+	p.pos++
 	return next
 }
 
@@ -553,9 +553,9 @@ func (p *parser) eatLine() {
 func (p parser) curr() token {
 	if p.done() {
 		return token{eolToken, -1, nil}
-	} else {
-		return p.tokens[p.pos]
 	}
+
+	return p.tokens[p.pos]
 }
 
 func (p parser) prev() token {
@@ -592,9 +592,9 @@ func compile(stmts []statement) (code []string) {
 	return
 }
 
-func nextId() int {
-	currId++
-	return currId
+func nextID() int {
+	currID++
+	return currID
 }
 
 func pushOp(header string, code []string) []string {
