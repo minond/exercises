@@ -101,14 +101,6 @@ const (
 var (
 	currId = 0
 
-	spDec = []string{
-		"@SP",   // Load top of stack
-		"A=M",   // Save the address
-		"D=A-1", // Decrement the address by 1
-		"@SP",   // Reload top of stack
-		"M=D",   // Set memory value to D
-	}
-
 	segmentsMap = map[tokenid]segment{
 		argumentToken: argumentMem,
 		constantToken: constantMem,
@@ -240,12 +232,14 @@ func (s segment) String() string {
 	}
 }
 
+// TODO
 func (s pushStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: push %s %d", s.line, s.seg, s.val),
 	}
 }
 
+// TODO
 func (s popStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: pop %s %d", s.line, s.seg, s.val),
@@ -253,15 +247,11 @@ func (s popStmt) asm() []string {
 }
 
 func (s addStmt) asm() []string {
-	return append([]string{
-		fmt.Sprintf("; line %03d: add", s.line),
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-		"M=D+M", // Subtract D from value in SP-1
-	}, spDec...)
+	return binOp(fmt.Sprintf("; line %03d: add", s.line),
+		[]string{"M=D+M"})
 }
 
+// TODO
 func (s andStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: and", s.line),
@@ -270,106 +260,37 @@ func (s andStmt) asm() []string {
 
 func (s eqStmt) asm() []string {
 	id := nextId()
-	return append([]string{
-		fmt.Sprintf("; line %03d: eq", s.line),
-		fmt.Sprintf("; id: %d", id),
-
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-		"D=D+M", // Subtract D from value in D
-
-		fmt.Sprintf("@EQ.%d", id),
-		"D; JEQ", // Jump to EQ if D=0
-
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=0",   // Set it to 0
-
-		fmt.Sprintf("@DONE.%d", id),
-		"0; JMP", // Go to DONE
-
-		fmt.Sprintf("(EQ.%d)", id),
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=1",   // Set it to 1
-
-		fmt.Sprintf("(DONE.%d)", id),
-	}, spDec...)
+	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	return compOp(id, "JEQ", header)
 }
 
 func (s gtStmt) asm() []string {
 	id := nextId()
-	return append([]string{
-		fmt.Sprintf("; line %03d: gt", s.line),
-		fmt.Sprintf("; id: %d", id),
-
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-		"D=D+M", // Subtract D from value in D
-
-		fmt.Sprintf("@GT.%d", id),
-		"D; JGT", // Jump to GT if D>0
-
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=0",   // Set it to 0
-
-		fmt.Sprintf("@DONE.%d", id),
-		"0; JMP", // Go to DONE
-
-		fmt.Sprintf("(GT.%d)", id),
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=1",   // Set it to 1
-
-		fmt.Sprintf("(DONE.%d)", id),
-	}, spDec...)
+	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	return compOp(id, "JGT", header)
 }
 
 func (s ltStmt) asm() []string {
 	id := nextId()
-	return append([]string{
-		fmt.Sprintf("; line %03d: lt", s.line),
-		fmt.Sprintf("; id: %d", id),
-
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-		"D=D+M", // Subtract D from value in D
-
-		fmt.Sprintf("@LT.%d", id),
-		"D; JLT", // Jump to LT if D<0
-
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=0",   // Set it to 0
-
-		fmt.Sprintf("@DONE.%d", id),
-		"0; JMP", // Go to DONE
-
-		fmt.Sprintf("(LT.%d)", id),
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=1",   // Set it to 1
-
-		fmt.Sprintf("(DONE.%d)", id),
-	}, spDec...)
+	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	return compOp(id, "JLT", header)
 }
 
+// TODO
 func (s negStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: neg", s.line),
 	}
 }
 
+// TODO
 func (s notStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: not", s.line),
 	}
 }
 
+// TODO
 func (s orStmt) asm() []string {
 	return []string{
 		fmt.Sprintf("; line %03d: or", s.line),
@@ -377,13 +298,8 @@ func (s orStmt) asm() []string {
 }
 
 func (s subStmt) asm() []string {
-	return append([]string{
-		fmt.Sprintf("; line %03d: sub", s.line),
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-		"M=D-M", // Subtract D from value in SP-1
-	}, spDec...)
+	return binOp(fmt.Sprintf("; line %03d: sub", s.line),
+		[]string{"M=D-M"})
 }
 
 func (s errStmt) asm() []string {
@@ -674,6 +590,47 @@ func compile(stmts []statement) (code []string) {
 func nextId() int {
 	currId++
 	return currId
+}
+
+func spdecOp() []string {
+	return []string{
+		"@SP",   // Load top of stack
+		"A=M",   // Save the address
+		"D=A-1", // Decrement the address by 1
+		"@SP",   // Reload top of stack
+		"M=D",   // Set memory value to D
+	}
+}
+
+func binOp(header string, code []string) []string {
+	return append(append([]string{
+		header,
+		"@SP",   // Load top of stack
+		"D=M",   // Into D
+		"A=A-1", // Point to previous memory cell. We're still pointing to SP
+	}, code...), spdecOp()...)
+}
+
+func compOp(id int, comp, header string) []string {
+	return binOp(header, []string{
+		"D=D+M", // Subtract D from value in D
+		fmt.Sprintf("@EQ.%d", id),
+		fmt.Sprintf("D; %s", comp), // Perform jump
+
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=0",   // Set it to 0
+
+		fmt.Sprintf("@DONE.%d", id),
+		"0; JMP", // Go to DONE
+
+		fmt.Sprintf("(EQ.%d)", id),
+		"@SP",   // Load top of stack
+		"A=A+1", // Point to next cell
+		"M=1",   // Set it to 1
+
+		fmt.Sprintf("(DONE.%d)", id),
+	})
 }
 
 func main() {
