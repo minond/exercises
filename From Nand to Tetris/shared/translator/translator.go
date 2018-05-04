@@ -251,11 +251,9 @@ func (s addStmt) asm() []string {
 		[]string{"M=D+M"})
 }
 
-// TODO
 func (s andStmt) asm() []string {
-	return []string{
-		fmt.Sprintf("; line %03d: and", s.line),
-	}
+	return binOp(fmt.Sprintf("; line %03d: and", s.line),
+		[]string{"M=D&M"})
 }
 
 func (s eqStmt) asm() []string {
@@ -276,25 +274,19 @@ func (s ltStmt) asm() []string {
 	return compOp(id, "JLT", header)
 }
 
-// TODO
 func (s negStmt) asm() []string {
-	return []string{
-		fmt.Sprintf("; line %03d: neg", s.line),
-	}
+	return binOp(fmt.Sprintf("; line %03d: neg", s.line),
+		[]string{"M=-M"})
 }
 
-// TODO
 func (s notStmt) asm() []string {
-	return []string{
-		fmt.Sprintf("; line %03d: not", s.line),
-	}
+	return binOp(fmt.Sprintf("; line %03d: not", s.line),
+		[]string{"M=!M"})
 }
 
-// TODO
 func (s orStmt) asm() []string {
-	return []string{
-		fmt.Sprintf("; line %03d: or", s.line),
-	}
+	return binOp(fmt.Sprintf("; line %03d: or", s.line),
+		[]string{"M=D|M"})
 }
 
 func (s subStmt) asm() []string {
