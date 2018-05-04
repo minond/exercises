@@ -234,70 +234,83 @@ func (s segment) String() string {
 
 // TODO
 func (s pushStmt) asm() []string {
-	return []string{
-		fmt.Sprintf("; line %03d: push %s %d", s.line, s.seg, s.val),
+	header := comment("line %03d: push %s %d", s.line, s.seg, s.val)
+	switch s.seg {
+	case argumentMem:
+	case constantMem:
+		return pushOp(header, []string{
+			fmt.Sprintf("@%d", s.val),
+			"D=A",
+		})
+	case localMem:
+	case staticMem:
+	case tempMem:
+	case thatMem:
+	case thisMem:
 	}
+
+	return []string{comment("error, unimplemented push")}
 }
 
 // TODO
 func (s popStmt) asm() []string {
 	return []string{
-		fmt.Sprintf("; line %03d: pop %s %d", s.line, s.seg, s.val),
+		comment("line %03d: pop %s %d", s.line, s.seg, s.val),
 	}
 }
 
 func (s addStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: add", s.line),
+	return binOp(comment("line %03d: add", s.line),
 		[]string{"M=D+M"})
 }
 
 func (s andStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: and", s.line),
+	return binOp(comment("line %03d: and", s.line),
 		[]string{"M=D&M"})
 }
 
 func (s eqStmt) asm() []string {
 	id := nextId()
-	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JEQ", header)
 }
 
 func (s gtStmt) asm() []string {
 	id := nextId()
-	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JGT", header)
 }
 
 func (s ltStmt) asm() []string {
 	id := nextId()
-	header := fmt.Sprintf("; line %03d: eq (%d)", s.line, id)
+	header := comment("line %03d: eq (%d)", s.line, id)
 	return compOp(id, "JLT", header)
 }
 
 func (s negStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: neg", s.line),
+	return binOp(comment("line %03d: neg", s.line),
 		[]string{"M=-M"})
 }
 
 func (s notStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: not", s.line),
+	return binOp(comment("line %03d: not", s.line),
 		[]string{"M=!M"})
 }
 
 func (s orStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: or", s.line),
+	return binOp(comment("line %03d: or", s.line),
 		[]string{"M=D|M"})
 }
 
 func (s subStmt) asm() []string {
-	return binOp(fmt.Sprintf("; line %03d: sub", s.line),
+	return binOp(comment("line %03d: sub", s.line),
 		[]string{"M=D-M"})
 }
 
 func (s errStmt) asm() []string {
 	id := nextId()
 	return []string{
-		fmt.Sprintf("; Error: %v, %s\n", s.error, s.token),
+		comment("Error: %v, %s\n", s.error, s.token),
 		fmt.Sprintf("(ERROR.%d)", id),
 		fmt.Sprintf("@ERROR.%d", id),
 		"0; JMP",
@@ -584,6 +597,17 @@ func nextId() int {
 	return currId
 }
 
+func pushOp(header string, code []string) []string {
+	push := []string{
+		"@SP",   // Load top of stack
+		"M=M+1", // Increment address by 1
+		"A=M-1", // Point address reg to old SP
+		"M=D",   // Save the value of D in RAM[M]
+	}
+
+	return append(append([]string{header}, code...), push...)
+}
+
 func spdecOp() []string {
 	return []string{
 		"@SP",   // Load top of stack
@@ -623,6 +647,10 @@ func compOp(id int, comp, header string) []string {
 
 		fmt.Sprintf("(DONE.%d)", id),
 	})
+}
+
+func comment(str string, args ...interface{}) string {
+	return fmt.Sprintf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; "+str, args...)
 }
 
 func main() {
