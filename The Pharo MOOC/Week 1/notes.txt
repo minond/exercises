@@ -99,6 +99,23 @@ fct := [ :x | x * x + 3 ]
 ```
 
 
+Classes
+
+- A class is defined by sending a message to its superclass
+- Classes are defined inside packages
+- Methods are public
+- By default a method returns the receiver, `self`
+- Class methods are just methods of the class side
+
+
+```smalltalk
+Object subclass: #Point
+  instanceVariableNames: 'x y'
+  classVariableNames: ''
+  package: ''
+```
+
+
 Methods
 
 ```smalltalk
