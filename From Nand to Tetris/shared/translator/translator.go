@@ -627,7 +627,7 @@ func uniOp(header, op string) []string {
 	return []string{
 		header,
 		"@SP",
-		"AM=M-1",
+		"A=M-1",
 		fmt.Sprintf("M=%sM", op),
 	}
 }
