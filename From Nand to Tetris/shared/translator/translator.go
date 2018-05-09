@@ -232,16 +232,20 @@ func (s segment) String() string {
 	}
 }
 
-// TODO
 func (s pushStmt) asm() []string {
 	header := comment("line %03d: push %s %d", s.line, s.seg, s.val)
 	switch s.seg {
 	case argumentMem:
 	case constantMem:
-		return pushOp(header, []string{
+		return []string{
+			header,
 			fmt.Sprintf("@%d", s.val),
 			"D=A",
-		})
+			"@SP",
+			"AM=M+1",
+			"A=A-1",
+			"M=D",
+		}
 	case localMem:
 	case staticMem:
 	case tempMem:
@@ -249,62 +253,73 @@ func (s pushStmt) asm() []string {
 	case thisMem:
 	}
 
-	return []string{comment("error, unimplemented push")}
+	return []string{
+		header,
+		comment("error, unimplemented push"),
+	}
 }
 
-// TODO
 func (s popStmt) asm() []string {
+	header := comment("line %03d: pop %s %d", s.line, s.seg, s.val)
+
+	switch s.seg {
+	case argumentMem:
+	case localMem:
+	case staticMem:
+	case tempMem:
+	case thatMem:
+	case thisMem:
+	}
+
 	return []string{
-		comment("line %03d: pop %s %d", s.line, s.seg, s.val),
+		header,
+		comment("error, unimplemented push"),
 	}
 }
 
 func (s addStmt) asm() []string {
-	return binOp(comment("line %03d: add", s.line),
-		[]string{"M=D+M"})
+	return binOp(comment("line %03d: add", s.line), "+")
 }
 
 func (s andStmt) asm() []string {
-	return binOp(comment("line %03d: and", s.line),
-		[]string{"M=D&M"})
+	return binOp(comment("line %03d: and", s.line), "&")
 }
 
 func (s eqStmt) asm() []string {
 	id := nextID()
-	header := comment("line %03d: eq (%d)", s.line, id)
-	return compOp(id, "JEQ", header)
+	return []string{
+		comment("line %03d: eq (%d)", s.line, id),
+	}
 }
 
 func (s gtStmt) asm() []string {
 	id := nextID()
-	header := comment("line %03d: eq (%d)", s.line, id)
-	return compOp(id, "JGT", header)
+	return []string{
+		comment("line %03d: gt (%d)", s.line, id),
+	}
 }
 
 func (s ltStmt) asm() []string {
 	id := nextID()
-	header := comment("line %03d: eq (%d)", s.line, id)
-	return compOp(id, "JLT", header)
+	return []string{
+		comment("line %03d: lt (%d)", s.line, id),
+	}
 }
 
 func (s negStmt) asm() []string {
-	return binOp(comment("line %03d: neg", s.line),
-		[]string{"M=-M"})
+	return uniOp(comment("line %03d: neg", s.line), "-")
 }
 
 func (s notStmt) asm() []string {
-	return binOp(comment("line %03d: not", s.line),
-		[]string{"M=!M"})
+	return uniOp(comment("line %03d: not", s.line), "!")
 }
 
 func (s orStmt) asm() []string {
-	return binOp(comment("line %03d: or", s.line),
-		[]string{"M=D|M"})
+	return binOp(comment("line %03d: or", s.line), "|")
 }
 
 func (s subStmt) asm() []string {
-	return binOp(comment("line %03d: sub", s.line),
-		[]string{"M=D-M"})
+	return binOp(comment("line %03d: sub", s.line), "-")
 }
 
 func (s errStmt) asm() []string {
@@ -597,96 +612,36 @@ func nextID() int {
 	return currID
 }
 
-func pushOp(header string, code []string) []string {
-	push := []string{
-		"@SP",   // Load top of stack
-		"M=M+1", // Increment address by 1
-		"A=M-1", // Point address reg to old SP
-		"M=D",   // Save the value of D in RAM[M]
-	}
-
-	return append(append([]string{header}, code...), push...)
-}
-
-func spdecOp() []string {
+func binOp(header, op string) []string {
 	return []string{
-		"@SP",   // Load top of stack
-		"A=M",   // Save the address
-		"D=A-1", // Decrement the address by 1
-		"@SP",   // Reload top of stack
-		"M=D",   // Set memory value to D
+		header,
+		"@SP",
+		"AM=M-1",
+		"D=M",
+		"AM=A-1",
+		fmt.Sprintf("M=D%sM", op),
 	}
 }
 
-func binOp(header string, code []string) []string {
-	return append(append([]string{
+func uniOp(header, op string) []string {
+	return []string{
 		header,
-		"@SP",   // Load top of stack
-		"D=M",   // Into D
-		"A=A-1", // Point to previous memory cell. We're still pointing to SP
-	}, code...), spdecOp()...)
-}
-
-func compOp(id int, comp, header string) []string {
-	return binOp(header, []string{
-		"D=D+M", // Subtract D from value in D
-		fmt.Sprintf("@EQ.%d", id),
-		fmt.Sprintf("D; %s", comp), // Perform jump
-
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=0",   // Set it to 0
-
-		fmt.Sprintf("@DONE.%d", id),
-		"0; JMP", // Go to DONE
-
-		fmt.Sprintf("(EQ.%d)", id),
-		"@SP",   // Load top of stack
-		"A=A+1", // Point to next cell
-		"M=1",   // Set it to 1
-
-		fmt.Sprintf("(DONE.%d)", id),
-	})
+		"@SP",
+		"AM=M-1",
+		fmt.Sprintf("M=%sM", op),
+	}
 }
 
 func comment(str string, args ...interface{}) string {
-	return fmt.Sprintf(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; "+str, args...)
+	return fmt.Sprintf("// "+str, args...)
 }
 
 func main() {
 	sample := `
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/07/MemoryAccess/BasicTest/BasicTest.vm
-
-// Executes pop and push commands using the virtual memory segments.
-push constant 10
-pop local 0
-push constant 21
-push constant 22
-pop argument 2
-pop argument 1
-push constant 36
-pop this 6
-push constant 42
-push constant 45
-pop that 5
-pop that 2
-push constant 510
-pop temp 6
-push local 0
-push that 5
+push constant 7
+push constant 8
 add
-push argument 1
-sub
-push this 6
-push this 6
-add
-sub
-eq
-push temp 6
-add`
+`
 
 	statements, _ := parse(tokenize(sample))
 	for _, line := range compile(statements) {
