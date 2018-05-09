@@ -236,6 +236,7 @@ func (s pushStmt) asm() []string {
 	header := comment("line %03d: push %s %d", s.line, s.seg, s.val)
 	switch s.seg {
 	case argumentMem:
+		return []string{}
 	case constantMem:
 		return []string{
 			header,
@@ -247,15 +248,17 @@ func (s pushStmt) asm() []string {
 			"M=D",
 		}
 	case localMem:
+		return []string{}
 	case staticMem:
+		return []string{}
 	case tempMem:
+		return []string{}
 	case thatMem:
+		return []string{}
 	case thisMem:
-	}
-
-	return []string{
-		header,
-		comment("error, unimplemented push"),
+		return []string{}
+	default:
+		panic(fmt.Sprintf("Unimplemented push %v", s))
 	}
 }
 
@@ -275,11 +278,8 @@ func (s popStmt) asm() []string {
 		return popOp(header, "THAT", s.val)
 	case thisMem:
 		return popOp(header, "THIS", s.val)
-	}
-
-	return []string{
-		header,
-		comment("error, unimplemented push"),
+	default:
+		panic(fmt.Sprintf("Unimplemented pop %v", s))
 	}
 }
 
