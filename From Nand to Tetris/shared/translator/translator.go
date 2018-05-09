@@ -264,11 +264,17 @@ func (s popStmt) asm() []string {
 
 	switch s.seg {
 	case argumentMem:
+		return popOp(header, "ARG", s.val)
 	case localMem:
+		return popOp(header, "LCL", s.val)
 	case staticMem:
+		return popOp(header, "STATIC", s.val)
 	case tempMem:
+		return popOp(header, "TEMP", s.val)
 	case thatMem:
+		return popOp(header, "THAT", s.val)
 	case thisMem:
+		return popOp(header, "THIS", s.val)
 	}
 
 	return []string{
@@ -615,20 +621,39 @@ func nextID() int {
 func binOp(header, op string) []string {
 	return []string{
 		header,
-		"@SP",
-		"AM=M-1",
-		"D=M",
-		"AM=A-1",
-		fmt.Sprintf("M=D%sM", op),
+		"@SP",                     // Load the SP
+		"AM=M-1",                  // Update the SP = SP-1 and point to SP-1
+		"D=M",                     // Store SP-1 value in D
+		"AM=A-1",                  // Update the SP = A-1 and point to SP-1
+		fmt.Sprintf("M=D%sM", op), // Run operation on D and M, which is SP-2
 	}
 }
 
 func uniOp(header, op string) []string {
 	return []string{
 		header,
-		"@SP",
-		"A=M-1",
-		fmt.Sprintf("M=%sM", op),
+		"@SP",                    // Load the SP
+		"A=M-1",                  // Point to SP-1 but do not update SP
+		fmt.Sprintf("M=%sM", op), // Run operation on M, which is SP-1
+	}
+}
+
+func popOp(header, seg string, offset int) []string {
+	return []string{
+		header,
+
+		fmt.Sprintf("@%s", seg), // Load the segment
+		"D=M", // Store the start of that segment's address in D
+		fmt.Sprintf("@%d", offset), // Load the offset
+		"D=D+A",                    // Store the start + offset of address in D
+		"@R13",
+		"M=D",    // Store that address in R13
+		"@SP",    // Load the SP
+		"AM=M-1", // Update the SP = SP-1 and point to SP-1
+		"D=M",    // Store value of SP-1 in D
+		"@R13",
+		"A=M", // Pointer to address previously stored in R13, which is start + offset
+		"M=D", // Set that value in memory to D which is SP-1
 	}
 }
 
