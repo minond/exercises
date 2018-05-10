@@ -150,6 +150,19 @@ var (
 		thatToken,
 		thisToken,
 	}
+
+	segments = map[string]int{
+		"SP":     256,
+		"LCL":    300,
+		"ARG":    400,
+		"THIS":   3000,
+		"THAT":   3010,
+		"TEMP":   5,
+		"R13":    13,
+		"R14":    14,
+		"R15":    15,
+		"STATIC": 16,
+	}
 )
 
 func (t token) String() string {
@@ -236,27 +249,19 @@ func (s pushStmt) asm() []string {
 	header := comment("line %03d: push %s %d", s.line, s.seg, s.val)
 	switch s.seg {
 	case argumentMem:
-		return []string{}
+		return pushOp(header, "ARG", s.val)
 	case constantMem:
-		return []string{
-			header,
-			fmt.Sprintf("@%d", s.val),
-			"D=A",
-			"@SP",
-			"AM=M+1",
-			"A=A-1",
-			"M=D",
-		}
+		return pushDOp(header, []string{fmt.Sprintf("@%d", s.val), "D=A"})
 	case localMem:
-		return []string{}
+		return pushOp(header, "LCL", s.val)
 	case staticMem:
-		return []string{}
+		return pushOp(header, "STATIC", s.val)
 	case tempMem:
-		return []string{}
+		return pushOp(header, "TEMP", s.val)
 	case thatMem:
-		return []string{}
+		return pushOp(header, "THAT", s.val)
 	case thisMem:
-		return []string{}
+		return pushOp(header, "THIS", s.val)
 	default:
 		panic(fmt.Sprintf("Unimplemented push %v", s))
 	}
@@ -264,7 +269,6 @@ func (s pushStmt) asm() []string {
 
 func (s popStmt) asm() []string {
 	header := comment("line %03d: pop %s %d", s.line, s.seg, s.val)
-
 	switch s.seg {
 	case argumentMem:
 		return popOp(header, "ARG", s.val)
@@ -283,13 +287,12 @@ func (s popStmt) asm() []string {
 	}
 }
 
-func (s addStmt) asm() []string {
-	return binOp(comment("line %03d: add", s.line), "+")
-}
-
-func (s andStmt) asm() []string {
-	return binOp(comment("line %03d: and", s.line), "&")
-}
+func (s addStmt) asm() []string { return binOp(comment("line %03d: add", s.line), "+") }
+func (s andStmt) asm() []string { return binOp(comment("line %03d: and", s.line), "&") }
+func (s negStmt) asm() []string { return uniOp(comment("line %03d: neg", s.line), "-") }
+func (s notStmt) asm() []string { return uniOp(comment("line %03d: not", s.line), "!") }
+func (s orStmt) asm() []string  { return binOp(comment("line %03d: or", s.line), "|") }
+func (s subStmt) asm() []string { return binOp(comment("line %03d: sub", s.line), "-") }
 
 func (s eqStmt) asm() []string {
 	id := nextID()
@@ -310,22 +313,6 @@ func (s ltStmt) asm() []string {
 	return []string{
 		comment("line %03d: lt (%d)", s.line, id),
 	}
-}
-
-func (s negStmt) asm() []string {
-	return uniOp(comment("line %03d: neg", s.line), "-")
-}
-
-func (s notStmt) asm() []string {
-	return uniOp(comment("line %03d: not", s.line), "!")
-}
-
-func (s orStmt) asm() []string {
-	return binOp(comment("line %03d: or", s.line), "|")
-}
-
-func (s subStmt) asm() []string {
-	return binOp(comment("line %03d: sub", s.line), "-")
 }
 
 func (s errStmt) asm() []string {
@@ -621,10 +608,14 @@ func nextID() int {
 func binOp(header, op string) []string {
 	return []string{
 		header,
-		"@SP",                     // Load the SP
-		"AM=M-1",                  // Update the SP = SP-1 and point to SP-1
-		"D=M",                     // Store SP-1 value in D
-		"AM=A-1",                  // Update the SP = A-1 and point to SP-1
+		"@SP",    // Load the SP
+		"AM=M-1", // Update the SP = SP-1 and point to SP-1
+		"D=M",    // Store SP-1 value in D
+		"AM=A-1", // Update the SP = A-1 and point to SP-1
+		// XXX Remove after testing
+		// "M=0",
+		// "@SP",
+		// "A=M-1",
 		fmt.Sprintf("M=D%sM", op), // Run operation on D and M, which is SP-2
 	}
 }
@@ -636,6 +627,33 @@ func uniOp(header, op string) []string {
 		"A=M-1",                  // Point to SP-1 but do not update SP
 		fmt.Sprintf("M=%sM", op), // Run operation on M, which is SP-1
 	}
+}
+
+func pushDOp(header string, code []string) []string {
+	d := []string{
+		"@SP",
+		"AM=M+1",
+		"A=A-1",
+		"M=D",
+	}
+	return append(append([]string{header}, code...), d...)
+}
+
+func pushOp(header, seg string, offset int) []string {
+	d := []string{
+		"@SP",
+		"AM=M+1",
+		"A=A-1",
+		"M=D",
+	}
+	return append([]string{
+		header,
+		fmt.Sprintf("@%s", seg), // Load the segment
+		"D=M", // Store the start of that segment's address in D
+		fmt.Sprintf("@%d", offset), // Load the offset
+		"A=D+A",                    // Point to address which is start + offset
+		"D=M",                      // Set D = value at address start + offset
+	}, d...)
 }
 
 func popOp(header, seg string, offset int) []string {
@@ -652,13 +670,23 @@ func popOp(header, seg string, offset int) []string {
 		"AM=M-1", // Update the SP = SP-1 and point to SP-1
 		"D=M",    // Store value of SP-1 in D
 		"@R13",
-		"A=M", // Pointer to address previously stored in R13, which is start + offset
+		"A=M", // Point to address previously stored in R13, which is start + offset
 		"M=D", // Set that value in memory to D which is SP-1
 	}
 }
 
 func comment(str string, args ...interface{}) string {
 	return fmt.Sprintf("// "+str, args...)
+}
+
+func mem(loc int, seg string) []string {
+	return []string{
+		fmt.Sprintf("// set %s %d", seg, loc),
+		fmt.Sprintf("@%d", loc),
+		"D=A",
+		fmt.Sprintf("@%s", seg),
+		"M=D",
+	}
 }
 
 func main() {
