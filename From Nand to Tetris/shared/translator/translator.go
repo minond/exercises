@@ -334,23 +334,17 @@ func (s subStmt) asm() []string { return binOp(comment("line %03d: sub", s.line)
 
 func (s eqStmt) asm() []string {
 	id := nextID()
-	return []string{
-		comment("line %03d: eq (%d)", s.line, id),
-	}
+	return compOp(id, comment("line %03d: eq (%d)", s.line, id), "JEQ")
 }
 
 func (s gtStmt) asm() []string {
 	id := nextID()
-	return []string{
-		comment("line %03d: gt (%d)", s.line, id),
-	}
+	return compOp(id, comment("line %03d: gt (%d)", s.line, id), "JGT")
 }
 
 func (s ltStmt) asm() []string {
 	id := nextID()
-	return []string{
-		comment("line %03d: lt (%d)", s.line, id),
-	}
+	return compOp(id, comment("line %03d: lt (%d)", s.line, id), "JLT")
 }
 
 func (s errStmt) asm() []string {
@@ -466,7 +460,7 @@ func (p parser) run(label string) (statements []statement, ok bool) {
 		case addToken:
 			statements = append(statements, addStmt{p.prev().line})
 		case andToken:
-			statements = append(statements, addStmt{p.prev().line})
+			statements = append(statements, andStmt{p.prev().line})
 		case eqToken:
 			statements = append(statements, eqStmt{p.prev().line})
 		case gtToken:
@@ -643,6 +637,42 @@ func compile(stmts []statement) (code []string) {
 func nextID() int {
 	currID++
 	return currID
+}
+
+func compOp(id int, header, op string) []string {
+	pass_label := fmt.Sprintf("pass_%d", id)
+	fail_label := fmt.Sprintf("fail_%d", id)
+	cont_label := fmt.Sprintf("cont_%d", id)
+
+	return []string{
+		header,
+		"@SP",    // Load the SP
+		"AM=M-1", // Update the SP = SP-1 and point to SP-1
+		"D=M",    // Store SP-1 value in D
+		"AM=A-1", // Update the SP = A-1 and point to SP-1
+		"D=M-D",  // Find the difference
+
+		fmt.Sprintf("@%s", pass_label),
+		fmt.Sprintf("D;%s", op), // If jump op = true, jump to pass_label
+		fmt.Sprintf("@%s", fail_label),
+		"0;JMP", // Else jump to fail_label
+
+		fmt.Sprintf("(%s)", pass_label), // pass code
+		"@SP",   // Load the SP
+		"A=M-1", // Point to SP-1
+		"M=-1",  // Set SP-1 = -1
+		fmt.Sprintf("@%s", cont_label),
+		"0;JMP", // Done
+
+		fmt.Sprintf("(%s)", fail_label), // fail code
+		"@SP",   // Load the SP
+		"A=M-1", // Point to SP-1
+		"M=0",   // Set SP-1 = 0
+		fmt.Sprintf("@%s", cont_label),
+		"0;JMP", // Done
+
+		fmt.Sprintf("(%s)", cont_label), // rest
+	}
 }
 
 func binOp(header, op string) []string {
