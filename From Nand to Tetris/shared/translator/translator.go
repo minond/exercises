@@ -2,7 +2,10 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strconv"
 	"unicode"
 )
@@ -608,15 +611,11 @@ func nextID() int {
 func binOp(header, op string) []string {
 	return []string{
 		header,
-		"@SP",    // Load the SP
-		"AM=M-1", // Update the SP = SP-1 and point to SP-1
-		"D=M",    // Store SP-1 value in D
-		"AM=A-1", // Update the SP = A-1 and point to SP-1
-		// XXX Remove after testing
-		// "M=0",
-		// "@SP",
-		// "A=M-1",
-		fmt.Sprintf("M=D%sM", op), // Run operation on D and M, which is SP-2
+		"@SP",                     // Load the SP
+		"AM=M-1",                  // Update the SP = SP-1 and point to SP-1
+		"D=M",                     // Store SP-1 value in D
+		"AM=A-1",                  // Update the SP = A-1 and point to SP-1
+		fmt.Sprintf("M=M%sD", op), // Run operation on D and M, which is SP-2
 	}
 }
 
@@ -690,13 +689,30 @@ func mem(loc int, seg string) []string {
 }
 
 func main() {
-	sample := `
-push constant 7
-push constant 8
-add
-`
+	headers := flag.Bool("headers", false, "Include headers, such as memory segment definitions.")
+	flag.Parse()
 
-	statements, _ := parse(tokenize(sample))
+	if len(flag.Args()) == 0 {
+		fmt.Printf("Usage: %s file.vm\n", os.Args[0])
+		return
+	}
+
+	file := flag.Arg(0)
+	text, err := ioutil.ReadFile(file)
+	if err != nil {
+		panic(err)
+	}
+
+	if headers != nil && *headers == true {
+		for seg, loc := range segments {
+			for _, line := range mem(loc, seg) {
+				fmt.Println(line)
+			}
+		}
+	}
+
+	statements, _ := parse(tokenize(string(text)))
+
 	for _, line := range compile(statements) {
 		fmt.Println(line)
 	}
