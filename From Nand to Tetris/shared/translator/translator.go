@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"unicode"
@@ -783,7 +782,7 @@ func main() {
 	}
 
 	for i, file := range flag.Args() {
-		asm := strings.Replace(filepath.Base(file), ".vm", ".asm", 1)
+		asm := strings.Replace(file, ".vm", ".asm", 1)
 		text, err := ioutil.ReadFile(file)
 		if err != nil {
 			panic(err)
@@ -797,6 +796,7 @@ func main() {
 			buff = append(buff, []byte(line)...)
 		}
 
+		fmt.Printf("Saving %s to %s\n", file, asm)
 		ioutil.WriteFile(asm, buff, os.ModePerm)
 	}
 }
