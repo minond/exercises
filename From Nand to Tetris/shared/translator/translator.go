@@ -96,9 +96,10 @@ const (
 )
 
 const (
-	fslashRn = rune('/')
-	nilRn    = rune(0)
-	nlRn     = rune('\n')
+	fslashRn   = rune('/')
+	nilRn      = rune(0)
+	nlRn       = rune('\n')
+	tempOffset = 5
 )
 
 var (
@@ -260,7 +261,7 @@ func (s pushStmt) asm() []string {
 	case staticMem:
 		return pushOp(header, "STATIC", s.val)
 	case tempMem:
-		return pushOp(header, "TEMP", s.val)
+		return pushOp(header, "TEMP", s.val+tempOffset)
 	case thatMem:
 		return pushOp(header, "THAT", s.val)
 	case thisMem:
@@ -280,7 +281,7 @@ func (s popStmt) asm() []string {
 	case staticMem:
 		return popOp(header, "STATIC", s.val)
 	case tempMem:
-		return popOp(header, "TEMP", s.val)
+		return popOp(header, "TEMP", s.val+tempOffset)
 	case thatMem:
 		return popOp(header, "THAT", s.val)
 	case thisMem:
