@@ -793,7 +793,7 @@ func main() {
 		buff := []byte{}
 
 		for _, line := range compile(statements) {
-			buff = append(buff, []byte(line)...)
+			buff = append(buff, []byte(line+"\n")...)
 		}
 
 		fmt.Printf("Saving %s to %s\n", file, asm)
