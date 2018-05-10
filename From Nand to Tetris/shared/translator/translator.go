@@ -34,15 +34,17 @@ type statement interface {
 }
 
 type pushStmt struct {
-	seg  segment
-	val  int
-	line int
+	label string
+	seg   segment
+	val   int
+	line  int
 }
 
 type popStmt struct {
-	seg  segment
-	val  int
-	line int
+	label string
+	seg   segment
+	val   int
+	line  int
 }
 
 type errStmt struct {
@@ -64,6 +66,7 @@ type subStmt struct{ line int }
 const (
 	argumentMem segment = iota
 	constantMem
+	pointerMem
 	localMem
 	staticMem
 	tempMem
@@ -81,6 +84,7 @@ const (
 	andToken
 	argumentToken
 	constantToken
+	pointerToken
 	eqToken
 	gtToken
 	localToken
@@ -96,10 +100,12 @@ const (
 )
 
 const (
-	fslashRn   = rune('/')
-	nilRn      = rune(0)
-	nlRn       = rune('\n')
-	tempOffset = 5
+	fslashRn = rune('/')
+	nilRn    = rune(0)
+	nlRn     = rune('\n')
+
+	pointerOffset = 3
+	tempOffset    = 5
 )
 
 var (
@@ -108,6 +114,7 @@ var (
 	segmentsMap = map[tokenid]segment{
 		argumentToken: argumentMem,
 		constantToken: constantMem,
+		pointerToken:  pointerMem,
 		localToken:    localMem,
 		staticToken:   staticMem,
 		tempToken:     tempMem,
@@ -122,6 +129,7 @@ var (
 		"constant": constantToken,
 		"eq":       eqToken,
 		"gt":       gtToken,
+		"pointer":  pointerToken,
 		"local":    localToken,
 		"lt":       ltToken,
 		"neg":      negToken,
@@ -138,6 +146,7 @@ var (
 
 	tokensPopMem = []tokenid{
 		argumentToken,
+		pointerToken,
 		localToken,
 		staticToken,
 		tempToken,
@@ -148,6 +157,7 @@ var (
 	tokensPushMem = []tokenid{
 		argumentToken,
 		constantToken,
+		pointerToken,
 		localToken,
 		staticToken,
 		tempToken,
@@ -234,6 +244,8 @@ func (s segment) String() string {
 		return "argument"
 	case constantMem:
 		return "constant"
+	case pointerMem:
+		return "pointer"
 	case localMem:
 		return "local"
 	case staticMem:
@@ -256,12 +268,23 @@ func (s pushStmt) asm() []string {
 		return pushOp(header, "ARG", s.val)
 	case constantMem:
 		return pushDOp(header, []string{fmt.Sprintf("@%d", s.val), "D=A"})
+	case pointerMem:
+		return pushDOp(header, []string{
+			fmt.Sprintf("@%d", s.val+pointerOffset),
+			"D=M",
+		})
 	case localMem:
 		return pushOp(header, "LCL", s.val)
 	case staticMem:
-		return pushOp(header, "STATIC", s.val)
+		return pushDOp(header, []string{
+			fmt.Sprintf("@%s_%d", s.label, s.val+tempOffset),
+			"D=M",
+		})
 	case tempMem:
-		return pushOp(header, "TEMP", s.val+tempOffset)
+		return pushDOp(header, []string{
+			fmt.Sprintf("@%d", s.val+tempOffset),
+			"D=M",
+		})
 	case thatMem:
 		return pushOp(header, "THAT", s.val)
 	case thisMem:
@@ -276,12 +299,23 @@ func (s popStmt) asm() []string {
 	switch s.seg {
 	case argumentMem:
 		return popOp(header, "ARG", s.val)
+	case pointerMem:
+		return popDOp(header, []string{
+			fmt.Sprintf("@%d", s.val+pointerOffset),
+			"M=D",
+		})
 	case localMem:
 		return popOp(header, "LCL", s.val)
 	case staticMem:
-		return popOp(header, "STATIC", s.val)
+		return popDOp(header, []string{
+			fmt.Sprintf("@%s_%d", s.label, s.val+tempOffset),
+			"M=D",
+		})
 	case tempMem:
-		return popOp(header, "TEMP", s.val+tempOffset)
+		return popDOp(header, []string{
+			fmt.Sprintf("@%d", s.val+tempOffset),
+			"M=D",
+		})
 	case thatMem:
 		return popOp(header, "THAT", s.val)
 	case thisMem:
@@ -420,15 +454,15 @@ func (t *tokenizer) eatUntil(f func(rune) bool) (buff []rune) {
 	return buff
 }
 
-func (p parser) run() (statements []statement, ok bool) {
+func (p parser) run(label string) (statements []statement, ok bool) {
 	ok = true
 
 	for !p.done() {
 		switch p.eat().id {
 		case pushToken:
-			statements = append(statements, p.parsePushPop(true, tokensPushMem))
+			statements = append(statements, p.parsePushPop(true, tokensPushMem, label))
 		case popToken:
-			statements = append(statements, p.parsePushPop(false, tokensPopMem))
+			statements = append(statements, p.parsePushPop(false, tokensPopMem, label))
 		case addToken:
 			statements = append(statements, addStmt{p.prev().line})
 		case andToken:
@@ -473,7 +507,7 @@ func (p parser) run() (statements []statement, ok bool) {
 	return statements, ok
 }
 
-func (p *parser) parsePushPop(isPush bool, memTokens []tokenid) statement {
+func (p *parser) parsePushPop(isPush bool, memTokens []tokenid, label string) statement {
 	segTok, err := p.expect(memTokens...)
 
 	if err != nil {
@@ -525,16 +559,18 @@ func (p *parser) parsePushPop(isPush bool, memTokens []tokenid) statement {
 
 	if isPush {
 		return pushStmt{
-			seg:  seg,
-			val:  num,
-			line: segTok.line,
+			label: label,
+			seg:   seg,
+			val:   num,
+			line:  segTok.line,
 		}
 	}
 
 	return popStmt{
-		seg:  seg,
-		val:  num,
-		line: segTok.line,
+		label: label,
+		seg:   seg,
+		val:   num,
+		line:  segTok.line,
 	}
 }
 
@@ -592,9 +628,9 @@ func tokenize(src string) []token {
 	return toks.run()
 }
 
-func parse(tokens []token) ([]statement, bool) {
+func parse(tokens []token, label string) ([]statement, bool) {
 	parse := parser{tokens: tokens}
-	return parse.run()
+	return parse.run(label)
 }
 
 func compile(stmts []statement) (code []string) {
@@ -656,10 +692,18 @@ func pushOp(header, seg string, offset int) []string {
 	}, d...)
 }
 
+func popDOp(header string, code []string) []string {
+	return append([]string{
+		header,
+		"@SP",    // Load the SP
+		"AM=M-1", // Update the SP = SP-1 and point to SP-1
+		"D=M",    // Store value of SP-1 in D
+	}, code...)
+}
+
 func popOp(header, seg string, offset int) []string {
 	return []string{
 		header,
-
 		fmt.Sprintf("@%s", seg), // Load the segment
 		"D=M", // Store the start of that segment's address in D
 		fmt.Sprintf("@%d", offset), // Load the offset
@@ -698,12 +742,6 @@ func main() {
 		return
 	}
 
-	file := flag.Arg(0)
-	text, err := ioutil.ReadFile(file)
-	if err != nil {
-		panic(err)
-	}
-
 	if headers != nil && *headers == true {
 		for seg, loc := range segments {
 			for _, line := range mem(loc, seg) {
@@ -712,9 +750,18 @@ func main() {
 		}
 	}
 
-	statements, _ := parse(tokenize(string(text)))
+	for i, file := range flag.Args() {
+		text, err := ioutil.ReadFile(file)
+		if err != nil {
+			panic(err)
+		}
 
-	for _, line := range compile(statements) {
-		fmt.Println(line)
+		label := fmt.Sprintf("file_%d", i)
+		statements, _ := parse(tokenize(string(text)), label)
+
+		for _, line := range compile(statements) {
+			fmt.Println(line)
+		}
+
 	}
 }
