@@ -1,5 +1,0 @@
-#!/bin/bash
-
-wget http://www.nand2tetris.org/software/nand2tetris.zip
-unzip nand2tetris.zip
-rm nand2tetris.zip
