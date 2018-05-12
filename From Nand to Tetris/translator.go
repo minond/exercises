@@ -208,6 +208,8 @@ func (id tokenid) String() string {
 		return "argument"
 	case constantToken:
 		return "constant"
+	case pointerToken:
+		return "pointer"
 	case eqToken:
 		return "eq"
 	case gtToken:
@@ -265,20 +267,24 @@ func (s segment) String() string {
 func (s pushStmt) asm() []string {
 	header := comment("line %03d: push %s %d", s.line, s.seg, s.val)
 	switch s.seg {
-	case argumentMem:
-		return pushOp(header, "ARG", s.val)
 	case constantMem:
 		return pushDOp(header, []string{fmt.Sprintf("@%d", s.val), "D=A"})
+	case argumentMem:
+		return pushOp(header, "ARG", s.val)
+	case localMem:
+		return pushOp(header, "LCL", s.val)
+	case thatMem:
+		return pushOp(header, "THAT", s.val)
+	case thisMem:
+		return pushOp(header, "THIS", s.val)
 	case pointerMem:
 		return pushDOp(header, []string{
 			fmt.Sprintf("@%d", s.val+pointerOffset),
 			"D=M",
 		})
-	case localMem:
-		return pushOp(header, "LCL", s.val)
 	case staticMem:
 		return pushDOp(header, []string{
-			fmt.Sprintf("@%s_%d", s.label, s.val+tempOffset),
+			fmt.Sprintf("@%s_%d", s.label, s.val),
 			"D=M",
 		})
 	case tempMem:
@@ -286,10 +292,6 @@ func (s pushStmt) asm() []string {
 			fmt.Sprintf("@%d", s.val+tempOffset),
 			"D=M",
 		})
-	case thatMem:
-		return pushOp(header, "THAT", s.val)
-	case thisMem:
-		return pushOp(header, "THIS", s.val)
 	default:
 		panic(fmt.Sprintf("Unimplemented push %v", s))
 	}
@@ -300,16 +302,20 @@ func (s popStmt) asm() []string {
 	switch s.seg {
 	case argumentMem:
 		return popOp(header, "ARG", s.val)
+	case localMem:
+		return popOp(header, "LCL", s.val)
+	case thatMem:
+		return popOp(header, "THAT", s.val)
+	case thisMem:
+		return popOp(header, "THIS", s.val)
 	case pointerMem:
 		return popDOp(header, []string{
 			fmt.Sprintf("@%d", s.val+pointerOffset),
 			"M=D",
 		})
-	case localMem:
-		return popOp(header, "LCL", s.val)
 	case staticMem:
 		return popDOp(header, []string{
-			fmt.Sprintf("@%s_%d", s.label, s.val+tempOffset),
+			fmt.Sprintf("@%s_%d", s.label, s.val),
 			"M=D",
 		})
 	case tempMem:
@@ -317,10 +323,6 @@ func (s popStmt) asm() []string {
 			fmt.Sprintf("@%d", s.val+tempOffset),
 			"M=D",
 		})
-	case thatMem:
-		return popOp(header, "THAT", s.val)
-	case thisMem:
-		return popOp(header, "THIS", s.val)
 	default:
 		panic(fmt.Sprintf("Unimplemented pop %v", s))
 	}
@@ -351,9 +353,9 @@ func (s ltStmt) asm() []string {
 func (s errStmt) asm() []string {
 	id := nextID()
 	return []string{
-		comment("Error: %v, %s\n", s.error, s.token),
-		fmt.Sprintf("(ERROR.%d)", id),
-		fmt.Sprintf("@ERROR.%d", id),
+		comment("Error: %v, %s", s.error, s.token),
+		fmt.Sprintf("(error_%d)", id),
+		fmt.Sprintf("@error_%d", id),
 		"0; JMP",
 	}
 }
