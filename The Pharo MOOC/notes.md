@@ -95,8 +95,14 @@ factorial
 Messages can be sent to any object, including classes: `1 class`, `Date today`
 
 Unary messages: `9 squared`, `Date today`
-Binary messages: `1+2`, `3@4`
-Keyword message: `receiver key1: arg1 key2: arg2`, `2 between: 10 and: 20`
+Binary messages: `1+2`, `3@4`. One, two, or three characters taken from `+ - /
+\ * ~ < > = @ % | & ! ? ,`
+
+Keyword message: `receiver key1: arg1 key2: arg2`, `2 between: 10 and: 20`.
+Where `anObject key1: arg1 key2: arg2` is equivalent to
+`anObject.key1key2(arg1, arg2)` in another language.
+
+
 Message priority: (Msg) > Unary > Binary > Keyword
   - We execute ()
   - Then unary
@@ -140,4 +146,16 @@ Keywords: 2 between: 10 and: 20
           |      +-- Keyword
           |
           +-- Receiver
+```
+
+```smalltalk
+SmallInteger selectors select: #isUnary
+  #(#printString #even #asCharacter #highBitOfMagnitude #sqrt #identityHash
+  #lowBit #shallowCopy #hashMultiply #highBitOfPositiveReceiver
+  #largeIdentityHash #nextInstance #basicIdentityHash #isLarge
+  #decimalDigitLength #digitLength #threeDigitName #highBit #bitStringLength
+  #as31BitSmallInt #deepCopy #asFloat #nextObject #sizeInMemory #odd #hash)
+
+SmallInteger selectors select: #isBinary
+  #(#'~=' #= #/ #'//' #'\\' #- #+ #'>=' #< #'<=' #> #*)
 ```
