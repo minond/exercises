@@ -4,6 +4,12 @@ final String title = 'Converter';
 final List<ConvertionGroup> groups = <ConvertionGroup>[
   new ConvertionGroup('Length', Icons.filter_1),
   new ConvertionGroup('Area', Icons.filter_2),
+  new ConvertionGroup('Volume', Icons.filter_3),
+  new ConvertionGroup('Mass', Icons.filter_4),
+  new ConvertionGroup('Time', Icons.filter_5),
+  new ConvertionGroup('Digital Storage', Icons.filter_6),
+  new ConvertionGroup('Energy', Icons.filter_7),
+  new ConvertionGroup('Currency', Icons.filter_8),
 ];
 
 class ConvertionGroup {
@@ -29,7 +35,7 @@ Widget groupItem(ConvertionGroup group) => Container(
         },
         child: ListTile(
           leading: Icon(
-            icon: group.icon,
+            group.icon,
             size: 25.0,
             color: Colors.blue,
           ),
