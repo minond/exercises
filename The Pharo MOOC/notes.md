@@ -30,6 +30,16 @@ exampleWithNumber: x
 ```
 
 
+Expressions are separated by periods. Periods are separators and not
+terminators, as such they do not need to be placed after every line:
+
+```smalltalk
+Transcript cr.
+Transcript show: 1.
+Transcript show: 2
+```
+
+
 Cascades, syntax to send all messages to the same receiver,
 
 ```smalltalk
@@ -38,6 +48,32 @@ ZnClient new
   queryAt: 'title' put: 'Pharo';
   queryAt: 'action' put: 'edit';
   get
+```
+
+```smalltalk
+"These two examples do the same thing"
+
+| c |
+c := OrderedCollection new.
+c add: 1.
+c add: 2
+
+| c |
+c := OrderedCollection new
+  add: 1;
+  add: 2
+```
+
+
+### Local variables
+
+Local variables are defined inside of pipes:
+
+```smalltalk
+| a b c |
+a := 1
+b := 1
+c := a + b
 ```
 
 
@@ -103,11 +139,12 @@ Where `anObject key1: arg1 key2: arg2` is equivalent to
 `anObject.key1key2(arg1, arg2)` in another language.
 
 
-Message priority: (Msg) > Unary > Binary > Keyword
-  - We execute ()
-  - Then unary
-  - Then binary
-  - And finally Keyword messages
+Message priority: (Msg) > Unary > Binary > Keyword. When at the same level, we
+execute from left to right. There is no mathematical precedence.
+  - execute () first,
+  - then unary,
+  - then binary,
+  - and finally Keyword messages
 
 
 ```text
