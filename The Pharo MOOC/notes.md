@@ -79,6 +79,11 @@ c := a + b
 
 #### Blocks
 
+Blocks are normal values. Calling a block is done with the `value` message
+which takes the parameters that are passed to the block. Blocks that take
+multiple arguments are with `value:value:...:value:` messages. Blocks can have
+returns, `^`, which exit the method where the block is defined.
+
 ```smalltalk
 fct := [ :x | x * x + 3 ]
 
@@ -94,6 +99,18 @@ fct := [ :x | x * x + 3 ]
 > 2
 > 4
 > 86
+```
+
+```smalltalk
+| add add2 |
+add := [ :x :y | x + y ].
+add2 := [ :x | x + 2 ].
+
+add value: 2 value: 4.
+> 6
+
+add2 value: 5.
+> 7
 ```
 
 
