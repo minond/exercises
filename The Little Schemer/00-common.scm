@@ -26,3 +26,12 @@
       ((and (atom? x) (atom? y))
        (eq? x y))
       (else #f))))
+
+(define (sub1 n)
+  (- n 1))
+
+(define (add1 n)
+  (+ n 1))
+
+(define (one? n)
+  (= n 1))
