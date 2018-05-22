@@ -113,6 +113,41 @@ add2 value: 5.
 > 7
 ```
 
+#### Loops
+
+Loops are just messages passed to objects. There are also iterators. Iterators
+are messages that must be sent to collections.
+
+- `do:` iterate
+- `collect:` iterate and collect results
+- `select:` select matching elements
+- `reject:` reject matching elements
+- `detect:` get first element matching
+- `detect:ifNone:` get first element matching or a default value
+- `includes:` test inclusion
+- `whileTrue`, `whileTrue:`, `whileFalse`, `whileFalse:`, and more..
+
+```smalltalk
+4 timesRepeat:
+  [ Transcript show: "hi" ; space ]
+
+1 to: 100 do:
+  [ :i | Transcript show: i ; space ]
+
+1 to: 100 by: 3 do:
+  [ :i | Transcript show: i ; space ]
+
+#(1 2 3 4) do:
+  [ :i | Transcript show: i ; space ]
+
+atLeastAsLuminentAs: aFloat
+  | revisedColor |
+  revisedColor := self.
+  [ revisedColor luminanc < aFloat ] whileTrue:
+    [ revisedColor := revisedColor slightlyLighter ].
+  ^ revisedColor
+```
+
 
 #### Classes
 
