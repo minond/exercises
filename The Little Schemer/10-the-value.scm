@@ -44,3 +44,114 @@
 
 (debug 'my-table)
 (debug '(lookup-in-table 'entree my-table noop-1))
+
+; Types:
+; *const
+; *quote
+; *identifier
+; *lambda
+; *cond
+; *application
+
+(define (build typ env)
+  (cons typ (list env)))
+
+(define (expressiont-to-action e)
+  (cond
+    ((atom? e) (atom-to-action e))
+    (else (list-to-action e))))
+
+(define (atom-to-action e)
+  (cond
+    ((number? e) *const)
+    ((eq? e #t) *const)
+    ((eq? e #f) *const)
+    ((eq? e 'cons) *const)
+    ((eq? e 'car) *const)
+    ((eq? e 'cdr) *const)
+    ((eq? e 'null?) *const)
+    ((eq? e 'eq?) *const)
+    ((eq? e 'atom?) *const)
+    ((eq? e 'zero?) *const)
+    ((eq? e add1) *const)
+    ((eq? e sub1) *const)
+    ((eq? e number?) *const)
+    (else *identifier)))
+
+(define (list-to-action e)
+  (cond
+    ((atom? (car e))
+     (cond
+       ((eq? (car e) 'lambda) *lambda)
+       ((eq? (car e) 'quote) *quote)
+       ((eq? (car e) 'cond) *cond)
+       (else *application)))
+    (else *application)))
+
+(define (value e)
+  (meaning e '()))
+
+(define (meaning e table)
+  ((expressiont-to-action e) e table))
+
+(define (*const e table)
+  (cond
+    ((number? e) e)
+    ((eq? e #t) #t)
+    ((eq? e #f) #f)
+    (else (build 'primitive e))))
+
+(define (*quote e table)
+  (unquote e))
+
+(define (*identifier e table)
+  (lookup-in-table e table (lambda (e)
+                             (car '()))))
+
+(define table-of first)
+(define formals-of second)
+(define body-of third)
+(define (*lambda e table)
+  (build 'non-primitive (cons table (cdr e))))
+
+(define question-of first)
+(define answer-of second)
+(define cond-lines-of cdr)
+
+(define (evcond lines table)
+  (cond
+    ((else? (question-of (car lines)))
+     (meaning (answer-of (car lines)) table))
+    ((meaning (question-of (car lines)))
+     (meaning (answer-of (car lines))))
+    (else (evcond (cdr lines) table))))
+
+(define (else? c)
+  (and (atom? c) (eq? c 'else)))
+
+(define (*cond e table)
+  (evcond (cond-lines-of e) table))
+
+(define (evlis es table)
+  (cond
+    ((null? es) '())
+    (else (cond (meaning (car es) table)
+                (evlis (cdr es) table)))))
+
+(define function-of car)
+(define arguments-of cdr)
+
+(define (primitive? x)
+  (eq? 'primitive (first x)))
+
+(define (non-primitive? x)
+  (eq? 'non-primitive (first x)))
+
+(define (apply f args)
+  (cond
+    ((primitive? f) (apply-primitive (second f) args))
+    ((non-primitive? f) (apply-closure (second f) args))))
+
+(define (*application e table)
+  (apply (meaning (function-of e) table)
+         (evlis (arguments-of e) table)))

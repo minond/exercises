@@ -35,3 +35,7 @@
 
 (define (one? n)
   (= n 1))
+
+(define (first xs) (car xs))
+(define (second xs) (car (cdr xs)))
+(define (third xs) (car (cdr (cdr xs))))
