@@ -56,7 +56,7 @@
 (define (build typ env)
   (cons typ (list env)))
 
-(define (expressiont-to-action e)
+(define (expression-to-action e)
   (cond
     ((atom? e) (atom-to-action e))
     (else (list-to-action e))))
@@ -73,9 +73,9 @@
     ((eq? e 'eq?) *const)
     ((eq? e 'atom?) *const)
     ((eq? e 'zero?) *const)
-    ((eq? e add1) *const)
-    ((eq? e sub1) *const)
-    ((eq? e number?) *const)
+    ((eq? e 'add1) *const)
+    ((eq? e 'sub1) *const)
+    ((eq? e 'number?) *const)
     (else *identifier)))
 
 (define (list-to-action e)
@@ -88,11 +88,12 @@
        (else *application)))
     (else *application)))
 
+; What makes value unusual? It sees representations of expressions.
 (define (value e)
   (meaning e '()))
 
 (define (meaning e table)
-  ((expressiont-to-action e) e table))
+  ((expression-to-action e) e table))
 
 (define (*const e table)
   (cond
@@ -135,7 +136,7 @@
 (define (evlis es table)
   (cond
     ((null? es) '())
-    (else (cond (meaning (car es) table)
+    (else (cons (meaning (car es) table)
                 (evlis (cdr es) table)))))
 
 (define function-of car)
@@ -151,6 +152,30 @@
   (cond
     ((primitive? f) (apply-primitive (second f) args))
     ((non-primitive? f) (apply-closure (second f) args))))
+
+(define (apply-primitive name args)
+  (cond
+    ((eq? name 'cons) (cons (first args) (second args)))
+    ((eq? name 'car) (car (first args)))
+    ((eq? name 'cdr) (cdr (first args)))
+    ((eq? name 'null?) (null? (first args)))
+    ((eq? name 'eq?) (eq? (first args)))
+    ((eq? name 'atom?) ((lambda (x)
+                          (cond
+                            ((null? x) #f)
+                            ((atom? x) #t)
+                            ((primitive? x) #t)
+                            ((non-primitive? x) #t)
+                            (else #f))) (first args)))
+    ((eq? name 'zero?) (zero? (first args)))
+    ((eq? name 'number?) (number? (first args)))
+    ((eq? name 'add1) (add1 (first args)))
+    ((eq? name 'sub1) (sub1 (first args)))))
+
+(define (apply-closure closure args)
+  (meaning (body-of closure)
+           (extend-table (new-entry (formals-of closure) args)
+                         (table-of closure))))
 
 (define (*application e table)
   (apply (meaning (function-of e) table)
