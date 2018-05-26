@@ -54,6 +54,8 @@ func RuleIII(str String) []String {
 	var variation String
 	var variations []String
 
+	// TODO This should generate all of the possible permutations of this rule
+	// applied at different locations.
 	for i := 1; i+2 < len(str); i++ {
 		if str[i : i+3].Eq(String{I, I, I}) {
 			if len(str) > i+3 {
@@ -73,6 +75,8 @@ func RuleIV(str String) []String {
 	var variation String
 	var variations []String
 
+	// TODO This should generate all of the possible permutations of this rule
+	// applied at different locations.
 	for i := 1; i+1 < len(str); i++ {
 		if str[i : i+2].Eq(String{U, U}) {
 			if len(str) > i+2 {
