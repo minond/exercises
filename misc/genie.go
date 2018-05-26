@@ -57,9 +57,9 @@ func RuleIII(str String) []String {
 	for i := 1; i+2 < len(str); i++ {
 		if str[i : i+3].Eq(String{I, I, I}) {
 			if len(str) > i+3 {
-				variation = append(str[:i-1], append(String{M}, str[i+3:]...)...)
+				variation = append(str[:i], append(String{U}, str[i+3:]...)...)
 			} else {
-				variation = append(str[:i-1], M)
+				variation = append(str[:i], U)
 			}
 			variations = append(variations, variation)
 		}
@@ -76,9 +76,9 @@ func RuleIV(str String) []String {
 	for i := 1; i+1 < len(str); i++ {
 		if str[i : i+2].Eq(String{U, U}) {
 			if len(str) > i+2 {
-				variation = append(str[:i-1], str[i+2:]...)
+				variation = append(str[:i], str[i+2:]...)
 			} else {
-				variation = str[:i-1]
+				variation = str[:i]
 			}
 			variations = append(variations, variation)
 		}
@@ -91,7 +91,7 @@ func main() {
 	next := []String{{M, I}}
 	curr := []String{}
 	secs := 0
-	i := 0
+	i := 1
 
 	go func() {
 		for {
@@ -112,6 +112,8 @@ func main() {
 			curr = append(curr, RuleIII(str)...)
 			curr = append(curr, RuleIV(str)...)
 		}
+
+		fmt.Printf("Generation %d with %d strings after %d seconds\n", i, len(curr), secs)
 
 		for _, str := range curr {
 			if str.Eq(String{M, U}) {
