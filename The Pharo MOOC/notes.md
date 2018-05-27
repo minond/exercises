@@ -248,3 +248,28 @@ SmallInteger selectors select: #isUnary
 SmallInteger selectors select: #isBinary
   #(#'~=' #= #/ #'//' #'\\' #- #+ #'>=' #< #'<=' #> #*)
 ```
+
+
+### Booleans
+
+`true` is a singleton of the instance of the class `True`. `false` is a
+singleton of the instance of the class `False`. No conditional statements or
+expressions; just messages that are sent to booleans. Just like loops.
+
+`&` and `|` are eager binary operators which always evaluate both sides. For
+example, `false & (1 error: 'crazy')` results in an error where `false and: [ 1
+error: 'crazy' ]` returns `false` without an error.
+
+```smalltalk
+Weather isRaining
+  ifTrue: [ self takeMyUnbrella ]
+  ifFalse: [ self takeMySunglasses ].
+
+myProtocol
+  ifEmpty: [ 'No Protocol' ]
+
+self listOfItems
+  ifNotEmpty: [ :aList | aList at: index ]
+```
+
+`ifTrue: []`/`ifTrue: [] ifFalse: []` is heavily optimized.
