@@ -1,0 +1,13 @@
+Implementation of a function call
+
+For each function **call** during run-time, the implementation has to:
+- pass parameters from the calling function to the called function,
+- determine the return address within the caller's code,
+- save the caller's return address, stack, and memory segments, and finally
+- jump to execute the called function.
+
+For each function **return** during run-time, the implementation has to :
+- return to the caller the value computed by the called function,
+- recycle the memory resources used by the called function,
+- reinstate the caller's stack and memory segments, and finally
+- jump to the return address in the caller's code.
