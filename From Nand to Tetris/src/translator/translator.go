@@ -784,7 +784,7 @@ func main() {
 	}
 
 	for i, file := range flag.Args() {
-		asm := strings.Replace(file, ".vm", ".asm", 1)
+		asm := strings.TrimRight(file, ".vm") + ".asm"
 		text, err := ioutil.ReadFile(file)
 		if err != nil {
 			panic(err)

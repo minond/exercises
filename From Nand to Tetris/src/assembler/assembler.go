@@ -1,4 +1,4 @@
-package assembler
+package main
 
 import (
 	"fmt"
