@@ -77,7 +77,7 @@ c := a + b
 ```
 
 
-#### Blocks
+### Blocks
 
 Blocks are normal values. Calling a block is done with the `value` message
 which takes the parameters that are passed to the block. Blocks that take
@@ -113,7 +113,7 @@ add2 value: 5.
 > 7
 ```
 
-#### Loops
+### Loops
 
 Loops are just messages passed to objects. There are also iterators. Iterators
 are messages that must be sent to collections.
@@ -149,7 +149,7 @@ atLeastAsLuminentAs: aFloat
 ```
 
 
-#### Classes
+### Classes
 
 - A class is defined by sending a message to its superclass
 - Classes are defined inside packages
@@ -166,7 +166,7 @@ Object subclass: #Point
 ```
 
 
-#### Methods
+### Methods
 
 ```smalltalk
 factorial
