@@ -1,4 +1,0 @@
-Prolog is homoiconic. Data is expressed as terms defined in a knowledgebase.
-Code is also expressed as terms defined in a knowledgebase. So code and data
-are the same thing. We can even say there is no code - only entries in the
-knowledgebase.
