@@ -1,0 +1,14 @@
+{
+	"category" : "MyCounter",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "MarcosMinond 5/6/2018 17:03",
+	"instvars" : [
+		"count" ],
+	"name" : "Counter",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }
