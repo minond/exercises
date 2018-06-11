@@ -1,0 +1,3 @@
+accessor
+beVisible
+	visible := true

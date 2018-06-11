@@ -1,0 +1,3 @@
+accessor
+isVisible
+	^ visible

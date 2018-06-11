@@ -1,0 +1,3 @@
+accessor
+notVisible
+	visible := false
