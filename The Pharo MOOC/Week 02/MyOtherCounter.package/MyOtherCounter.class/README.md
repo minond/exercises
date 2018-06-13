@@ -1,0 +1,1 @@
+A counter class created through the debugging process

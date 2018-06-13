@@ -1,0 +1,3 @@
+getter
+count
+	^ count
