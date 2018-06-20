@@ -1,0 +1,3 @@
+posts
+allBlogPosts
+	^ posts

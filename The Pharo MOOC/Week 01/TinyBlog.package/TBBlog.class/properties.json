@@ -1,0 +1,14 @@
+{
+	"category" : "TinyBlog",
+	"classinstvars" : [
+		"uniqueInstance" ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "<historical>",
+	"instvars" : [
+		"posts" ],
+	"name" : "TBBlog",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }
