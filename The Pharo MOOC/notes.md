@@ -273,3 +273,20 @@ self listOfItems
 ```
 
 `ifTrue: []`/`ifTrue: [] ifFalse: []` is heavily optimized.
+
+
+### Keywords
+
+- `true` a unique instance of the class `True`
+- `false` a unique instance of the class `False`
+- `nil` a unique instance of the class `UndefinedObject`
+- `self` refers to the current receiver (`this` in Java)
+- `super` refers to the current receiver but method lookup starts in the super
+  class.
+- `thisContext` refers to the current execution stack.
+
+
+### Conventions
+
+- Lowercase variable names are used for local/private/temporary variables
+- Uppercase variable names are used for shared of global variables
