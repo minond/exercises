@@ -62,10 +62,10 @@ class Parser(tokens: MutableList[Token]) {
     val name = previous()
     val value =
       if (matches(EQUAL)) expression()
-      else new Expr.Variable(name)
+      else Expr.Variable(name)
 
     consume(SEMICOLON, "Expecting a semicolon at the end of a declaration.")
-    new Stmt.Var(name, value)
+    Stmt.Var(name, value)
   }
 
   // printStmt  = "print" expression ";" ;
@@ -73,14 +73,14 @@ class Parser(tokens: MutableList[Token]) {
     consume(PRINT, "Expecting 'print' keyword at the start of print statement.")
     val expr = expression()
     consume(SEMICOLON, "Expecting a semicolon at the end of a print statement.")
-    new Stmt.Print(expr)
+    Stmt.Print(expr)
   }
 
   // exprStmt   = expression ";" ;
   private def exprStmt(): Stmt = {
     val expr = expression()
     consume(SEMICOLON, "Expecting a semicolon at the end of a statement.")
-    new Stmt.Expression(expr)
+    Stmt.Expression(expr)
   }
 
   // expression = equality ;
@@ -95,7 +95,7 @@ class Parser(tokens: MutableList[Token]) {
     while (matches(BANG_EQUAL, EQUAL_EQUAL)) {
       val op = previous()
       val right = comparison()
-      expr = new Expr.Binary(expr, op, right)
+      expr = Expr.Binary(expr, op, right)
     }
 
     expr
@@ -108,7 +108,7 @@ class Parser(tokens: MutableList[Token]) {
     while (matches(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
       val op = previous()
       val right = addition()
-      expr = new Expr.Binary(expr, op, right)
+      expr = Expr.Binary(expr, op, right)
     }
 
     expr
@@ -121,7 +121,7 @@ class Parser(tokens: MutableList[Token]) {
     while (matches(MINUS, PLUS)) {
       val op = previous()
       val right = multiplication()
-      expr = new Expr.Binary(expr, op, right)
+      expr = Expr.Binary(expr, op, right)
     }
 
     expr
@@ -134,7 +134,7 @@ class Parser(tokens: MutableList[Token]) {
     while (matches(SLASH, STAR)) {
       val op = previous()
       val right = unary()
-      expr = new Expr.Binary(expr, op, right)
+      expr = Expr.Binary(expr, op, right)
     }
 
     expr
@@ -144,7 +144,7 @@ class Parser(tokens: MutableList[Token]) {
   //       | primary ;
   private def unary(): Expr = {
     if (matches(BANG, MINUS)) {
-      new Expr.Unary(previous(), unary())
+      Expr.Unary(previous(), unary())
     } else {
       primary()
     }
@@ -156,19 +156,19 @@ class Parser(tokens: MutableList[Token]) {
   //                | IDENTIFIER ;
   private def primary(): Expr = {
     if (matches(TRUE)) {
-      new Expr.Literal(true)
+      Expr.Literal(true)
     } else if (matches(FALSE)) {
-      new Expr.Literal(false)
+      Expr.Literal(false)
     } else if (matches(NIL)) {
-      new Expr.Literal(null)
+      Expr.Literal(null)
     } else if (matches(NUMBER, STRING)) {
-      new Expr.Literal(previous().literal)
+      Expr.Literal(previous().literal)
     } else if (matches(LEFT_PAREN)) {
       val expr = expression()
       consume(RIGHT_PAREN, "Expecting ')' after expression.")
-      new Expr.Grouping(expr)
+      Expr.Grouping(expr)
     } else if (matches(IDENTIFIER)) {
-      new Expr.Variable(previous())
+      Expr.Variable(previous())
     } else {
       throw error(peek(), "Expecting expression.")
     }

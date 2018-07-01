@@ -12,21 +12,21 @@ object Stmt {
     def visitVarStmt(stmt: Var): T
   }
 
-  class Expression(val expression: Expr) extends Stmt {
+  case class Expression(val expression: Expr) extends Stmt {
     def accept[T](visitor: Visitor[T]): T = {
-      visitor.visitExpressionStmt(new Expression(expression))
+      visitor.visitExpressionStmt(Expression(expression))
     }
   }
 
-  class Print(val expression: Expr) extends Stmt {
+  case class Print(val expression: Expr) extends Stmt {
     def accept[T](visitor: Visitor[T]): T = {
-      visitor.visitPrintStmt(new Print(expression))
+      visitor.visitPrintStmt(Print(expression))
     }
   }
 
-  class Var(val name: Token, val initializer: Expr) extends Stmt {
+  case class Var(val name: Token, val initializer: Expr) extends Stmt {
     def accept[T](visitor: Visitor[T]): T = {
-      visitor.visitVarStmt(new Var(name, initializer))
+      visitor.visitVarStmt(Var(name, initializer))
     }
   }
 }

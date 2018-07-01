@@ -4,18 +4,18 @@ import java.io.PrintWriter
 
 object GenerateAst extends App {
   if (args.length != 1) {
-    System.err.println("Usage: scala src/main/scala/tool/GenerateAst.scala <directory>")
+    System.err.println(
+      "Usage: scala src/main/scala/tool/GenerateAst.scala <directory>")
     System.exit(1)
   }
 
-  defineAst(
-    args(0),
-    "Stmt",
-    Array(
-      "Expression - expression: Expr",
-      "Print      - expression: Expr",
-      "Var        - name: Token, initializer: Expr"
-    ))
+  defineAst(args(0),
+            "Stmt",
+            Array(
+              "Expression - expression: Expr",
+              "Print      - expression: Expr",
+              "Var        - name: Token, initializer: Expr"
+            ))
 
   defineAst(
     args(0),
@@ -50,7 +50,9 @@ object GenerateAst extends App {
     writer.println("package com.craftinginterpreters.lox")
   }
 
-  def defineObject(writer: PrintWriter, baseName: String, types: Array[String]) = {
+  def defineObject(writer: PrintWriter,
+                   baseName: String,
+                   types: Array[String]) = {
     writer.println(s"object ${baseName} {")
     defineVisitor(writer, baseName, types)
 
@@ -70,11 +72,10 @@ object GenerateAst extends App {
     writer.println("}")
   }
 
-  def defineType(
-      writer: PrintWriter,
-      baseName: String,
-      className: String,
-      fields: String) = {
+  def defineType(writer: PrintWriter,
+                 baseName: String,
+                 className: String,
+                 fields: String) = {
     val justArgs = fields
       .split(",")
       .map { field =>
@@ -93,17 +94,19 @@ object GenerateAst extends App {
       .mkString(", ")
 
     // Constructor
-    writer.println(s"  class $className($accessArgs) extends $baseName {")
+    writer.println(s"  case class $className($accessArgs) extends $baseName {")
 
     // Visitor
     writer.println(s"    def accept[T](visitor: Visitor[T]): T = {")
     writer.println(
-      s"      visitor.visit${className}${baseName}(new $className($justArgs))")
+      s"      visitor.visit${className}${baseName}($className($justArgs))")
     writer.println("    }")
     writer.println("  }")
   }
 
-  def defineVisitor(writer: PrintWriter, baseName: String, types: Array[String]) = {
+  def defineVisitor(writer: PrintWriter,
+                    baseName: String,
+                    types: Array[String]) = {
     writer.println("  trait Visitor[T] {")
 
     for (ttype <- types) {
