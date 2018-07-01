@@ -1,18 +1,17 @@
 /* AUTO GENERATED - DO NOT EDIT */
 package com.craftinginterpreters.lox
 
-
 abstract class Expr {
   def accept[T](visitor: Expr.Visitor[T]): T
 }
 
 object Expr {
   trait Visitor[T] {
-    def visitBinaryExpr (expr: Binary): T
-    def visitGroupingExpr (expr: Grouping): T
-    def visitLiteralExpr (expr: Literal): T
-    def visitUnaryExpr (expr: Unary): T
-    def visitVariableExpr (expr: Variable): T
+    def visitBinaryExpr(expr: Binary): T
+    def visitGroupingExpr(expr: Grouping): T
+    def visitLiteralExpr(expr: Literal): T
+    def visitUnaryExpr(expr: Unary): T
+    def visitVariableExpr(expr: Variable): T
   }
 
   class Binary(val left: Expr, val operator: Token, val right: Expr) extends Expr {

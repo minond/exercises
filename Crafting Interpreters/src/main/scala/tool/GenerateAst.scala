@@ -38,8 +38,6 @@ object GenerateAst extends App {
     defineHeader(writer)
     writer.println("")
 
-    writer.println("")
-
     defineClass(writer, baseName)
     writer.println("")
 
@@ -111,7 +109,7 @@ object GenerateAst extends App {
     for (ttype <- types) {
       val typeName = ttype.split("-")(0).trim()
       writer.println(
-        s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${typeName}): T")
+        s"    def visit${typeName}${baseName}(${baseName.toLowerCase}: ${typeName}): T")
     }
 
     writer.println("  }")

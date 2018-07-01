@@ -1,16 +1,15 @@
 /* AUTO GENERATED - DO NOT EDIT */
 package com.craftinginterpreters.lox
 
-
 abstract class Stmt {
   def accept[T](visitor: Stmt.Visitor[T]): T
 }
 
 object Stmt {
   trait Visitor[T] {
-    def visitExpressionStmt (stmt: Expression): T
-    def visitPrintStmt (stmt: Print): T
-    def visitVarStmt (stmt: Var): T
+    def visitExpressionStmt(stmt: Expression): T
+    def visitPrintStmt(stmt: Print): T
+    def visitVarStmt(stmt: Var): T
   }
 
   class Expression(val expression: Expr) extends Stmt {
