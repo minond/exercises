@@ -10,11 +10,12 @@ SCALAFLAGS = -deprecation \
 build:
 	scalac $(SCALAFLAGS) src/main/scala/*.scala
 
-tools:
-	scalac $(SCALAFLAGS) src/main/scala/tool/GenerateAst.scala
-
-run:
+run: build
 	scala com.craftinginterpreters.lox.Main
 
-gen_ast:
+lint:
+	scalafmt src
+
+gen:
+	scalac $(SCALAFLAGS) src/main/scala/tool/GenerateAst.scala
 	scala com.craftinginterpreters.lox.tool.GenerateAst src/main/scala
