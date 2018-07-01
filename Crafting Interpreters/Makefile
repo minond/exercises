@@ -13,7 +13,7 @@ build:
 run: build
 	scala com.craftinginterpreters.lox.Main
 
-lint:
+fmt:
 	scalafmt src
 
 gen:
