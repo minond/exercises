@@ -9,9 +9,9 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
   def interpret(statements: List[Stmt]): Unit = {
     statements.foreach { stmt =>
       Try { execute(stmt) } match {
-        case Success(_) =>
+        case Success(_)                 =>
         case Failure(err: RuntimeError) => Main.runtimeError(err)
-        case Failure(err) => throw err
+        case Failure(err)               => throw err
       }
     }
   }
@@ -34,32 +34,36 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
 
     expr.operator.ttype match {
       // Arithmetic operator
-      case MINUS => asOpNumber(expr.operator, left) - asOpNumber(expr.operator, right)
-      case SLASH => asOpNumber(expr.operator, left) / asOpNumber(expr.operator, right)
-      case STAR => asOpNumber(expr.operator, left) * asOpNumber(expr.operator, right)
+      case MINUS =>
+        asOpNumber(expr.operator, left) - asOpNumber(expr.operator, right)
+      case SLASH =>
+        asOpNumber(expr.operator, left) / asOpNumber(expr.operator, right)
+      case STAR =>
+        asOpNumber(expr.operator, left) * asOpNumber(expr.operator, right)
       case PLUS =>
         if (left.isInstanceOf[Double] && right.isInstanceOf[Double])
           left.asInstanceOf[Double] + right.asInstanceOf[Double]
         else if (left.isInstanceOf[String] && right.isInstanceOf[String])
           left.asInstanceOf[String] + right.asInstanceOf[String]
         else
-          throw new RuntimeError(
-            expr.operator,
-            "Operands must be two numbers or two strings.")
+          throw RuntimeError(expr.operator,
+                             "Operands must be two numbers or two strings.")
 
       // Relational operators
-      case GREATER => asOpNumber(expr.operator, left) > asOpNumber(expr.operator, right)
+      case GREATER =>
+        asOpNumber(expr.operator, left) > asOpNumber(expr.operator, right)
       case GREATER_EQUAL =>
         asOpNumber(expr.operator, left) >= asOpNumber(expr.operator, right)
-      case LESS => asOpNumber(expr.operator, left) < asOpNumber(expr.operator, right)
+      case LESS =>
+        asOpNumber(expr.operator, left) < asOpNumber(expr.operator, right)
       case LESS_EQUAL =>
         asOpNumber(expr.operator, left) <= asOpNumber(expr.operator, right)
 
       // Equality operators
-      case BANG_EQUAL => !isEqual(left, right)
+      case BANG_EQUAL  => !isEqual(left, right)
       case EQUAL_EQUAL => isEqual(left, right)
 
-      case _ => throw new RuntimeError(expr.operator, "Unknown operator.")
+      case _ => throw RuntimeError(expr.operator, "Unknown operator.")
     }
   }
 
@@ -69,10 +73,10 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
 
   override def visitLiteralExpr(expr: Expr.Literal): Any = {
     expr.value match {
-      case Some(value) => value
-      case None => null
+      case Some(value)             => value
+      case None                    => null
       case bool: java.lang.Boolean => bool
-      case _ => expr.value
+      case _                       => expr.value
     }
   }
 
@@ -81,8 +85,8 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
 
     expr.operator.ttype match {
       case MINUS => -asOpNumber(expr.operator, right)
-      case BANG => !isTruthy(right)
-      case _ => null
+      case BANG  => !isTruthy(right)
+      case _     => null
     }
   }
 
@@ -120,7 +124,7 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     if (num.isInstanceOf[Double])
       num.asInstanceOf[Double]
     else
-      throw new RuntimeError(op, "Operand must be a number.")
+      throw RuntimeError(op, "Operand must be a number.")
   }
 
   private def stringify(value: Any): String = {

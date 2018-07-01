@@ -5,15 +5,13 @@ import scala.util.{Try, Success, Failure}
 import com.craftinginterpreters.lox.TokenType._;
 
 class Parser(tokens: MutableList[Token]) {
-  class ParseError extends RuntimeException
-
   var current = 0
 
   def parse(): Either[ParseError, List[Stmt]] = {
     Try { program() } match {
       case Failure(parseErr: ParseError) => Left(parseErr)
-      case Failure(unknownErr) => throw unknownErr
-      case Success(stmt) => Right(stmt)
+      case Failure(unknownErr)           => throw unknownErr
+      case Success(stmt)                 => Right(stmt)
     }
   }
 
@@ -197,7 +195,7 @@ class Parser(tokens: MutableList[Token]) {
 
   private def error(token: Token, message: String): ParseError = {
     Main.error(token, message)
-    new ParseError()
+    ParseError(token)
   }
 
   private def matches(types: TokenType*): Boolean = {

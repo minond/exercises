@@ -21,7 +21,7 @@ class AstPrinter extends Expr.Visitor[String] {
       // literal values.
       expr.value match {
         case Some(str) => str.toString
-        case None => "nil?"
+        case None      => "nil?"
       }
     }
   }

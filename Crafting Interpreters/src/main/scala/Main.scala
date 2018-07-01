@@ -53,6 +53,9 @@ object Main {
 
       case Right(statements) =>
         if (!hadError) {
+          println()
+          println(statements)
+          println()
           interpreter.interpret(statements)
         }
     }
@@ -62,7 +65,8 @@ object Main {
   private def printTokens(expr: Expr): String = {
     expr match {
       case expr: Expr.Binary =>
-        printTokens(expr.left) + "\n" + expr.operator + "\n" + printTokens(expr.right)
+        printTokens(expr.left) + "\n" + expr.operator + "\n" + printTokens(
+          expr.right)
 
       case expr: Expr.Grouping =>
         printTokens(expr.expression)

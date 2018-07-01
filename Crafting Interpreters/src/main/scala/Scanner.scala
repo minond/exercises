@@ -43,26 +43,26 @@ class Scanner(source: String) {
 
   private def scanToken() = {
     advance() match {
-      case '(' => addToken(LEFT_PAREN)
-      case ')' => addToken(RIGHT_PAREN)
-      case '{' => addToken(RIGHT_BRACE)
-      case '}' => addToken(LEFT_BRACE)
-      case ',' => addToken(COMMA)
-      case '.' => addToken(DOT)
-      case '-' => addToken(MINUS)
-      case '+' => addToken(PLUS)
-      case ';' => addToken(SEMICOLON)
-      case '*' => addToken(STAR)
-      case '!' => addToken(if (matches('=')) BANG_EQUAL else BANG)
-      case '=' => addToken(if (matches('=')) EQUAL_EQUAL else EQUAL)
-      case '<' => addToken(if (matches('=')) LESS_EQUAL else LESS)
-      case '>' => addToken(if (matches('=')) GREATER_EQUAL else GREATER)
+      case '('               => addToken(LEFT_PAREN)
+      case ')'               => addToken(RIGHT_PAREN)
+      case '{'               => addToken(RIGHT_BRACE)
+      case '}'               => addToken(LEFT_BRACE)
+      case ','               => addToken(COMMA)
+      case '.'               => addToken(DOT)
+      case '-'               => addToken(MINUS)
+      case '+'               => addToken(PLUS)
+      case ';'               => addToken(SEMICOLON)
+      case '*'               => addToken(STAR)
+      case '!'               => addToken(if (matches('=')) BANG_EQUAL else BANG)
+      case '='               => addToken(if (matches('=')) EQUAL_EQUAL else EQUAL)
+      case '<'               => addToken(if (matches('=')) LESS_EQUAL else LESS)
+      case '>'               => addToken(if (matches('=')) GREATER_EQUAL else GREATER)
       case ' ' | '\r' | '\t' =>
-      case '\n' => line += 1
-      case '"' => string()
-      case 'o' => if (peek() == 'r') addToken(OR)
-      case c if isDigit(c) => number()
-      case c if isAlpha(c) => identifier()
+      case '\n'              => line += 1
+      case '"'               => string()
+      case 'o'               => if (peek() == 'r') addToken(OR)
+      case c if isDigit(c)   => number()
+      case c if isAlpha(c)   => identifier()
 
       case '/' =>
         if (matches('/')) {
