@@ -8,19 +8,26 @@ object GenerateAst extends App {
     System.exit(1)
   }
 
-  defineAst(args(0), "Stmt", Array(
-    "Expression - expression: Expr",
-    "Print      - expression: Expr",
-    "Var        - name: Token, initializer: Expr"
-  ))
+  defineAst(
+    args(0),
+    "Stmt",
+    Array(
+      "Expression - expression: Expr",
+      "Print      - expression: Expr",
+      "Var        - name: Token, initializer: Expr"
+    ))
 
-  defineAst(args(0), "Expr", Array(
-    "Binary   - left: Expr, operator: Token, right: Expr",
-    "Grouping - expression: Expr",
-    "Literal  - value: Any",
-    "Unary    - operator: Token, right: Expr",
-    "Variable - name: Token"
-  ))
+  defineAst(
+    args(0),
+    "Expr",
+    Array(
+      "Binary   - left: Expr, operator: Token, right: Expr",
+      "Grouping - expression: Expr",
+      "Literal  - value: Any",
+      "Unary    - operator: Token, right: Expr",
+      "Variable - name: Token"
+    )
+  )
 
   def defineAst(outputDir: String, baseName: String, types: Array[String]) = {
     val path = s"${outputDir}/${baseName}.scala"
@@ -65,16 +72,26 @@ object GenerateAst extends App {
     writer.println("}")
   }
 
-  def defineType(writer: PrintWriter, baseName: String, className: String, fields: String) = {
+  def defineType(
+      writer: PrintWriter,
+      baseName: String,
+      className: String,
+      fields: String) = {
     val justArgs = fields
       .split(",")
-      .map { field => field.split(":")(0).trim() }
+      .map { field =>
+        field.split(":")(0).trim()
+      }
       .mkString(", ")
 
     val accessArgs = fields
       .split(",")
-      .map { field => field.trim }
-      .map { field => s"val $field" }
+      .map { field =>
+        field.trim
+      }
+      .map { field =>
+        s"val $field"
+      }
       .mkString(", ")
 
     // Constructor
@@ -82,7 +99,8 @@ object GenerateAst extends App {
 
     // Visitor
     writer.println(s"    def accept[T](visitor: Visitor[T]): T = {")
-    writer.println(s"      visitor.visit${className}${baseName}(new $className($justArgs))")
+    writer.println(
+      s"      visitor.visit${className}${baseName}(new $className($justArgs))")
     writer.println("    }")
     writer.println("  }")
   }
@@ -92,7 +110,8 @@ object GenerateAst extends App {
 
     for (ttype <- types) {
       val typeName = ttype.split("-")(0).trim()
-      writer.println(s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${typeName}): T")
+      writer.println(
+        s"    def visit${typeName}${baseName} (${baseName.toLowerCase}: ${typeName}): T")
     }
 
     writer.println("  }")

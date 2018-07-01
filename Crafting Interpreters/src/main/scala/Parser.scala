@@ -177,9 +177,8 @@ class Parser(tokens: MutableList[Token]) {
   private def synchronize(): Unit = {
     advance()
 
-    while (!isAtEnd())
-      if (previous().ttype == SEMICOLON)
-        return
+    while (!isAtEnd()) if (previous().ttype == SEMICOLON)
+      return
 
     peek().ttype match {
       case CLASS | FOR | FUN | IF | PRINT | RETURN | VAR | WHILE =>

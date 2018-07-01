@@ -42,7 +42,7 @@ class Scanner(source: String) {
   }
 
   private def scanToken() = {
-    advance()  match {
+    advance() match {
       case '(' => addToken(LEFT_PAREN)
       case ')' => addToken(RIGHT_PAREN)
       case '{' => addToken(RIGHT_BRACE)
@@ -79,8 +79,7 @@ class Scanner(source: String) {
   }
 
   private def identifier() = {
-    while (isAlphaNumeric(peek()))
-      advance()
+    while (isAlphaNumeric(peek())) advance()
 
     val value = source.substring(start, current)
 
@@ -92,15 +91,13 @@ class Scanner(source: String) {
   }
 
   private def number() = {
-    while (isDigit(peek()))
-      advance()
+    while (isDigit(peek())) advance()
 
     if (peek() == '.' && isDigit(peekNext())) {
       // Eat the '.'
       advance()
 
-      while (isDigit(peek()))
-        advance()
+      while (isDigit(peek())) advance()
     }
 
     addToken(NUMBER, Some(source.substring(start, current).toDouble))

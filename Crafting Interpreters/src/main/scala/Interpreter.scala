@@ -6,7 +6,7 @@ import com.craftinginterpreters.lox.TokenType._
 class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
   val env = Environment(Map())
 
-  def interpret(statements: List[Stmt]): Unit  = {
+  def interpret(statements: List[Stmt]): Unit = {
     statements.foreach { stmt =>
       Try { execute(stmt) } match {
         case Success(_) =>
@@ -24,7 +24,7 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     println(stringify(evaluate(stmt.expression)))
   }
 
-  override def visitVarStmt (stmt: Stmt.Var): Unit = {
+  override def visitVarStmt(stmt: Stmt.Var): Unit = {
     env.define(stmt.name.lexeme, evaluate(stmt.initializer))
   }
 
@@ -43,13 +43,17 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
         else if (left.isInstanceOf[String] && right.isInstanceOf[String])
           left.asInstanceOf[String] + right.asInstanceOf[String]
         else
-          throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
+          throw new RuntimeError(
+            expr.operator,
+            "Operands must be two numbers or two strings.")
 
       // Relational operators
       case GREATER => asOpNumber(expr.operator, left) > asOpNumber(expr.operator, right)
-      case GREATER_EQUAL => asOpNumber(expr.operator, left) >= asOpNumber(expr.operator, right)
+      case GREATER_EQUAL =>
+        asOpNumber(expr.operator, left) >= asOpNumber(expr.operator, right)
       case LESS => asOpNumber(expr.operator, left) < asOpNumber(expr.operator, right)
-      case LESS_EQUAL => asOpNumber(expr.operator, left) <= asOpNumber(expr.operator, right)
+      case LESS_EQUAL =>
+        asOpNumber(expr.operator, left) <= asOpNumber(expr.operator, right)
 
       // Equality operators
       case BANG_EQUAL => !isEqual(left, right)
@@ -82,7 +86,7 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     }
   }
 
-  override def visitVariableExpr (expr: Expr.Variable): Any = {
+  override def visitVariableExpr(expr: Expr.Variable): Any = {
     env.get(expr.name).getOrElse(null)
   }
 
