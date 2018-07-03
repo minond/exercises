@@ -1,18 +1,14 @@
-- The Little Schemer
-  By Daniel P. Friedman and Matthias Felleisen
-  https://mitpress.mit.edu/books/little-schemer
-
-- Compiler Construction
-  By Niklaus Wirth
-  https://books.google.com/books?id=GDUzAAAAMAAJ
-
-- C Programming Language (2nd Edition)
-  By Brian W. Kernighan and Dennis Ritchie
-  https://books.google.com/books?id=3_wGtAEACAAJ
+- Beautiful Racket
+  By Matthew Butterick
+  https://beautifulracket.com/
 
 - Build Your Own Lisp
   By Daniel Holden
   http://buildyourownlisp.com/
+
+- Compiler Construction
+  By Niklaus Wirth
+  https://books.google.com/books?id=GDUzAAAAMAAJ
 
 - Crafting Interpreters
   By Bob Nystrom
@@ -33,6 +29,14 @@
 - Seven Languages in Seven Weeks
   By Bruce Tate
   https://pragprog.com/book/btlang/seven-languages-in-seven-weeks
+
+- The C Programming Language (2nd Edition)
+  By Brian W. Kernighan and Dennis Ritchie
+  https://books.google.com/books?id=3_wGtAEACAAJ
+
+- The Little Schemer
+  By Daniel P. Friedman and Matthias Felleisen
+  https://mitpress.mit.edu/books/little-schemer
 
 - The Pragmatic Programmer
   By Andy Hunt and Dave Thomas
