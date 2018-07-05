@@ -17,8 +17,8 @@
      (display HANDLE-EXPR ...)))
 
 (define (handle-args . args)
-  (for/fold ([stack empty])
-            ([arg (in-list args)] #:unless (void? arg))
+  (for/fold [(stack '())]
+            [(arg args) #:unless (void? arg)]
     (cond [(number? arg) (cons arg stack)]
-          [#t (define res (arg (first stack) (second stack)))
-              (cons res (drop stack 2))])))
+          [else (cons (arg (car stack) (car (cdr stack)))
+                      (cdr (cdr stack)))])))
