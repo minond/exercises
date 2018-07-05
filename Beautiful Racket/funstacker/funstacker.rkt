@@ -18,7 +18,7 @@
 
 (define (handle-args . args)
   (for/fold [(stack '())]
-            [(arg args) #:unless (void? arg)]
+            [(arg (in-list args)) #:unless (void? arg)]
     (cond [(number? arg) (cons arg stack)]
           [else (cons (arg (car stack) (car (cdr stack)))
                       (cdr (cdr stack)))])))
