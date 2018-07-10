@@ -1,1 +1,0 @@
-("6.12" ("fdbeac7b1021d752a5595c96ca1261993cc74400" . "b93b02030558776e9df316d33fd2047afd3e2af1") #"/Users/marcosmindon/code/courses/Racket School 2018/arith/../define-function.rkt" (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt") (collects #"syntax" #"parse.rkt"))
