@@ -1,4 +1,4 @@
-#lang s-exp arith
+#lang arith
 
 (define-function (add-them a b)
                  (+ a b))

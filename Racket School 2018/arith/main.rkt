@@ -11,6 +11,24 @@
                      [if2 if]
                      [complain-app #%app]))
 
+#;
+(module reader racket/base
+  (provide (rename-out [my-read-syntax read-syntax]))
+
+  (define (get-all src in)
+    (define e (read-syntax src in))
+    (if (eof-object? e)
+      '()
+      (cons e (get-all src in))))
+
+  (define (my-read-syntax src in)
+    (define all (get-all src in))
+    #`(module whatever #,(datum->syntax #f 'arith)
+        #,@all)))
+
+; The syntax/module-reader language does everything the expression above does.
+(module reader syntax/module-reader arith)
+
 (define-syntax (number-datum stx)
   (syntax-parse stx
     [(_ . v:number) #'(#%datum . v)]
