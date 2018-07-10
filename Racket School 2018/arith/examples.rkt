@@ -1,4 +1,4 @@
-#lang s-exp "arith.rkt"
+#lang s-exp arith
 
 (define-function (add-them a b)
                  (+ a b))
