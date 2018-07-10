@@ -153,7 +153,7 @@
           [album 30]
           [year 4 (lambda (x) (cons 'hi x))])
 
-
+#;
 (define-syntax (define-function stx)
   (syntax-parse stx
     [(_ (function-name:id parameter:id ...) body:expr)
@@ -161,6 +161,7 @@
      #`(define-syntax function-name
          (cons #,arity #'(lambda (parameter ...) body)))]))
 
+#;
 (define-syntax (function-app stx)
   (syntax-parse stx
     [(_ function-name:id argument:expr ...)
@@ -168,15 +169,101 @@
      #:fail-unless (= arity (length (syntax->list #'(argument ...)))) "arity mismatch"
      #`(#,function argument ...)]))
 
+#;
 (define-for-syntax (lookup function-name stx)
   (define (when-it-fails)
     (raise-syntax-error #f "not defined" stx))
   (define x (syntax-local-value function-name when-it-fails))
   (values (car x) (cdr x)))
 
+#;
 (define-function (s a b)
                  (+ a b))
 
 ; (function-app s 1 2 3) ; => arity mismatch
 ; (function-app s2 1 2) ; => syntax-local-value: unbound identifier: #<syntax:readline-input:115:14 s2>
 ; (function-app s 1 2)
+
+#;
+(define-syntax (define-function stx)
+  (syntax-parse stx
+    [(_ (name params ...) body)
+     (define arity (length (syntax->list #'(params ...))))
+     #`(define-syntax name
+         (cons #,arity #'(lambda (params ...) body)))]))
+
+#;
+(define-syntax (function-app stx)
+  (syntax-parse stx
+    [(_ fn args ...)
+     #:do((define-values (arity function) (lookup #'fn)))
+     #`(#,function args ...)]))
+
+#;
+(define-for-syntax (lookup fn)
+  (define ret (syntax-local-value fn))
+  (values (car ret) (cdr ret)))
+
+#;
+(define-function (s a b)
+                 (+ a b))
+
+#;
+(lookup s)
+
+#;
+(function-app s 1 12)
+
+#;
+(define-for-syntax (lookup fn)
+  (define ret (syntax-local-value fn))
+  (values (car ret) (cdr ret)))
+
+#;
+(define-syntax (define-function stx)
+  (syntax-parse stx
+    [(_ (name args ...) body)
+     (define arity (length (syntax->list #'(args ...))))
+     #`(define-syntax name
+         (cons #,arity #'(lambda (args ...) body)))]))
+
+#;
+(define-syntax (function-app stx)
+  (syntax-parse stx
+    [(_ fn args ...)
+     #:do((define-values (arity function) (lookup #'fn)))
+     #`(#,function args ...)]))
+
+#;
+(define-function (s x y z)
+                 (+ x y z))
+
+#;
+(function-app s 1 2 3)
+
+#;
+(define-for-syntax (lookup fn)
+  (define ret (syntax-local-value fn))
+  (values (car ret) (cdr ret)))
+
+#;
+(define-syntax (define-function stx)
+  (syntax-parse stx
+    [(_ (name args ...) body)
+     (define arity (length (syntax->list #'(args ...))))
+     #`(define-syntax name
+         (cons #,arity (lambda (args ...) body)))]))
+
+#;
+(define-syntax (function-app stx)
+  (syntax-parse stx
+    [(_ fn args ...)
+     #:do((define-values (arity function) (lookup #'fn)))
+     #`(#,function args ...)]))
+
+#;
+(define-function (s x y z)
+                 (+ x y z))
+
+#;
+(function-app s 1 2 12)
