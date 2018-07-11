@@ -10,9 +10,10 @@
       (cons c (tokenize ip))))
 
 (define (parse tok)
-  (if (cons? tok)
-      (map parse tok)
-      'taco))
+  (cond
+    [(list? tok) (map parse tok)]
+    [(cons? tok) (cons (parse (car tok)) (parse (cdr tok)))]
+    [else 'taco]))
 
 (define (read-syntax src ip)
   (define toks (tokenize ip))
