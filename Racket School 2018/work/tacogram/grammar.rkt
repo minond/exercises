@@ -1,8 +1,8 @@
 #lang brag
 
-taco-program : taco-leaf+
+taco-program : /ws{0,} taco-leaf+ /ws{0,}
 
-taco-leaf : /ws{0,} /open (taco | not-a-taco){7} /close /ws{0,}
+taco-leaf : /open (taco | not-a-taco){7} /close
 
 taco : /"%"
 not-a-taco : /"#" /"$"
