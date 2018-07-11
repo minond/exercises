@@ -5,15 +5,15 @@
 
 (provide #%module-begin then else
          define-function function-app
-         (rename-out [number-datum #%datum]
-                     [plus +]
-                     [minus -]
+         exactly inexactly
+         (rename-out [datum #%datum]
                      [if2 if]
                      [complain-app #%app]))
 
 #;
 (module reader racket/base
-  (provide (rename-out [my-read-syntax read-syntax]))
+  (provide my-read-syntax-temp
+           (rename-out [my-read-syntax read-syntax]))
 
   (define (get-all src in)
     (define e (read-syntax src in))
@@ -21,18 +21,32 @@
       '()
       (cons e (get-all src in))))
 
-  (define (my-read-syntax src in)
+  ; (parameterize ([read-decimal-as-inexact #f])
+  ;   (read-syntax 'one (open-input-string ".1")))
+
+  (define (my-read-syntax-temp src in)
     (define all (get-all src in))
     #`(module whatever #,(datum->syntax #f 'arith)
-        #,@all)))
+        #,@all))
+
+  (define my-read-syntax
+    (parameterize ([read-decimal-as-inexact #f])
+      my-read-syntax-temp)))
 
 ; The syntax/module-reader language does everything the expression above does.
-(module reader syntax/module-reader arith)
+; (module reader syntax/module-reader arith)
 
-(define-syntax (number-datum stx)
+(module reader syntax/module-reader
+  arith
+  #:wrapper1 (lambda (t)
+               (parameterize ([read-decimal-as-inexact #f])
+                 (t))))
+
+(define-syntax (datum stx)
   (syntax-parse stx
     [(_ . v:number) #'(#%datum . v)]
     [(_ . v:boolean) #'(#%datum . v)]
+    [(_ . v:string) #'(#%datum . v)]
     [(_ . other) (raise-syntax-error #f "not allowed" #'other)]))
 
 #;
@@ -46,7 +60,7 @@
         ...)]))
 
 #;
-(define-ops (plus +) (minus -))
+(define-ops (plus +) (minus -) (div /))
 
 #;
 (define-syntax (define-and-provide-ops stx)
@@ -70,7 +84,7 @@
 
          (provide (rename-out [name op])) ...)]))
 
-(define-and-provide-ops (plus +) (minus -))
+(define-and-provide-ops (plus +) (minus -) (div /))
 ; (define-and-provide-ops + - * /)
 
 #;
@@ -90,6 +104,14 @@
 
 (define-syntax (then stx)
   (raise-syntax-error 'not-allowed "then is not allower as an expression" stx))
+
+(define-syntax (exactly stx)
+  (syntax-parse stx
+    [(_ n:expr) #`(inexact->exact n)]))
+
+(define-syntax (inexactly stx)
+  (syntax-parse stx
+    [(_ n:expr) #`(exact->inexact n)]))
 
 (define-syntax (if2 stx)
   (syntax-parse stx
