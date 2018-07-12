@@ -15,22 +15,11 @@
 
 (require 'right-away)
 
-
 (module parent racket/base
   (define y 123)
   (provide y)
 
-  (module* child #;racket/base
-    ; (require (submod ".."))
-    (define x y)
-    ; (provide x)
-  )
-
-  ; (require 'child)
-  ; (displayln x)
-  )
+  (module* child
+    (define x y)))
 
 (require 'parent)
-
-
-; (define x (make-parameter 123))

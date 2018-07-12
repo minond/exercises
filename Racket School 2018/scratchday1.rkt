@@ -25,10 +25,6 @@
 ;; (define-hello world) mean the identifier 'world' is bould to "good bye"
 ;; translate this code of the shape (define 2nd-of-given-syntax "good bye")
 
-; (define-syntax (define-hello stx)
-;  (define id (second (syntax->list stx)))
-;  #`(define #,id "good bye"))
-
 #;
 (define-syntax (define-hello stx)
   (syntax-parse stx
@@ -36,12 +32,6 @@
      #`(begin
          (define the-identifier "good bye")
          ...)]))
-
-; (define-hello world good bye)
-; world
-; good
-; bye
-
 
 ;; SYNTAX
 ;; produces the list of all non-#false results of the give expressions
@@ -56,7 +46,6 @@
      #`(let ([e0-value e0])
          (and e0-value (list e0-value)))]
     [(_ e0:expr e1:expr ...)
-;     (combine #'e0 #'(some e1 ...))]))
      #'(combine e0 (some e1 ...))]))
 
 #;
@@ -71,26 +60,6 @@
                    (list v)))
              #f))]))
 
-#|
-(define-for-syntax (combine e0 some-of-e1)
-  #`(let ([v #,e0])
-      (if v
-          (let ([w #,some-of-e1])
-            (if (cons? w)
-                (cons v w)
-                (list v)))
-          #f)))
-|#
-
-
-; (check-equal? (some #f) #f)
-; (check-equal? (some #f #f) #f)
-; (check-equal? (some 3) (list 3))
-; (check-equal? (some (begin (displayln "hello") 2)) (list 2))
-; (check-equal? (some 1 2 #f 3) (list 1 2))
-; (check-equal? (some 1 2 #f (displayln 'hello?)) (list 1 2))
-; (check-equal? (some #f #f #f 1 2 3) #f)
-
 #;
 (define-syntax (define-world* stx)
   (syntax-parse stx
@@ -99,12 +68,6 @@
        #`(begin
            (define value -1)
            (define identifier (begin (set! value (+ value 1)) value)) ...)]))
-
-
-; (define-world* x y z)
-; x
-; y
-; z
 
 (define (dummy-extract tags from to)
   (list tags from to))
@@ -118,11 +81,8 @@
 (define-syntax (split-ct stx)
   (syntax-parse stx
     [(_ tags start:byte end:byte [name step:byte (~optional converter)] ...)
-     #:do (
-           ;(define width (sum-of #'start #'(step ...)))
-           (define width 98)
-           (define end-number (syntax-e #'end))
-           )
+     #:do ((define width 98)
+           (define end-number (syntax-e #'end)))
      #:fail-unless (<= width end-number) "index out of range"
      #'(let*-values ([(index) start]
                      [(name index) (values (dummy-extract tags index (+ index step -1))

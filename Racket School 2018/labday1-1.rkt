@@ -26,8 +26,6 @@
   (define parts (syntax->list stx))
   (define ids (cdr parts))
   (define pairs (pairings ids 0))
-  ;(displayln pairs)
-  ;#`(begin #,pairs))
   #`(begin #,@pairs))
 
 #;
