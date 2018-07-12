@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../define-function.rkt"
+(require "../define-function/main.rkt"
          (for-syntax syntax/parse))
 
 (provide #%module-begin then else
