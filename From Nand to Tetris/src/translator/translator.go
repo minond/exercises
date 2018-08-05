@@ -330,25 +330,13 @@ func (s popStmt) asm() []string {
 
 func (s addStmt) asm() []string { return binOp(comment("line %03d: add", s.line), "+") }
 func (s andStmt) asm() []string { return binOp(comment("line %03d: and", s.line), "&") }
+func (s eqStmt) asm() []string  { return compOp(comment("line %03d: eq (%d)", s.line), "JEQ") }
+func (s gtStmt) asm() []string  { return compOp(comment("line %03d: gt (%d)", s.line), "JGT") }
+func (s ltStmt) asm() []string  { return compOp(comment("line %03d: lt (%d)", s.line), "JLT") }
 func (s negStmt) asm() []string { return uniOp(comment("line %03d: neg", s.line), "-") }
 func (s notStmt) asm() []string { return uniOp(comment("line %03d: not", s.line), "!") }
 func (s orStmt) asm() []string  { return binOp(comment("line %03d: or", s.line), "|") }
 func (s subStmt) asm() []string { return binOp(comment("line %03d: sub", s.line), "-") }
-
-func (s eqStmt) asm() []string {
-	id := nextID()
-	return compOp(id, comment("line %03d: eq (%d)", s.line, id), "JEQ")
-}
-
-func (s gtStmt) asm() []string {
-	id := nextID()
-	return compOp(id, comment("line %03d: gt (%d)", s.line, id), "JGT")
-}
-
-func (s ltStmt) asm() []string {
-	id := nextID()
-	return compOp(id, comment("line %03d: lt (%d)", s.line, id), "JLT")
-}
 
 func (s errStmt) asm() []string {
 	id := nextID()
@@ -642,7 +630,8 @@ func nextID() int {
 	return currID
 }
 
-func compOp(id int, header, op string) []string {
+func compOp(header, op string) []string {
+	id := nextID()
 	pass_label := fmt.Sprintf("pass_%d", id)
 	fail_label := fmt.Sprintf("fail_%d", id)
 	cont_label := fmt.Sprintf("cont_%d", id)

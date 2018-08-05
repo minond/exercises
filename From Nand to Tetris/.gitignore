@@ -4,5 +4,7 @@
 *.hack
 *.asm
 *.vm
-nand2tetris
-nand2tetris.zip
+
+/nand2tetris
+/translator
+/assembler
