@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Hangman {
+public class hangman {
   public static void main(String[] args) {
     Random rand = new Random();
     Scanner in = new Scanner(System.in);
