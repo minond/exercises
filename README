@@ -7,4 +7,5 @@ Playing around.
 - `nim`, https://nim-by-example.github.io/
 - `p99`, https://sites.google.com/site/prologsite/prolog-problems
 - `scala`, https://docs.scala-lang.org/tour/tour-of-scala.html
-- The Toy Virtual Machine, Terence Parr's little vm: https://www.youtube.com/watch?v=OjaAToVkoTw
+- The Toy Virtual Machine, https://introcs.cs.princeton.edu/java/64simulator/
+- Terence Parr's little vm: https://www.youtube.com/watch?v=OjaAToVkoTw
