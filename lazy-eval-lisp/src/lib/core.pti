@@ -1,0 +1,333 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Standard Library
+;;
+;; 1. Internal functions
+;; 2. Core functions
+;; 3. List and pairs
+;; 4. Comparison
+;; 5. Logic
+;; 6. Math
+;; 7. Test helpers
+;; 8. Macros
+;; 9. Misc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Internal functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (thunk/equal? a)
+  (lambda (b)
+    (equal? a b)))
+
+(define (thunk/type/equal? t)
+  (lambda (x)
+    (equal? (type/name x) t)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Core functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define boolean? (thunk/type/equal? 'boolean))
+(define false? (thunk/equal? #f))
+(define integer? (thunk/type/equal? 'integer))
+(define procedure? (thunk/type/equal? 'procedure))
+(define pair? (thunk/type/equal? 'pair))
+(define quote? (thunk/type/equal? 'quote))
+(define real? (thunk/type/equal? 'real))
+(define string? (thunk/type/equal? 'string))
+(define true? (thunk/equal? #t))
+(define zero? (thunk/equal? 0))
+
+(define list?
+  (lambda (x)
+    (equal? 'sexpr (type/name (unquote x)))))
+
+(define (number? x)
+  (or (integer? x) (real? x)))
+
+(define (null? xs)
+  (equal? (list) xs))
+
+(define (map f xs)
+  (cond
+    ((null? xs) '())
+    (#t (cons (f (car xs)) (map f (cdr xs))))))
+
+(define (fold id f xs)
+  (cond
+    ((null? xs) id)
+    (#t (fold (f id (car xs)) f (cdr xs)))))
+
+(define (filter f xs)
+  (cond
+    ((null? xs) '())
+    ((f (car xs))
+     (cons (car xs)
+           (filter f (cdr xs))))
+    (#t (filter f (cdr xs)))))
+
+(define (compose f g)
+  (lambda args
+    (apply f (apply g args))))
+
+(define (curry f)
+  (let* ((n (type/proc/arity f))
+         (aux (lambda (buff)
+                (lambda args
+                  (let* ((all (join buff args)))
+                    (if (equal? n (length all))
+                      (apply f all)
+                      (aux all)))))))
+    (aux '())))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; List and pairs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (list . xs)
+  xs)
+
+(define (pair a b)
+  (cons a b))
+
+(define (set . xs)
+  (let* ((aux (lambda (xs acc)
+                (cond
+                  ((null? xs) acc)
+                  ((member? (car xs) acc) (aux (cdr xs) acc))
+                  (#t (aux (cdr xs) (cons (car xs) acc)))))))
+    (if (list? (car xs))
+      (aux (car xs) '())
+      (aux xs '()))))
+
+(define (cadar xs)
+  (car (cdr (car xs))))
+
+(define (first xs)
+  (cond
+    ((null? xs) (error "first expects a non-empty list"))
+    (#t (car xs))))
+
+(define (second xs)
+  (cond
+    ((null? xs) (error "second expects a two-item list"))
+    ((null? (cdr xs)) (error "second expects a two-item list"))
+    (#t (car (cdr xs)))))
+
+(define (third xs)
+  (cond
+    ((null? xs) (error "third expects a three-item list"))
+    ((null? (cdr xs)) (error "third expects a three-item list"))
+    ((null? (cdr (cdr xs))) (error "third expects a three-item list"))
+    (#t (car (cdr (cdr xs))))))
+
+(define (length xs)
+  (cond
+    ((null? xs) 0)
+    (#t (+ 1 (length (cdr xs))))))
+
+(define (nth i xs)
+  (cond
+    ((null? xs) '())
+    ((zero? i) (car xs))
+    (#t (nth (dec i) (cdr xs)))))
+
+(define (last xs)
+  (nth (dec (length xs)) xs))
+
+(define (join xs ys)
+  (cond
+    ((null? xs) ys)
+    (#t (cons (car xs) (join (cdr xs) ys)))))
+
+(define (take n xs)
+  (cond
+    ((null? xs) '())
+    ((zero? n) '())
+    (#t (cons (car xs) (take (dec n) (cdr xs))))))
+
+(define (drop n xs)
+  (cond
+    ((null? xs) '())
+    ((zero? n) xs)
+    (#t (drop (dec n) (cdr xs)))))
+
+(define (split n xs)
+  (cons (take n xs)
+        (cons (drop n xs) '())))
+
+(define (member? elem xs)
+  (cond
+    ((null? xs) #f)
+    ((equal? elem (car xs)) #t)
+    (#t (member? elem (cdr xs)))))
+
+(define (range from . to)
+  (cond
+    ((null? to) (range 0 from))
+    ((equal? from (car to)) (list (car to)))
+    (#t (cons from (range (inc from) (car to))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Comparison
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (= a b)
+  (and (all? number? a b)
+       (equal? a b)))
+
+(define (!= a b)
+  (not (= a b)))
+
+(define (>= a b)
+  (or (= a b)
+      (> a b)))
+
+(define (< a b)
+  (not (>= a b)))
+
+(define (<= a b)
+  (or (= a b)
+      (< a b)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Logic
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (all? f . xs)
+  (let* ((aux (lambda (xs)
+                (cond
+                  ((null? xs) #t)
+                  ((f (car xs)) (aux (cdr xs)))
+                  (#t #f)))))
+    (aux xs)))
+
+(define and
+  (lambda :lazy (. checks)
+    (let* ((aux (lambda (checks)
+                  (cond
+                    ((null? checks) #t)
+                    ((false? (eval (car checks))) #f)
+                    (#t (aux (cdr checks)))))))
+      (aux checks))))
+
+(define or
+  (lambda :lazy checks
+    (if (null? checks)
+      #f
+      (let* ((value (eval (car checks))))
+        (if (false? value)
+          (apply or (cdr checks))
+          value)))))
+
+(define (not x)
+  (if (false? x) #t #f))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Math
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (+ . xs)
+  (fold 0 add xs))
+
+(define (* . xs)
+  (fold 1 mult xs))
+
+(define (- . xs)
+  (cond
+    ((equal? 0 (length xs)) 0)
+    ((equal? 1 (length xs)) (* -1 (car xs)))
+    (#t (fold (car xs)
+              sub
+              (cdr xs)))))
+
+(define (sub a b)
+  (add a (mult -1 b)))
+
+(define (inc x)
+  (add x 1))
+
+(define (dec x)
+  (sub x 1))
+
+(define (double x)
+  (+ x x))
+
+(define (triple x)
+  (+ x x x))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define ok? (thunk/equal? 'ok))
+
+(define (assert fn . args)
+  (if (apply (eval fn) (map eval args))
+    (begin (printf "; pass: (apply %s '%s)" fn args)
+           (newline))
+    (begin (printf "; Assertion error!")
+           (newline)
+           (printf "; fail (apply %s '%s)" fn args)
+           (newline)
+           (halt "Assertion error."))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Macros
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Clojure's thread-first macro
+; https://clojure.org/guides/threading_macros
+(define ->
+  (lambda :lazy (arg . fns)
+    (cond
+      ((null? fns) arg)
+      (#t (->lambda arg fns)))))
+
+(define ->lambda
+  (lambda (arg fns)
+    (cond
+      ((null? fns) arg)
+      (#t
+       (->lambda (eval (cons (car (car fns))
+                             (cons arg (cdr (car fns)))))
+                 (cdr fns))))))
+
+(define if
+  (lambda :lazy (check pass fail)
+    (cond
+      ((false? (eval check)) (eval fail))
+      (#t (eval pass)))))
+
+(define case
+  (lambda :lazy (item . conds)
+    (let* ((is-item (lambda (x) (equal? (car x) item)))
+           (is-else (lambda (y) (equal? (car y) 'else)))
+           (item-expr (unquote (filter is-item conds)))
+           (else-expr (unquote (filter is-else conds))))
+      (cond
+        ((not (null? item-expr)) (eval (cadar item-expr)))
+        ((not (null? else-expr)) (eval (cadar else-expr)))
+        (#t '())))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Misc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define Y
+  (lambda (le)
+    ((lambda (f) (f f))
+     (lambda (f)
+       (le (lambda (x) ((f f) x)))))))
+
+
+; vim:ft=racket

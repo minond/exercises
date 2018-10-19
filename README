@@ -1,4 +1,4 @@
-Playing around with different programming languages.
+Playing around.
 
 - `d`, https://tour.dlang.org/
 - `dart`, https://www.udacity.com/course/build-native-mobile-apps-with-flutter--ud905
@@ -7,3 +7,4 @@ Playing around with different programming languages.
 - `nim`, https://nim-by-example.github.io/
 - `p99`, https://sites.google.com/site/prologsite/prolog-problems
 - `scala`, https://docs.scala-lang.org/tour/tour-of-scala.html
+- The Toy Virtual Machine, Terence Parr's little vm: https://www.youtube.com/watch?v=OjaAToVkoTw
