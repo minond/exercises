@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Final Project</title>
+  <script src="https://www.dukelearntoprogram.com/course1/common/js/image/SimpleImage.js"></script>
+  <script>
+    //TODO:
+    //global vars
+    var canvas;
+    var blurryImage;
+    var image;
+    //we want to upload an image
+    function uploadImage() {
+      //find file input element by id
+      canvas = document.getElementById("output");
+      var  fileInput = document.getElementById("image-input");
+      //create image with SimpleImage constructor using file input element
+      image = new SimpleImage(fileInput); 
+      //draw image to canvas
+      image.drawTo(canvas);
+    }
+
+    //we want to make the image blurry
+    function makeBlurry() {
+
+      if (image == null) {
+        alert("no image uploaded");
+        return;
+      }
+      //create blank image
+      var blankImage = new SimpleImage(image.getWidth(), image.getHeight());
+      
+      //iterate through image pixel by pixel
+      console.log(image.values().length)
+      for(var pixel of image.values()){
+        //generate random number between 0 and 1
+        var randomNumber = Math.random();
+        //if random is less than 0.5 copy original image pixel
+        var x = pixel.getX();
+          var y = pixel.getY();
+        if(randomNumber < 0.5){
+          //get x and y value of original pixel
+          
+          //set original pixel on blank image at x and y
+          blankImage.setPixel(x,y,pixel);
+        } else {
+          //make an offsetX variable
+          //assign to x + 1 if x is less than image width
+          //otherwise assign to x - 1 
+          var offsetX;
+          if(x < image.getWidth() - 1){
+            offsetX = x+1;
+          } else {
+            offsetX = x-1;
+          }
+          //make an offsetY variable
+          //assign to y + 1 if y is less than image height
+          //otherwise assign to y - 1 
+          var offsetY;
+          if(y < image.getHeight() - 1) {
+            offsetY = y+1;
+          } else {
+            offsetY = y-1;
+          }
+          //set pixel with on blankImage with x, y and pixel at offsetX and offsetY
+          var nearbyPixel = image.getPixel(offsetX, offsetY);
+          blankImage.setPixel(x, y, nearbyPixel);
+        }
+        //otherwise copy a nearby image pixel
+      }
+      blankImage.drawTo(canvas)
+
+    }
+  </script>
+  <style>
+  canvas {
+    border: 1px dotted gray;
+    margin: 10px 0;
+    height: 250px;
+    width: 500px;
+  }
+  </style>
+</head>
+<body>
+
+<h2>Final Project</h2>
+
+<canvas id="output"></canvas>
+<input accept="image/*" id="image-input" value="Upload Image" type="file" onchange="uploadImage()" />
+
+<div>
+  <input value="Filter #1" type="button" onclick="makeBlurry()" />
+</div>
+
+</body>
+</html>
