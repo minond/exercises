@@ -24,7 +24,7 @@ object Stmt {
     }
   }
 
-  case class Var(val name: Token, val initializer: Expr) extends Stmt {
+  case class Var(val name: Token, val initializer: Option[Expr]) extends Stmt {
     def accept[T](visitor: Visitor[T]): T = {
       visitor.visitVarStmt(Var(name, initializer))
     }

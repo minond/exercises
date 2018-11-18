@@ -25,7 +25,13 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
   }
 
   override def visitVarStmt(stmt: Stmt.Var): Unit = {
-    env.define(stmt.name.lexeme, evaluate(stmt.initializer))
+    stmt.initializer match {
+      case Some(v) =>
+        env.define(stmt.name.lexeme, evaluate(v))
+
+      case None =>
+        env.define(stmt.name.lexeme, null)
+    }
   }
 
   override def visitBinaryExpr(expr: Expr.Binary): Any = {

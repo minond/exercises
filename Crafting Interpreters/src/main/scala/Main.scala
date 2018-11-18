@@ -16,7 +16,7 @@ object Main {
     } else if (args.length == 1) {
       runFile(args(0))
     } else {
-      runPrompt();
+      runPrompt
     }
   }
 

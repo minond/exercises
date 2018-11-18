@@ -14,8 +14,7 @@ object Expr {
     def visitVariableExpr(expr: Variable): T
   }
 
-  case class Binary(val left: Expr, val operator: Token, val right: Expr)
-      extends Expr {
+  case class Binary(val left: Expr, val operator: Token, val right: Expr) extends Expr {
     def accept[T](visitor: Visitor[T]): T = {
       visitor.visitBinaryExpr(Binary(left, operator, right))
     }

@@ -59,8 +59,8 @@ class Parser(tokens: MutableList[Token]) {
 
     val name = previous()
     val value =
-      if (matches(EQUAL)) expression()
-      else Expr.Variable(name)
+      if (matches(EQUAL)) Some(expression())
+      else None
 
     consume(SEMICOLON, "Expecting a semicolon at the end of a declaration.")
     Stmt.Var(name, value)
