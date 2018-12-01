@@ -127,3 +127,37 @@ somethingThatTakeCanEayMice[Cat, SmallAnimal](takesCatReturnsSmallAnimal)
 //
 // Remember, argument types are *always* contravariant and return types are
 // *always* covariant.
+
+
+// All together now
+final case class MySet[+Elem](data: Elem*) {
+  def fold[Typ >: Elem](id: MySet[Typ])(op: (Typ, MySet[Typ]) => MySet[Typ]): MySet[Typ] =
+    data.foldRight(id)(op)
+
+  def add[Typ >: Elem](elem: Typ): MySet[Typ] =
+    MySet((data :+ elem) :_*)
+
+  def contains[Typ >: Elem](elem: Typ): Boolean =
+    data.exists { _ == elem }
+
+  def ∪[Typ >: Elem](other: MySet[Typ]): MySet[Typ] =
+    other.fold(this) { (elem, set) =>
+      if (!set.contains(elem)) set.add(elem)
+      else set
+    }
+}
+
+case class CatDog(name: String) extends Animal
+
+val dogs: MySet[Dog] = MySet(Dog("goodboy"))
+val cats: MySet[Cat] = MySet(Cat("kitty"))
+val catdog = CatDog("alone in this world lives the little catdog")
+
+val animals: MySet[Animal] = cats ∪ dogs
+
+printf(s"animals.contains(Dog(goodboy)): ${animals.contains(Dog("goodboy"))}\n")
+printf(s"dogs.contains(Dog(goodboy)): ${dogs.contains(Dog("goodboy"))}\n")
+printf(s"cats.contains(Dog(goodboy)): ${cats.contains(Dog("goodboy"))}\n")
+printf(s"cats ∪ dogs: ${cats ∪ dogs }\n")
+printf(s"(cats ∪ dogs).contains(catdog): ${(cats ∪ dogs).contains(catdog)}\n")
+printf(s"(cats ∪ dogs ∪ MySet(catdog)).contains(catdog): ${(cats ∪ dogs ∪ MySet(catdog)).contains(catdog)}\n")
