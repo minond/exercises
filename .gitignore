@@ -6,6 +6,10 @@ target
 .dub
 *-test-library
 
+// C
+*.out
+*.out.*
+
 // Erlang
 *.beam
 
