@@ -1,8 +1,19 @@
-*/project
-*/target
+// Scala
+project
+target
 
+// D
+.dub
+*-test-library
+
+// Erlang
 *.beam
+
+// Python
 *.pyc
+
+// Java
+*.class
+
 *.swp
 *.swo
-*.class
