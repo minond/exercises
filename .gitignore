@@ -10,6 +10,9 @@ target
 *.out
 *.out.*
 
+// C++
+build
+
 // Erlang
 *.beam
 
