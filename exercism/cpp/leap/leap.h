@@ -1,5 +1,5 @@
 namespace leap {
 
-bool is_leap_year(int);
+bool is_leap_year(unsigned short);
 
 };
