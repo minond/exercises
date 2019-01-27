@@ -14,33 +14,29 @@ object Expr {
     def visitVariableExpr(expr: Variable): T
   }
 
-  case class Binary(val left: Expr, val operator: Token, val right: Expr) extends Expr {
-    def accept[T](visitor: Visitor[T]): T = {
+  case class Binary(val left: Expr, val operator: Token, val right: Expr)
+    extends Expr {
+    def accept[T](visitor: Visitor[T]): T =
       visitor.visitBinaryExpr(Binary(left, operator, right))
-    }
   }
 
   case class Grouping(val expression: Expr) extends Expr {
-    def accept[T](visitor: Visitor[T]): T = {
+    def accept[T](visitor: Visitor[T]): T =
       visitor.visitGroupingExpr(Grouping(expression))
-    }
   }
 
   case class Literal(val value: Any) extends Expr {
-    def accept[T](visitor: Visitor[T]): T = {
+    def accept[T](visitor: Visitor[T]): T =
       visitor.visitLiteralExpr(Literal(value))
-    }
   }
 
   case class Unary(val operator: Token, val right: Expr) extends Expr {
-    def accept[T](visitor: Visitor[T]): T = {
+    def accept[T](visitor: Visitor[T]): T =
       visitor.visitUnaryExpr(Unary(operator, right))
-    }
   }
 
   case class Variable(val name: Token) extends Expr {
-    def accept[T](visitor: Visitor[T]): T = {
+    def accept[T](visitor: Visitor[T]): T =
       visitor.visitVariableExpr(Variable(name))
-    }
   }
 }

@@ -41,7 +41,7 @@ class Scanner(source: String) {
     tokens
   }
 
-  private def scanToken() = {
+  private def scanToken() =
     advance() match {
       case '('               => addToken(LEFT_PAREN)
       case ')'               => addToken(RIGHT_PAREN)
@@ -76,7 +76,6 @@ class Scanner(source: String) {
       case c =>
         Main.error(line, s"Unterminated character: $c")
     }
-  }
 
   private def identifier() = {
     while (isAlphaNumeric(peek())) advance()
@@ -120,25 +119,20 @@ class Scanner(source: String) {
     }
   }
 
-  private def isAtEnd() = {
+  private def isAtEnd() =
     current >= source.length
-  }
 
-  private def isDigit(c: Char) = {
+  private def isDigit(c: Char) =
     c >= '0' && c <= '9'
-  }
 
-  private def isAlpha(c: Char) = {
+  private def isAlpha(c: Char) =
     (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
-  }
 
-  private def isAlphaNumeric(c: Char) = {
+  private def isAlphaNumeric(c: Char) =
     isDigit(c) || isAlpha(c)
-  }
 
-  private def addToken(ttype: TokenType): Unit = {
+  private def addToken(ttype: TokenType): Unit =
     addToken(ttype, None)
-  }
 
   private def addToken(ttype: TokenType, literal: Option[Any]): Unit = {
     val text = source.substring(start, current)
@@ -158,17 +152,15 @@ class Scanner(source: String) {
     true
   }
 
-  private def peek(): Char = {
+  private def peek(): Char =
     if (isAtEnd())
       '\u0000'
     else
       source.charAt(current)
-  }
 
-  private def peekNext(): Char = {
+  private def peekNext(): Char =
     if (current + 1 >= source.length)
       '\u0000'
     else
       source.charAt(current + 1)
-  }
 }

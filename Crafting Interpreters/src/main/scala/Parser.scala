@@ -1,19 +1,18 @@
 package com.craftinginterpreters.lox
 
 import collection.mutable.MutableList
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import com.craftinginterpreters.lox.TokenType._;
 
 class Parser(tokens: MutableList[Token]) {
   var current = 0
 
-  def parse(): Either[ParseError, List[Stmt]] = {
+  def parse(): Either[ParseError, List[Stmt]] =
     Try { program() } match {
       case Failure(parseErr: ParseError) => Left(parseErr)
       case Failure(unknownErr)           => throw unknownErr
       case Success(stmt)                 => Right(stmt)
     }
-  }
 
   // program    = statement* EOF ;
   private def program(): List[Stmt] = {
@@ -34,23 +33,21 @@ class Parser(tokens: MutableList[Token]) {
 
   // declaration = varDecl
   //             | statement ;
-  private def declaration(): Stmt = {
+  private def declaration(): Stmt =
     if (check(VAR)) {
       varStmt()
     } else {
       statement()
     }
-  }
 
   // statement  = printStmt
   //            | exprStmt ;
-  private def statement(): Stmt = {
+  private def statement(): Stmt =
     if (check(PRINT)) {
       printStmt()
     } else {
       exprStmt()
     }
-  }
 
   // varDecl        = "var" IDENTIFIER ( "=" expression )? ";" ;
   private def varStmt(): Stmt = {
@@ -82,9 +79,8 @@ class Parser(tokens: MutableList[Token]) {
   }
 
   // expression = equality ;
-  private def expression(): Expr = {
+  private def expression(): Expr =
     equality()
-  }
 
   // equality   = comparison ( ( "!=" | "==" ) comparison )* ;
   private def equality(): Expr = {
@@ -140,19 +136,18 @@ class Parser(tokens: MutableList[Token]) {
 
   // unary = ( "!" | "-" ) unary
   //       | primary ;
-  private def unary(): Expr = {
+  private def unary(): Expr =
     if (matches(BANG, MINUS)) {
       Expr.Unary(previous(), unary())
     } else {
       primary()
     }
-  }
 
   // primary        = "true" | "false" | "null" | "this"
   //                | NUMBER | STRING
   //                | "(" expression ")"
   //                | IDENTIFIER ;
-  private def primary(): Expr = {
+  private def primary(): Expr =
     if (matches(TRUE)) {
       Expr.Literal(true)
     } else if (matches(FALSE)) {
@@ -170,7 +165,6 @@ class Parser(tokens: MutableList[Token]) {
     } else {
       throw error(peek(), "Expecting expression.")
     }
-  }
 
   private def synchronize(): Unit = {
     advance()
@@ -188,10 +182,9 @@ class Parser(tokens: MutableList[Token]) {
     advance()
   }
 
-  private def consume(ttype: TokenType, message: String) = {
+  private def consume(ttype: TokenType, message: String) =
     if (!matches(ttype))
       throw error(peek(), message)
-  }
 
   private def error(token: Token, message: String): ParseError = {
     Main.error(token, message)
@@ -208,29 +201,24 @@ class Parser(tokens: MutableList[Token]) {
     false
   }
 
-  private def check(ttype: TokenType): Boolean = {
+  private def check(ttype: TokenType): Boolean =
     if (isAtEnd())
       false
     else
       peek().ttype == ttype
-  }
 
-  private def advance() = {
+  private def advance() =
     if (!isAtEnd())
       current += 1
     else
       previous()
-  }
 
-  private def isAtEnd() = {
+  private def isAtEnd() =
     peek().ttype == EOF
-  }
 
-  private def peek(): Token = {
+  private def peek(): Token =
     tokens(current)
-  }
 
-  private def previous(): Token = {
+  private def previous(): Token =
     tokens(current - 1)
-  }
 }

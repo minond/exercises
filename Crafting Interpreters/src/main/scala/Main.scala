@@ -10,7 +10,7 @@ object Main {
   var hadError = false
   var hadRuntimeError = false
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]) =
     if (args.length > 1) {
       System.out.println("Usage: main [script]");
     } else if (args.length == 1) {
@@ -18,7 +18,6 @@ object Main {
     } else {
       runPrompt
     }
-  }
 
   private def runFile(path: String) = {
     val bytes = Files.readAllBytes(Paths.get(path))
@@ -62,11 +61,12 @@ object Main {
   }
 
   // TODO find a better home for this function
-  private def printTokens(expr: Expr): String = {
+  private def printTokens(expr: Expr): String =
     expr match {
       case expr: Expr.Binary =>
         printTokens(expr.left) + "\n" + expr.operator + "\n" + printTokens(
-          expr.right)
+          expr.right
+        )
 
       case expr: Expr.Grouping =>
         printTokens(expr.expression)
@@ -79,11 +79,10 @@ object Main {
 
       case _ => ""
     }
-  }
 
   // TODO find a better home for this function, specially since
   // Interpreter.stringify already exists
-  private def stringify(value: Any): String = {
+  private def stringify(value: Any): String =
     if (value == null) {
       "nil"
     } else if (value.isInstanceOf[Double]) {
@@ -96,19 +95,16 @@ object Main {
     } else {
       value.toString
     }
-  }
 
-  def error(token: Token, message: String) = {
+  def error(token: Token, message: String) =
     if (token.ttype == TokenType.EOF) {
       report(token.line, " at end", message)
     } else {
       report(token.line, " at '" + token.lexeme + "'", message)
     }
-  }
 
-  def error(line: Int, message: String) = {
+  def error(line: Int, message: String) =
     report(line, "", message)
-  }
 
   def runtimeError(err: RuntimeError) = {
     Console.err.println(err.getMessage())

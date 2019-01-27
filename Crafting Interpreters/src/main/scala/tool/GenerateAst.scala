@@ -5,17 +5,20 @@ import java.io.PrintWriter
 object GenerateAst extends App {
   if (args.length != 1) {
     System.err.println(
-      "Usage: scala src/main/scala/tool/GenerateAst.scala <directory>")
+      "Usage: scala src/main/scala/tool/GenerateAst.scala <directory>"
+    )
     System.exit(1)
   }
 
-  defineAst(args(0),
-            "Stmt",
-            Array(
-              "Expression - expression: Expr",
-              "Print      - expression: Expr",
-              "Var        - name: Token, initializer: Option[Expr]"
-            ))
+  defineAst(
+    args(0),
+    "Stmt",
+    Array(
+      "Expression - expression: Expr",
+      "Print      - expression: Expr",
+      "Var        - name: Token, initializer: Option[Expr]"
+    )
+  )
 
   defineAst(
     args(0),
@@ -50,9 +53,11 @@ object GenerateAst extends App {
     writer.println("package com.craftinginterpreters.lox")
   }
 
-  def defineObject(writer: PrintWriter,
-                   baseName: String,
-                   types: Array[String]) = {
+  def defineObject(
+    writer: PrintWriter,
+    baseName: String,
+    types: Array[String]
+  ) = {
     writer.println(s"object ${baseName} {")
     defineVisitor(writer, baseName, types)
 
@@ -72,10 +77,12 @@ object GenerateAst extends App {
     writer.println("}")
   }
 
-  def defineType(writer: PrintWriter,
-                 baseName: String,
-                 className: String,
-                 fields: String) = {
+  def defineType(
+    writer: PrintWriter,
+    baseName: String,
+    className: String,
+    fields: String
+  ) = {
     val justArgs = fields
       .split(",")
       .map { field =>
@@ -99,20 +106,24 @@ object GenerateAst extends App {
     // Visitor
     writer.println(s"    def accept[T](visitor: Visitor[T]): T = {")
     writer.println(
-      s"      visitor.visit${className}${baseName}($className($justArgs))")
+      s"      visitor.visit${className}${baseName}($className($justArgs))"
+    )
     writer.println("    }")
     writer.println("  }")
   }
 
-  def defineVisitor(writer: PrintWriter,
-                    baseName: String,
-                    types: Array[String]) = {
+  def defineVisitor(
+    writer: PrintWriter,
+    baseName: String,
+    types: Array[String]
+  ) = {
     writer.println("  trait Visitor[T] {")
 
     for (ttype <- types) {
       val typeName = ttype.split("-")(0).trim()
       writer.println(
-        s"    def visit${typeName}${baseName}(${baseName.toLowerCase}: ${typeName}): T")
+        s"    def visit${typeName}${baseName}(${baseName.toLowerCase}: ${typeName}): T"
+      )
     }
 
     writer.println("  }")

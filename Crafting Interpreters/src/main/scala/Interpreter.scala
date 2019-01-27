@@ -1,12 +1,12 @@
 package com.craftinginterpreters.lox
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import com.craftinginterpreters.lox.TokenType._
 
 class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
   val env = Environment(Map())
 
-  def interpret(statements: List[Stmt]): Unit = {
+  def interpret(statements: List[Stmt]): Unit =
     statements.foreach { stmt =>
       Try { execute(stmt) } match {
         case Success(_)                 =>
@@ -14,17 +14,14 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
         case Failure(err)               => throw err
       }
     }
-  }
 
-  override def visitExpressionStmt(stmt: Stmt.Expression): Unit = {
+  override def visitExpressionStmt(stmt: Stmt.Expression): Unit =
     evaluate(stmt.expression)
-  }
 
-  override def visitPrintStmt(stmt: Stmt.Print): Unit = {
+  override def visitPrintStmt(stmt: Stmt.Print): Unit =
     println(stringify(evaluate(stmt.expression)))
-  }
 
-  override def visitVarStmt(stmt: Stmt.Var): Unit = {
+  override def visitVarStmt(stmt: Stmt.Var): Unit =
     stmt.initializer match {
       case Some(v) =>
         env.define(stmt.name.lexeme, evaluate(v))
@@ -32,7 +29,6 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
       case None =>
         env.define(stmt.name.lexeme, null)
     }
-  }
 
   override def visitBinaryExpr(expr: Expr.Binary): Any = {
     val left = evaluate(expr.left)
@@ -52,8 +48,10 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
         else if (left.isInstanceOf[String] && right.isInstanceOf[String])
           left.asInstanceOf[String] + right.asInstanceOf[String]
         else
-          throw RuntimeError(expr.operator,
-                             "Operands must be two numbers or two strings.")
+          throw RuntimeError(
+            expr.operator,
+            "Operands must be two numbers or two strings."
+          )
 
       // Relational operators
       case GREATER =>
@@ -73,18 +71,16 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     }
   }
 
-  override def visitGroupingExpr(expr: Expr.Grouping): Any = {
+  override def visitGroupingExpr(expr: Expr.Grouping): Any =
     evaluate(expr.expression)
-  }
 
-  override def visitLiteralExpr(expr: Expr.Literal): Any = {
+  override def visitLiteralExpr(expr: Expr.Literal): Any =
     expr.value match {
       case Some(value)             => value
       case None                    => null
       case bool: java.lang.Boolean => bool
       case _                       => expr.value
     }
-  }
 
   override def visitUnaryExpr(expr: Expr.Unary): Any = {
     val right = evaluate(expr.right)
@@ -96,44 +92,38 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     }
   }
 
-  override def visitVariableExpr(expr: Expr.Variable): Any = {
+  override def visitVariableExpr(expr: Expr.Variable): Any =
     env.get(expr.name).getOrElse(null)
-  }
 
-  private def execute(stmt: Stmt): Any = {
+  private def execute(stmt: Stmt): Any =
     stmt.accept(this)
-  }
 
-  private def evaluate(expr: Expr): Any = {
+  private def evaluate(expr: Expr): Any =
     expr.accept(this)
-  }
 
-  private def isTruthy(value: Any): Boolean = {
+  private def isTruthy(value: Any): Boolean =
     if (value == null)
       false
     else if (value.isInstanceOf[Boolean])
       value.asInstanceOf[Boolean]
     else
       true
-  }
 
-  private def isEqual(left: Any, right: Any): Boolean = {
+  private def isEqual(left: Any, right: Any): Boolean =
     if (left == null && right == null)
       true
     else if (left == null)
       false
     else
       left == right
-  }
 
-  private def asOpNumber(op: Token, num: Any): Double = {
+  private def asOpNumber(op: Token, num: Any): Double =
     if (num.isInstanceOf[Double])
       num.asInstanceOf[Double]
     else
       throw RuntimeError(op, "Operand must be a number.")
-  }
 
-  private def stringify(value: Any): String = {
+  private def stringify(value: Any): String =
     if (value == null) {
       "nil"
     } else if (value.isInstanceOf[Double]) {
@@ -146,5 +136,4 @@ class Interpreter extends Expr.Visitor[Any] with Stmt.Visitor[Unit] {
     } else {
       value.toString
     }
-  }
 }

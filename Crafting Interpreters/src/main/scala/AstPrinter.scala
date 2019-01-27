@@ -1,19 +1,16 @@
 package com.craftinginterpreters.lox
 
 class AstPrinter extends Expr.Visitor[String] {
-  def print(expr: Expr): String = {
+  def print(expr: Expr): String =
     expr.accept(this)
-  }
 
-  override def visitBinaryExpr(expr: Expr.Binary): String = {
+  override def visitBinaryExpr(expr: Expr.Binary): String =
     parenthesize(expr.operator.lexeme, expr.left, expr.right)
-  }
 
-  override def visitGroupingExpr(expr: Expr.Grouping): String = {
+  override def visitGroupingExpr(expr: Expr.Grouping): String =
     parenthesize("group", expr.expression)
-  }
 
-  override def visitLiteralExpr(expr: Expr.Literal): String = {
+  override def visitLiteralExpr(expr: Expr.Literal): String =
     if (expr.value == null) {
       "nil"
     } else {
@@ -24,15 +21,12 @@ class AstPrinter extends Expr.Visitor[String] {
         case None      => "nil?"
       }
     }
-  }
 
-  override def visitUnaryExpr(expr: Expr.Unary): String = {
+  override def visitUnaryExpr(expr: Expr.Unary): String =
     parenthesize(expr.operator.lexeme, expr.right)
-  }
 
-  override def visitVariableExpr(expr: Expr.Variable): String = {
+  override def visitVariableExpr(expr: Expr.Variable): String =
     expr.name.lexeme
-  }
 
   private def parenthesize(name: String, exprs: Expr*): String = {
     val builder = new StringBuilder()
