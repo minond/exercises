@@ -52,9 +52,6 @@ object Main {
 
       case Right(statements) =>
         if (!hadError) {
-          println()
-          println(statements)
-          println()
           interpreter.interpret(statements)
         }
     }
