@@ -10,7 +10,7 @@ bool is_isogram(const char phrase[]) {
   }
 
   int len = strlen(phrase);
-  bool found[END_CHAR_CODE - START_CHAR_CODE];
+  bool found[END_CHAR_CODE - START_CHAR_CODE + 1];
   for (int i = 0; i < END_CHAR_CODE - START_CHAR_CODE + 1; i++) {
     found[i] = false;
   }
