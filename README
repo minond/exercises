@@ -29,6 +29,9 @@ Exercises from around the web, programming books, courses, and anything else.
 - The R Programming Environment
   https://www.coursera.org/learn/r-programming-environment
 
+- The Racket School 2018
+  https://summer-school.racket-lang.org/2018/
+
 
 ### Backlog
 
@@ -90,16 +93,3 @@ Exercises from around the web, programming books, courses, and anything else.
 - The Tao of Programming
   By Geoffrey James
   https://en.wikipedia.org/wiki/The_Tao_of_Programming
-
-
-### Misc.
-
-- `d`, https://tour.dlang.org/
-- `dart`, https://www.udacity.com/course/build-native-mobile-apps-with-flutter--ud905
-- `exercism`, http://exercism.io/
-- `go`, https://tour.golang.org/
-- `nim`, https://nim-by-example.github.io/
-- `p99`, https://sites.google.com/site/prologsite/prolog-problems
-- `scala`, https://docs.scala-lang.org/tour/tour-of-scala.html
-- The Toy Virtual Machine, https://introcs.cs.princeton.edu/java/64simulator/
-- Terence Parr's little vm: https://www.youtube.com/watch?v=OjaAToVkoTw
