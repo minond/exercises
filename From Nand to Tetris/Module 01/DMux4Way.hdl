@@ -1,0 +1,32 @@
+/**
+ * 4-way demultiplexor:
+ * {a, b, c, d} = {in, 0, 0, 0} if sel == 00
+ *                {0, in, 0, 0} if sel == 01
+ *                {0, 0, in, 0} if sel == 10
+ *                {0, 0, 0, in} if sel == 11
+ */
+
+CHIP DMux4Way {
+    IN in, sel[2];
+    OUT a, b, c, d;
+
+    PARTS:
+
+    Not(in = sel[0], out = notSel0);
+    Not(in = sel[1], out = notSel1);
+
+    And(a = notSel0, b = notSel1, out = selA);
+    And(a = selA, b = in, out = a);
+
+    // XXX I don't understand why this results in true when where sel is 01,
+    // notSel1 is 0, so 0 ^ 0 = false but we end up with selB being true???
+    And(a = sel[0], b = notSel1, out = selB);
+    And(a = selB, b = in, out = b);
+
+    // XXX Same as the previous example but the bits are flipped.
+    And(a = notSel0, b = sel[1], out = selC);
+    And(a = selC, b = in, out = c);
+
+    And(a = sel[0], b = sel[1], out = selD);
+    And(a = selD, b = in, out = d);
+}

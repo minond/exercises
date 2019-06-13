@@ -1,0 +1,18 @@
+Incompleteness
+==============
+
+Almost anything you might like to check statically is undecidable. Any static
+checker cannot do all of: always terminate, always be sound, always be
+complete. This is a mathematical theorem
+
+
+Examples:
+
+- Will this function terminate on some input?
+- Will this function ever use a variabnle not in the environement?
+- Will this function treat a string as a function?
+- Will this functino divide by zero?
+
+
+Undecidability is an essential concept at the core of computing. The inherent
+approximation of static checking is probably its most important ramification.

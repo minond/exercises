@@ -1,0 +1,538 @@
+Architecture
+------------
+
+      +-------+                +-------+            +-------+
+      |       |                |       |  >>>>>>>>  |       |
+      |       |  >>>>>>>>>>>>  |       |  Data Out  |       |
+      |  ROM  |  Instructions  |  CPU  |            |  RAM  |
+      |       |                |       |  <<<<<<<<  |       |
+      |       |                |       |  Data In   |       |
+      +-------+                +-------+            +-------+
+
+
+
+Addressing Modes
+----------------
+
+    | Type        | Example           | Description              |
+    |-------------|-------------------|--------------------------|
+    | Register    | Add R1, R2        | R2       ← R2 + R1       |
+    | Direct      | Add R1, M[200]    | Mem[200] ← Mem[200] + R1 |
+    | Indirect    | Add R1, @A        | Mem[A]   ← Mem[A] + R1   |
+    | Immediate   | Add 73, R1        | R1       ← R1 + 73       |
+
+
+
+Registers
+---------
+
+- D, 16-bit value
+- A, 16-bit value, represents the value set by an A-instructions. A is the
+  literal value set by an A-instruction.
+- M, 16-bit value, represents the memory address set by an A-instruction. M is
+  a pointer to the memory address set by an A-instruction.
+
+
+Symbols
+-------
+
+- R0 .. R15 are aliases for 0 .. 15, used to make a distinction between
+  register and numbers.
+- SCREEN is 16384
+- KBD is 24576
+
+
+The A-instruction
+-----------------
+
+Syntax is `@value`, where _value_ is either:
+- a non-negative decimal constant
+- a symbol (letter) referring to such a constant
+
+Semantics: sets the A register to _value_ then RAM[A] becomes the selected RAM
+register.
+
+Example 1:
+
+    @21
+
+This sets the A register to 21 and RAM[21] becomes the selected RAM register.
+
+
+Example 2:
+
+    @100
+    M = -1
+
+This sets RAM[100] to -1 by first setting the A register to 100, which in turn
+makes the M register point to RAM[100], so setting that to a new value results
+in the memory it points to being updated.
+
+
+Example 3:
+
+    0000000000000001
+    ^
+    op code
+
+
+A-instructions are prepresented in binary as any number that has the most
+significat bit set to `0`. For example, the code above is the equivelant to
+`@1`.
+
+
+
+The C-instruction
+-----------------
+
+Syntax is `dest = comp ; jump` where both _dest_ and _jump_ are optional. Jump
+instructions will run some condition (not always) and then jump to the line
+number stored in register A. Here's an infinite loop:
+
+    1: @1
+    2: 0;JMP
+
+Valid computations include:
+  - 0, 1, -1
+  - D, A, M
+  - -D, -A, -M
+  - !D, !A, !M
+  - D+1, A+1, M+1
+  - D-1, A-1, M-1
+  - D+A, D+M, A-D, M-D
+  - D&A, D&M
+  - D|A, D|M
+
+Valid desinations include:
+  - null, M, D, MD, A, AM, AD, AMD
+      where M is RAM[A] and AM, AD, AMD is a notation for storing the same
+      value in multiple locations
+
+Valid jumps include:
+  - null, JGT, JEQ, JLT, JNE, JLE, JMP
+      where "if ((result of computation) (jump type, eq, <, >, etc.) 0)" then
+      jump to execute the instruction in ROM[A].
+
+Example 1:
+
+    // Set the D register to -1
+    D=-1
+
+
+Example 2:
+
+    // Set RAM[300] to the value of the D register minus 1
+    @300
+    M=D-1
+
+
+Example 3:
+
+    // If (D-1==0) then jump to execute the instruction
+    // stored in ROM[56]
+    @56
+    D-1;JEQ
+
+
+Example 4:
+
+    // An unconditional jump, always jumps to ROM[A] which in this case is set
+    // to 1
+    @1
+    0;JMP
+
+Example 5:
+
+                  computation             jump
+                  |                       |
+            v---------------v          v------v
+    1 1 1 a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    ^ ^ ^ ^                   ^------^
+    | | | |                        |
+    | | | a-bit                    destination
+    | | |
+    | | ignored
+    | |
+    | ignored
+    |
+    op code
+
+
+Example 6:
+
+    // 1. The first line sets the A register to 1.
+    // 2. The second line computes A-1, which is 0.
+    // 3. It then stores this computation in the M register, which is RAM[1] (The
+    //    value of the A register is still 1).
+    // 4. The JEQ jump directive checks whether the computation is equal to 0.
+    // 5. This is true, so the next instruction will be the value stored in the A
+    //    register, which is 1.
+    @1
+    M=A-1;JEQ
+
+
+Example 7:
+
+    // Setting register to 10. No direct way to do this, so we set register A
+    // to 10 with an A-instruction and then use a C-instruction to set register
+    // D to register A.
+    @10
+    D=A
+
+
+Example 8:
+
+    // D++
+    D=D+1
+
+
+Example 9:
+
+    // D=RAM[17]. Again, no direct way of goind this, so we set register M to
+    // 17 with an A-instruction and then use a C-instruction to set register D
+    // to the memory value that is pointed to by the value stored in register
+    // M.
+    @17
+    D=M
+
+
+Example 10:
+
+    // RAM[17]=0
+    @17
+    M=0
+
+
+Example 11:
+
+    // RAM[17]=10
+    @10
+    D=A
+    @17
+    M=D
+
+
+Example 12:
+
+    // RAM[17]=RAM[3]
+    @3
+    D=M
+    @17
+    M=D
+
+
+Example 13:
+
+    // RAM[2]=RAM[0]+RAM[1]
+    @R0
+    D=M
+    @R1
+    D=D+M
+    @R2
+    M=D
+
+
+Example 14:
+
+    // D=10
+    @10
+    D=A
+
+
+Example 15:
+
+    // D=RAM[17]
+    @17
+    D=M
+
+
+Example 16:
+
+    // RAM[11]=10
+    @10
+    D=A
+    A=D+1
+    M=D
+
+
+Binary representations
+----------------------
+
+    | Instruction   | Op code | Example                                        |
+    |---------------|---------|------------------------------------------------|
+    | A-instruction | 0       | 0  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n |
+    | C-instruction | 1       | 1  1  1  a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3 |
+
+
+    | Comparison    | c1  c2  c3  c4  c5  c6 |
+    |---------------|------------------------|
+    |   0   |       |  1   0   1   0   1   0 |
+    |   1   |       |  1   1   1   1   1   1 |
+    |  -1   |       |  1   1   1   0   1   0 |
+    |   D   |       |  0   0   1   1   0   0 |
+    |   A   |   M   |  1   1   0   0   0   0 |
+    |  !D   |       |  0   0   1   1   0   1 |
+    |  !A   |  !M   |  1   1   0   0   0   1 |
+    |  -D   |       |  0   0   1   1   1   1 |
+    |  -A   |  -M   |  1   1   0   0   1   1 |
+    |  D+1  |       |  0   1   1   1   1   1 |
+    |  A+1  |  M+1  |  1   1   0   1   1   1 |
+    |  D-1  |       |  0   0   1   1   1   0 |
+    |  A-1  |  M-1  |  1   1   0   0   1   0 |
+    |  D+A  |  D+M  |  0   0   0   0   1   0 |
+    |  D-A  |  D-M  |  0   1   0   0   1   1 |
+    |  A-D  |  M-D  |  0   0   0   1   1   1 |
+    |  D&A  |  D&M  |  0   0   0   0   0   0 |
+    |  D|A  |  D|M  |  0   1   0   1   0   1 |
+    |---------------|------------------------|
+    |  a=0  |  a=1  |                        |
+
+
+    | Destination | d1  d2  d3 | Description                        |
+    |-------------|------------|------------------------------------|
+    | null        |  0   0   0 | The value is not stored            |
+    | M           |  0   0   1 | RAM[A]                             |
+    | D           |  0   1   0 | D register                         |
+    | MD          |  0   1   1 | RAM[A] and D register              |
+    | A           |  1   0   0 | A register                         |
+    | AM          |  1   0   1 | A register and RAM[A]              |
+    | AD          |  1   1   0 | A register and D register          |
+    | AMD         |  1   1   1 | A register, RAM[A], and D register |
+
+
+    | Jump | j1  j2  j3 | Description        |
+    |------|------------|--------------------|
+    | null |  0   0   0 | No jump            |
+    | JGT  |  0   0   1 | if out>0 jump      |
+    | JEQ  |  0   1   0 | if out=0 jump      |
+    | JGE  |  0   1   1 | if out>=0 jump     |
+    | JLT  |  1   0   0 | if out<0 jump      |
+    | JNE  |  1   0   1 | if out!=0 jump     |
+    | JLE  |  1   1   0 | if out<=0 jump     |
+    | JMP  |  1   1   1 | Unconditional jump |
+
+
+Screen output
+-------------
+
+Display unit is 256 x 512 and is black and white. Two methods of accessing the
+pixels are available:
+
+    word = Screen[32*row + col/16]
+    word = RAM[16384 + 32*row + col/16]
+
+    bit  = word[col%16]
+
+
+Note that 16384 is a constant offset where the screen memory is found in RAM.
+Accessing the bit in 4th row column number 55 would go like this:
+
+    word = Screen[32*4 + 55/16]
+    word = Screen[128 + 3]
+    word = Screen[131]
+    bit  = word[55%16]
+    bit  = word[7]
+
+This gets the 131st word in the Screen buffer then the 7th bit in that word. Or
+Screen[131], 7th bit.
+
+
+Keyboard input
+--------------
+
+Keyboard input is represented in 16 bits. There is a `Keyboard` chip and the
+memory offset is 24576, so `RAM[24576]`.
+
+
+Branching and Labels
+--------------------
+
+Here's a program that sets R1 to 1 if R0 is greater than 0 or to 0 if it is
+less than or equal to 0:
+
+    // if R0>0
+    // then R1=1
+    // else R1=0
+    00: @R0
+    01: D=M       // Loads the value of R0 into D so we can do a jump and comp
+
+    02: @8
+    03: D; JGT    // Jumps to line 8 if D>0
+
+    04: @R1       // Otherwise load register 1
+    05: M=0       // And set its value to 0
+    06: @10
+    07: 0; JMP    // Then jump to line 10 since we're done
+
+    08: @R1       // Then load register 1
+    09: M=1       // And set its value to 1
+
+    10: @10       // Goto 11
+    11: 0; JMP    // Goto 10
+
+
+Here is the same code but using labels
+
+        @R0
+        D=M
+
+        @POSITIVE
+        D; JGT
+
+        @R1
+        M=0
+        @END
+        0; JMP
+
+    (POSITIVE)
+        @R1
+        M=1
+
+    (END)
+        @10
+        0; JMP
+
+
+Variables
+---------
+
+Example using variables:
+
+    // temp = R1
+    // R1 = R0
+    // R0 = temp
+
+      @R1
+      D=M
+      @temp
+      M=D     // temp = R1
+
+      @R0
+      D=M
+      @R1
+      M=D     // R1 = R0
+
+      @temp
+      D=M
+      @R0
+      M=D     // R0 = temp
+
+    (END)
+      @END
+      0;JMP
+
+Variables look just like labels. Any symbol that has no corresponding label is
+a variable. Variables are allocated to the RAM from address 16 (where Rn
+registers end) onward.
+
+
+Iterations
+----------
+
+    // n = R0
+    // i = 1
+    // sum = 0
+    // LOOP:
+    // if i > n goto STOP
+    // sum = sum + i
+    // goto LOOP
+    // STOP
+    // R1 = sum
+
+      @R0
+      D=M
+      @n
+      M=D           // n = R0
+
+      @i
+      M=1           // i = 1
+
+      @sum
+      M=0           // sum = 0
+
+    (LOOP)
+      @i
+      D=M
+      @n
+      D=M-D
+      @STOP
+      D; JLT        // if i > n goto STOP
+
+      @i
+      D=M
+      @sum
+      M=M+D         // sum = sum + i
+
+      @LOOP
+      0;JMP         // goto LOOP
+
+    (STOP)
+      @sum
+      D=M
+      @R1
+      M=D           // R1 = sum
+
+    (END)
+      @END
+      0;JMP
+
+
+
+    // arr = 100
+    // n = 10
+    // for (i = 0; i < n; i++) {
+    //   arr[i] = -1
+    // }
+
+      @100
+      D=A
+      @arr
+      M=D       // arr = 100
+
+      @10
+      D=A
+      @n
+      M=D       // n = 10
+
+      @i
+      M=0       // i = 0
+
+    (LOOP)
+      @i
+      D=M
+      @n
+      D=D-M
+      @END
+      D; JGE    // if (i < n) then goto END
+
+      @i
+      D=M
+      @arr
+      A=M+D
+      M=-1      // arr[i] = -1
+
+      @i
+      M=M+1     // i++
+
+      @LOOP
+      0;JMP
+
+    (END)
+      @END
+      0;JMP
+
+
+Here `arr` is a pointer, since the value it stores it a pointer to a space in
+memory. Setting the A register lets us do pointer arithmetic, `A=1`, points to
+address space `1`, or:
+
+    @arr
+    D=A
+    @indexSize
+    A=D+M
+
+We first get the address of `arr` by loading it and storing that value in the D
+register. Then load the offset size which we can later access using the M
+register. With these two registers we can now set the A register to D+M which
+will result in moving ahead in memory by the indexSize starting at the
+beginning of the array, so now we're pointing to the second item in the array.

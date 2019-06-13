@@ -1,0 +1,155 @@
+Grammar
+-------
+
+```ebnf
+program      = { statement } ;
+statement    = label
+             | ainstruction
+             | cinstruction ;
+
+label        = "(" IDENTIFIERS ")" ;
+ainstruction = "@" IDENTIFIERS ;
+cinstruction = [ destination "=" ] computation [ ";" jump ] ;
+
+computation  = bitconstant
+             | regconstant
+             | uniop ( regconstant | bitconstant )
+             | regconstant binop ( regconstant | bitconstant ) ;
+
+regconstant  = "A" | "D" | "M"
+bitconstant  = "0" | "1"
+binop        = "+" | "-" | "&" | "|" ;
+uniop        = "!" | "-"
+destination  = "M" | "D" | "MD" | "A" | "AM" | "AD" | "AMD" ;
+jump         = "JGT" | "JEQ" | "JGE" | "JLT" | "JNE" | "JLE" | "JMP" ;
+```
+
+
+Symbols
+-------
+
+Pre-defined symbols
+-------------------
+
+    | Symbol    | Value   |
+    |-----------|---------|
+    | SP        | 0       |
+    | LCL       | 1       |
+    | ARG       | 2       |
+    | THIS      | 3       |
+    | THAT      | 4       |
+    | R0 .. R15 | 0 .. 15 |
+    | SCREEN    | 16384   |
+    | KBD       | 24576   |
+
+Label declaration
+------------------
+
+    (label)
+
+Variable declaration
+--------------------
+
+    @variableName
+
+
+
+A-Instruction
+-------------
+
+Syntax                Example
+-----------------------------
+
+@value                @21
+
+Binary
+------
+
+    0000000000000011
+    ^
+    |
+    |
+    +-- op code
+
+Where the _value_ is either:
+- a non-negative decimal constant or
+- a symbol referring to such a constant
+
+
+
+C-Instruction
+-------------
+
+Syntax                Example
+-----------------------------
+
+dest = comp ; jump    0;JMP
+                      AM=M-1
+                      M=D
+                      M=0
+
+Binary
+------
+
+                  computation             jump
+                  |                       |
+            v---------------v          v------v
+    1 1 1 a c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    ^ ^ ^ ^                   ^------^
+    | | | |                        |
+    | | | a-bit                    destination
+    | | |
+    | | ignored
+    | |
+    | ignored
+    |
+    op code
+
+
+    | Comparison    | c1  c2  c3  c4  c5  c6 |
+    |---------------|------------------------|
+    |   0   |       |  1   0   1   0   1   0 |
+    |   1   |       |  1   1   1   1   1   1 |
+    |  -1   |       |  1   1   1   0   1   0 |
+    |   D   |       |  0   0   1   1   0   0 |
+    |   A   |   M   |  1   1   0   0   0   0 |
+    |  !D   |       |  0   0   1   1   0   1 |
+    |  !A   |  !M   |  1   1   0   0   0   1 |
+    |  -D   |       |  0   0   1   1   1   1 |
+    |  -A   |  -M   |  1   1   0   0   1   1 |
+    |  D+1  |       |  0   1   1   1   1   1 |
+    |  A+1  |  M+1  |  1   1   0   1   1   1 |
+    |  D-1  |       |  0   0   1   1   1   0 |
+    |  A-1  |  M-1  |  1   1   0   0   1   0 |
+    |  D+A  |  D+M  |  0   0   0   0   1   0 |
+    |  D-A  |  D-M  |  0   1   0   0   1   1 |
+    |  A-D  |  M-D  |  0   0   0   1   1   1 |
+    |  D&A  |  D&M  |  0   0   0   0   0   0 |
+    |  D|A  |  D|M  |  0   1   0   1   0   1 |
+    |---------------|------------------------|
+    |  a=0  |  a=1  |                        |
+
+
+    | Destination | d1  d2  d3 | Description                        |
+    |-------------|------------|------------------------------------|
+    | null        |  0   0   0 | The value is not stored            |
+    | M           |  0   0   1 | RAM[A]                             |
+    | D           |  0   1   0 | D register                         |
+    | MD          |  0   1   1 | RAM[A] and D register              |
+    | A           |  1   0   0 | A register                         |
+    | AM          |  1   0   1 | A register and RAM[A]              |
+    | AD          |  1   1   0 | A register and D register          |
+    | AMD         |  1   1   1 | A register, RAM[A], and D register |
+
+
+    | Jump | j1  j2  j3 | Description        |
+    |------|------------|--------------------|
+    | null |  0   0   0 | No jump            |
+    | JGT  |  0   0   1 | if out>0 jump      |
+    | JEQ  |  0   1   0 | if out=0 jump      |
+    | JGE  |  0   1   1 | if out>=0 jump     |
+    | JLT  |  1   0   0 | if out<0 jump      |
+    | JNE  |  1   0   1 | if out!=0 jump     |
+    | JLE  |  1   1   0 | if out<=0 jump     |
+    | JMP  |  1   1   1 | Unconditional jump |
+

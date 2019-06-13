@@ -1,0 +1,14 @@
+Mixin Lookup Rules
+------------------
+
+
+When looking for receiver `obj`'s method `m`, look in `obj`'s class, then
+mixins that class includes, then `obj`'s superclass, then the superclass's
+mixins, etc.
+
+Mixins included in same level shadow each other depending on the order they
+were included. Ones included later shadow ones included before.
+
+Instance variables operate on the same class level (the instance itself), so
+they override each other the same way the would with any other style. This is
+poor style, don't set instance variables in mixins.

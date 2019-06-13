@@ -1,0 +1,155 @@
+Dynamic Typing vs. Static Typing
+================================
+
+Let's talk about, convenience, not preventing useful programs, catching bugs
+early, performance, and code reuse.
+
+
+Claim: dynamic typing is more convenient
+----------------------------------------
+
+Dynamic typing lets you build a heterogeneous list or return a "number or a
+string" without workarounds:
+
+Contents of example1.rkt:
+
+    01| (define (f y)
+    02|   (if (> y 0)
+    03|       (+ y y)
+    04|       "hi"))
+    05|
+    06| (let ([ans (f x)])
+    07|   (if (number? ans)
+    08|       (number->string ans)
+    09|       ans))
+
+
+Contents of example1.sml:
+
+    01| datatype t = Int of int
+    02|            | String of string
+    03|
+    04| fun f y =
+    05|   if y > 0
+    06|   then Int (y + y)
+    07|   else String "hi"
+    08|
+    09| case f x
+    10|  of Int i => Int.toString i
+    11|   | String s => s
+
+
+Racket allows us to have a function return a number and a string (depending on
+the code path it takes). SML does not. We have to work around this by creating
+types that can hold all possible return types.
+
+One could argue that static typing is more convenient that dynamic typings
+since it checks for type errors so the programmer doesn't have to.
+
+
+Claim: static typing prevents useful programs
+---------------------------------------------
+
+Any sound static type system forbids programs that do nothing wrong, forcing
+programmers to code around limitations:
+
+Contents of example2.rkt:
+
+    01| (define (f g)
+    02|   (cons (g 7) (g #t)))
+    03|
+    04| (define pair-of-pairs
+    05|   (f (lambda (x) (cons x x))))
+
+
+Contents of example2.sml:
+
+    01| fun f g =
+    02|   (g 7, g true)
+    03|
+    04| val pair_of_pairs =
+    05|   f (fn x => (x, x))
+
+
+The example above demonstrates two programs, both of which attempt to build
+heterogeneous lists of pairs. Racket allows this but SML does not.
+
+
+Claim: static typing catches bugs earlier
+-----------------------------------------
+
+Though static typing catches many simple bugs as soon as compiled. Since such
+bugs are always caught, no need to test for them. And in fact, one can code
+less carefully and "lean on" the type-checker.
+
+Contents of example3.rkt:
+
+    01| (define (pow x)
+    02|   (lambda (y)
+    03|     (if (= y 0)
+    04|         1
+    05|         (* x (pow x (- y 1))))))
+
+
+Contents of example3.sml:
+
+    01| fun pow x y =
+    02|   if y = 0
+    03|   then 1
+    04|   else x * pow (x, y - 1)
+
+
+Here we have two curried functions in Racket and SML. The Racket version
+compiles but is completely unusable. We should be calling it like so: `((pow 4)
+3)` but if you look closer at the implementation, on line 5 you'll notice that
+there is an internal call that is incorrect. The SML version catches this and
+complains, at compile time, that there is a bug on line 4.
+
+
+Claim: static typing is faster
+------------------------------
+
+The language implementation does not need to store tags/information, which
+takes time and space. And it does not need to check those tags, which takes
+time. And code written by a human does not need to check that it got arguments
+of the correct type and is returning a value of the correct type.
+
+
+Claim: dynamic typing can be fast
+---------------------------------
+
+The language implementation can optimize to remove some unnecessary tags and
+checks.
+
+
+Claim: code reuse is easier with dynamic typing
+-----------------------------------------------
+
+Without a restrictive type system, more code can just be reused with data of
+different types. If you can use cons cells for everything, libraries that work
+on cons cells are useful.
+
+
+Claim: code reuse possible with static typing
+---------------------------------------------
+
+Modern type systems should support reasonable code reuse with features like
+generics and subtyping.
+
+
+Claim: dynamic typing is better for prototyping
+-----------------------------------------------
+
+Dynamic code lets you test the part you have written while knowing you're not
+even close to covering all cases. One could argue that static typing is better
+for prototyping since you want to catch those bugs early on and most static
+languages give you ways to easily "fill in the blanks" when it comes to
+covering all types.
+
+
+Claim: static typing is better evolution
+----------------------------------------
+
+When making updates six months from now, it's nice to have a type checker
+assert that this change is not negatively affecting other parts of the code
+base.

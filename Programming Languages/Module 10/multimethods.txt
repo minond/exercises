@@ -1,0 +1,27 @@
+Multimethod
+-----------
+
+Is dynamic dispatch which also looks at the argument types. This is a runtime
+operation, and not to be confused static overloading like in Java, which is a
+compile time check instead. Try compiling `StaticOverloading.java` and you'll
+get this error:
+
+    StaticOverloading.java:59: error: cannot find symbol
+        this.e1.add(this.e2);
+               ^
+      symbol:   method add(LExp)
+      location: variable e1 of type LExp
+    1 error
+
+
+This is due to the fact that `LAdd.eval` is working with `LExp` which may not
+have an `add` method. If this were a runtime check it could know that `e1` and
+`e2` did actually have `add` methods and the operation would work.
+
+C# (v4+?) can simulate multimethods with its new `dynamic` type, allowing one
+to declare a method which redeclares the arguments in question as `dynamic` and
+calls a method again (even with the same name, so kind of like a static
+overloading combined with a runtime check, so... a multimethod.)
+
+
+See `MultiMethods.cs` and `StaticOverloading.java` for an examples.

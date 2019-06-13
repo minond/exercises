@@ -1,0 +1,3 @@
+collection
+size
+	^ posts size

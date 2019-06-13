@@ -1,0 +1,47 @@
+Implementation of a function call
+
+For each function **call** during run-time, the implementation has to:
+- pass parameters from the calling function to the called function,
+- determine the return address within the caller's code,
+- save the caller's return address, stack, and memory segments, and finally
+- jump to execute the called function.
+
+For each function **return** during run-time, the implementation has to :
+- return to the caller the value computed by the called function,
+- recycle the memory resources used by the called function,
+- reinstate the caller's stack and memory segments, and finally
+- jump to the return address in the caller's code.
+
+
+Syntax
+
+The code 'call mult 2' calls a function putting the last two items on the stack
+on that function's arguments memory segment. These two stack items are then
+replaced with the function's return value.
+
+Declaration is done with 'function mult 2' where two stands for the size of the
+function's local memory segment.
+
+
+Example:
+
+    function main 0
+      push constant 3
+      push constant 8
+      push constant 5
+      call mult 2
+      add
+      return
+
+    function mult 2
+      push constnat 0
+      pop local 0
+      push constant 1
+      pop local 1
+    label LOOP
+      push local 1
+      push argument 1
+      // ...
+    label END
+      push local 0
+      return

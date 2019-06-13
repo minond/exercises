@@ -1,0 +1,54 @@
+Generics vs. Subtyping
+----------------------
+
+
+Generics, what are they good for? Functions that operate over generic
+collections:
+
+    val len : 'a list -> int
+    val map : ('a -> 'b) -> 'a list -> 'b list
+    val swap : ('a * 'b) -> ('b * 'a)
+
+
+"Can be anything but some things have to be the same." Without generics one is
+left with downcasting. For example, in Java, Object was the only way to
+represent generic types and a cast was required whenever the value was needed
+in the original, wanted type.
+
+    class Pair {
+      Object x;
+      Object y;
+
+      Pair(Object x, Object y) {
+        this.x = x;
+        this.y = y;
+      }
+
+      Pair swap() {
+        return new Pair(y, x);
+      }
+    }
+
+    Pair p1 = new Pair(3, "Marcos");
+    Pair p2 = p1.swap();
+
+    System.out.println((String) p1.y);
+    System.out.println((String) p2.x);
+
+
+Subtyping, what is it good for? We need a Foo and we're getting a Bar, but
+that's ok because `Foo <: Bar`.
+
+Example: SML does not have subtyping but it does have generics, making the
+second section (ok.sml) ok and the third (bad.sml) something we cannot compile.
+It won't pass the type checker.
+
+    (* lib.sml *)
+    fun distToOrigin ({x = x, y = y}) =
+      Math.sqrt(x*x + y*y)
+
+    (* ok.sml *)
+    distToOrigin({x = 4.2, y = 2.9 })
+
+    (* bad.sml *)
+    distToOrigin({x = 4.2, y = 2.9, z = 2.4 })

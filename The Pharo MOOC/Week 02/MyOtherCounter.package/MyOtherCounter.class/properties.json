@@ -1,0 +1,14 @@
+{
+	"category" : "MyOtherCounter",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "<historical>",
+	"instvars" : [
+		"count" ],
+	"name" : "MyOtherCounter",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }

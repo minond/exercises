@@ -1,0 +1,38 @@
+Multiple Inheritance
+--------------------
+
+
+There are _immediate_ subclasses and _transitive_ subclasses. Given the graph
+below, `C` is an immediate subclass of `B` but not of `A`, it is just a
+transitive subclass of `A`.
+
+    Class Hierarchy
+    ---------------
+
+           A
+           |
+           |
+           B------D
+           |      |
+           |      |
+           C      E
+
+
+Multiple inheritance makes the class hierarchy not a tree anymore. We end up
+with a acyclic graph instead.
+
+    Class Hierarchy
+    ---------------
+
+           X
+           |
+          / \
+         /   \
+        /     \
+       /       W
+      V        |
+       \       Z
+        \     /
+         \   /
+          \ /
+           Y

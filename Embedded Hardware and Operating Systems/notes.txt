@@ -1,0 +1,452 @@
+Embedded Hardware and Operating Systems Notes
+
+# Design Characteristics and Challenges
+
+Attributes of Dependability:
+- Reliable
+- Available
+- Maintainable
+- Safe
+- Secure
+
+Energy efficiency can be estimated using the amount of useful work done per
+Joule. For example, in a processor, the number of instructions done per Joule.
+The number of operations per Joule increases as technology improves.
+
+
+
+# Input/Output Devices
+
+Peripherals and usually exposed as pins. Serial/parallel, analog/digital. There
+are a few possible ways to read input:
+
+- Initiate reading every N (us, ms, s, etc.), which can be triggered on a timer
+  by software. The shorter the interval the more times an input will be
+  checked, and the less likely you are to miss data. But this also make the
+  device less efficient since the processing element will be busy reading more
+  often.
+- Another way to read input is to take an interrupt-based approach. This is
+  hardware initiated and assures that no event will be missed. This method is
+  more reliable.
+
+
+
+# Wire Communication, ADC/DAC
+
+Communication methods are classified in terms serial vs. parallel, synchronous
+vs. asynchronous, full duplex vs. half duplex.
+
+- Synchronous communication: common clock, no synchronization communication,
+  higher throughput.
+- Asynchronous communication: no common clock, data stream has synchronization
+  information within it, less throughput.
+- Full duplex: bidirectional communication which can operate in both directions
+  at the same time. Example: a cell phone, USB v3
+- Half duplex: Bidirectional communication which only most in one direction at
+  a time. Example: a walkie-talkie, USB v1 & v2.
+
+USB, universal serial bus, is made up of four pins: Vcc, GND, Data-, and Data+.
+Below is a table of the data rates for different versions of the protocol:
+
+USB1.0    - 1.5 Mbit/s
+USB2.0    - 480 Mbit/s
+USB3.0    - 5 Gbit/s
+USB3.1    - 10 Gbit/s
+
+Transfers and packets: communication is done in transfers and transfers are
+made up of packets. Types of transfers: control transfer, bulk transfer,
+isochronous transfer, and interrupt transfer.
+
+A packet consists of start bit synchronization, a packet id, the content, and
+CRC, or error detecting information. Different types of packets: token, data,
+handshaking, descriptor.
+
+SPI, serial peripheral interface, uses 4 wires and operates with on master and
+multiple slaves.
+
+Converters: ADC and DAC. ADC, analog to digital converter, converts a voltage
+to a number. DAC, digital to analog converter, converts a number to voltage.
+
+
+
+# Sensors, Actuators, Interrupt vs Polling
+
+Actuators alter physical quantity. Sensors measure physical quantity. They
+convert physical variables (like weight, acceleration) to numbers. They usually
+have a range of limit, a minimum and a maximum limit they can measure from and
+to.
+
+Noise plays a factor in measurements:
+
+X(t)    = true value
+X’(t)    = value caused by noise
+S(t)    = X(t) + X’(t)
+
+Sampling
+
+S(t)    = function of time
+S _d(n) = S(nT) where T= fixed time interval between two subsequent samples and
+          the sampling rate is 1/T Hz.
+
+Polling is when the processor continuously checks the status. This is easy to
+implement but wasteful. See “Initiate reading every N” in Input/Output section.
+Interrupts on the other hand are not wasteful, have no way to miss events.
+Interrupts do break program flow, including other interrupts, so they should be
+fast.
+
+
+
+# Embedded Processors and FPGAs
+
+- https://en.wikipedia.org/wiki/Application-specific_integrated_circuit
+- https://en.wikipedia.org/wiki/Field-programmable_gate_array
+- https://en.wikipedia.org/wiki/Microcontroller
+
+What is a processor? It is an electronic device that executes computations
+sequentially. Computation is made up of many instructions. Different
+architectures have different instruction sets (eg. x86, ARM, etc.)
+
+Examples of processors: x86 (Intel 8086, AMD K5), RISC (Atmel AVR, IBM PowerPC
+601), ARM (Cortex M0, Cortex A57)
+
+What is as FPGA (Field-programmable Gate Array)? It is like a processor but
+created for more specific uses. An FPGA is configurable on a hardware level.
+They are less flexible but more efficient than processors. They are generally
+more energy efficient and faster.
+
+
+# Main features of Embedded Processors
+
+Types of embedded processors: DSP processors, Micro-controllers, GPUs. When
+choosing a processor, weigh the following:
+- Performance requirements
+- Energy consumption
+- Versatility
+- Cost
+
+
+# Micro-controllers
+
+CPU, control logic, instruction decoder, ALU, registers. Has memory, a program
+counter, RAM, and a clock. A higher clock frequency leads to an increase in
+operation speed and therefore an increase in energy consumption.
+
+Peripherals give you input. For example, there are those that give you a way of
+communication, like SPI, I2C, UART, TWI, USB, Ethernet, CAN. Timers and
+counters, like PWM, time interval measurements. And memory, like DMA (Direct
+Memory Access)
+
+Power modes provide developer control over what and when used power.
+Bootloaders are programs that live in the micro-controller and are a way to
+program the device.
+
+Use cases of Micro-controller platforms:
+- Arduino, Atmel AVR, ARM based platform, a range of peripherals available.
+- STM Nucleo, performance vs power, Arduino compatible extensions, builtin
+  programmer/debugger
+
+
+# FPGAs
+
+One one end of the spectrum we have ASICs, which are the most efficient and the
+fastest. They are also the most difficult to change since they are 100%
+hardware based. On the other end we have processors, which are built to handle
+a number of general purpose instructions. As a result, they can be used for any
+type of task but are also the least efficient option. Somewhere in between we
+have FPGAs, which are more hardware based but are built in a way that makes
+then easier to reconfigure.
+
+Logic block are the basic logic unit in an FPGA. Features vary per device.
+Memory is SRAM based, which is designed as small static memory cells. Power is
+required for this type of memory to work. An FPGA can be changed at different
+times. Dynamic reconfiguration can be done while the device is running. Static
+reconfiguration required a reboot.
+
+
+Microcontroller design flow: pick a language, like assembly or C/C++, program
+it. An example in C:
+
+    void main() {
+        PORTA.DIRSET = 0xFF;
+        PORTA.OUTSET = 0x01;
+    }
+
+
+FPGAs design flow: design the device in VHDL, Verilog, etc. An OR gate example
+in VHDL:
+
+    entity OR_entity is
+    port(
+        a: in std_logic;        -- input
+        b: in std_logic;        -- input
+        c: out std_logic    -- output
+    );
+    end OR_entity;
+
+    architecture OR_architecture of OR_entity is
+    begin
+        c <= a or b;
+    end OR_architecture;
+
+
+
+# Embedded Operating Systems
+
+A collection of several pieces of software that act as an intermediate layer
+between software and hardware, manage resources, and provide an environment for
+operating programs efficiently.
+
+Microkernel, a minimal kernel that only manages simple tasks, like handling
+interrupts, process management at a low-level, and message passing.
+Communication is done via IPC and message registers are also employed.
+Advantages include code side and ease of use. Disadvantages include speed; for
+example, in order to create a file in a monolithic kernel, 2 context switches
+are required: one going from the program to the OS to create the file, then a
+second going from the OS back to the program. In a microkernel, a different
+process may be in charge of the file system, while another may be in charge of
+the device driver, resulting in more context switching going from one program
+to another and then back again. As a result, the overall system is slower. This
+affects all forms of operations that require access to the OS, not just IO.
+
+Modular kernel, a hybrid between a monolithic kernel and a microkernel, making
+it a stable and overall good performance OS. Modular kernels are made up of
+many modules, each dedicated to a specific task and is loaded only when needed.
+
+
+Contiki, created by Adam Dunkels in 2002, and is an open source embedded OS
+built for networked and memory-contained systems with a focus on low-power IoT
+devices. It uses protothreads for sharing features of multi-threading and
+event-driven programming, has full TCP/IP networking, dynamic module loading.
+It only has a network simulator, called Cooja.
+
+Hello world in Contiki:
+
+    #include “contiki.h”
+    #include <stdio.h>
+
+    PROCESS(hello_world_process, “Hello World process”);
+    AUTOSTART_PROCESS(&hello_world_process);
+    PROCESS_THREAD(hello_world_process, ev, data) {
+        PROCESS_BEGIN();
+        printf(“Hello, world\n”);
+        PROCESS_END();
+    }
+
+
+TinyOS, another open source OS, this one is based on monolithic OSs, like
+Contiki, it’s was built for networked and memory-contained systems. Development
+started at Berkeley in 1999 and written using nesC. The nesC programming
+language is a component-based, event driven language used to build components
+for TinyOS, has separation of construction and composition, specification of
+component behavior, statically linked component via interfaces. It is
+lightweight in space and time. Simple scheduler, nesC has good support for
+detecting race conditions. TinyOS is designed to stay in sleep mode for as long
+as is possibly can.
+
+Hello world in TinyOS:
+
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    module HelloWorldM {
+        provides {
+            interface Hello;
+        }
+    }
+
+    interface Hello {
+        command void sayHello();
+    }
+
+    implementation {
+        command void Hello.sayHello() {
+            printf(“Hello, world\n”);
+        }
+    }
+
+
+RIOT OS, and is an open source embedded OS built for networked and
+memory-contained systems with a focus on low-power IoT devices. First developed
+by FU Berlin, INRIA, and HAW Hamburg in 1999. Designed in a modular way with
+contamination of system’s configuration. Has a ticklers scheduler which
+switches to an idle thread when there are no remaining tasks. Has zero-latency
+interrupt handlers and minimum context switching times with thread priorities,
+supports multithreading. Hello world in RIOT OS:
+
+    #include <stdio.h>
+
+    int main(void) {
+        printf(“Hello, world\n”);
+        return 0;
+    }
+
+
+
+# Contiki In Depth
+
+- https://en.wikipedia.org/wiki/EEPROM
+
+- Event-driven kernel where services communicate by posting messages. All
+  communication is done through the kernel.
+- Supports preemptive multi-threading. This is where the OS can interrupt a
+  thread and make the CPU work on another thread.
+- No HAL (Hardware Abstract Layer), there is no abstraction between the OS and
+  hardware, so drivers work directly with the hardware. It’s been ported to
+  various micro controllers.
+- It’s able to load and unload services and applications at runtime.
+- Only CPU multiplexing is provided as a module. Other services related to the
+  OS are libraries.
+
+From a programmer’s point of view, the difference between a service and an
+application is that a service is functionality used by one or more
+applications.
+
+A process can be run in either cooperative or preemptive mode. Cooperative code
+runs sequentially in a queue. This means that the first process has the right
+to use the CPU while the other processes wait. After the process is finished,
+then the other processes are ran. In preemptive mode, a process can be
+interrupted and a higher priority task is given the right to use the CPU and
+when it finished, the CPU is handed back to the original process. This is
+managed by the Process Control Block which is owned by the kernel.
+
+    struct process {
+        struct process *next;
+        const char *name;
+        int (* thread)(struct pt*, process_event_t, process_data_t);
+        struct pt pt;
+        unsigned char state, needspoll;
+    }
+
+
+Creating a new process is done using the `PROCESS` macro:
+
+    PROCESS(hello_world_process, “Hello World Process”);
+
+
+Parts of the core system are: communication service, language run-time, program
+loader, and the kernel. The core is compiled into an image. Programs are loaded
+by the program loader. Either communication static or EEPROM for obtaining the
+program binaries. Programs are first stored in EEPROM before being moved into
+the code memory.
+
+# Contiki’s Kernel Architecture
+
+Consists of a lightweight event scheduler. All program execution is triggered
+either by the polling mechanism or by events, which are sent by the kernel.
+Both synchronous and asynchronous events are supported. Asynchronous events are
+not delivered as soon as posted but are stored in an event queue instead. The
+receiver of an asynchronous event can be a specific process or all processes.
+Synchronous events can only be received by specific processes. Event
+identifiers:
+
+    #define PROCESS_EVENT_NONE        128
+    #define PROCESS_EVENT_INIT        129
+    #define PROCESS_EVENT_POLL        130
+    #define PROCESS_EVENT_EXIT        131
+    #define PROCESS_EVENT_CONTINUE    133
+    #define PROCESS_EVENT_MSG         134
+    #define PROCESS_EVENT_EXITED      135
+    #define PROCESS_EVENT_TIMER       136
+
+Loadable programs are implemented in Contiki using a binary format that uses
+relocation information and a runtime function to implemented a loadable
+program.
+
+Power saving features: one of the things that Contiki does to save power is
+that it checked the event queue and if it’s empty it goes to sleep mode. I can
+only be interrupted by an interrupt.
+
+
+# Services and Libraries
+
+Services is some functionality implemented as a module which is loaded only
+when needed. A service can be used by several application programs, like a
+sharable library. And can be dynamical replaced at runtime.
+
+Each service has a unique identifier. This is used to find the service. The
+service interface includes a version number and a function lookup table with
+pointers to the functions.
+
+Since the kernel is so minimal, a lot of the OS is implemented as libraries. A
+program can be linked with libraries in the following ways:
+    - Statically linked with the part of the core library needed.
+    - Statically linked with the part of the loadable program needed.
+    - Dynamically calling services that implement the library needed.
+
+
+# Communication in Contiki
+
+Sensor networks, a gateway, and a backend system are included in the sensor
+network system. Sensors collect data and sent it to the network wirelessly via
+different communication protocols, like WiFi or Bluetooth. Incoming packets are
+stored in a buffer, where using its headers it is directed to the right
+application(s) as a synchronous event.
+
+There are two communication stacks in Contiki. Rime, a lightweight
+communication stack designed for low-power radios, and uIP (or Micro IP), a
+small RFC-compliant TCP/IP stack. Rime is made up of simple protocols, which
+can be used to create other protocols. Has single-hop and multi-hop primitives,
+single-hop broadcast, single-hop unicast, reliable single-hop unicast, and
+best-effort multi-hop unicast. uIP is a TCP/IP compliant protocol suitable for
+small micro-controllers.
+
+Protothreads are used to implement sequential flow of control in a simple way.
+They are lightweight and stalkless threads, each using 2 bytes to store thread
+information. Protothreads are implemented using local continuations.
+
+    int a_protothread_example(struct pt *pt) {
+        PT_BEGIN(pt);
+        PT_WAIT_UNTIL(pt, condition1);        // blocks
+
+        if (something) {
+            PT_WAIT_UNTIL(pt, condition2);    // blocks
+        }
+
+        PT_END(pt);
+    }
+
+
+# Preemptive multi-threading
+
+Implemented as a library that uses timer interrupts. Each thread has a separate
+stack. API:
+    - mt_yield();
+    - mt_post(id, event, dataptr);
+    - mt_wait(event, dataptr);
+    - mt_exit();
+    - mt_start(thread, functionptr, dataptr);
+    - mt_exec(thread);
+
+Over-the-air-programming is a simple protocol in which a binary is sent to a
+node to be ran as a program.
+
+
+##  Contiki confugiration
+
++--------------------------+-------------------+
+| Contiki stack layer      | Value in Contiki  |
++--------------------------+-------------------+
+| Network layer            | rime_driver       |
+| MAC layer                | nullmac_driver    |
+| RDC                      | nullrdc_driver    |
+| Framer                   | framer_nullmac    |
+| Radio                    | nullradio_driver  |
++--------------------------+-------------------+
+
++--------------------------+-------------------+
+| RDC driver configuration | Value in Contiki  |
++--------------------------+-------------------+
+| ContikiMAC               | contikimac_driver |
+| Null_RDC                 | nullrdc_driver    |
+| LPP                      | lpp_driver        |
+| X-MAC                    | xmac_driver       |
+| CX-MAC                   | cxmac_driver      |
++--------------------------+-------------------+
+
+    // calc_energest.c
+    cpu = energest_type_time(ENERGEST_TYPE_CPU);
+    lpm = energest_type_time(ENERGEST_TYPE_LPM);
+    transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+    listen = energest_type_time(ENERGEST_TYPE_LISTEN);
+    time = cpu + lpm;
+    radio = transmit + listen;

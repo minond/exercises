@@ -1,0 +1,7 @@
+# Observations
+
+Network with 10 motes that announce their precence on the network in order for
+other motes to learn of them and save a record of their address in a list of
+neighbors. Then, on a timer, a message is sent to a neighbor picked at random.
+The message is a simple string that includes the node id of the node where the
+message originated from.

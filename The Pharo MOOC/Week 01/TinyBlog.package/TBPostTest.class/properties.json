@@ -1,0 +1,14 @@
+{
+	"category" : "TinyBlog",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "",
+	"instvars" : [
+		 ],
+	"name" : "TBPostTest",
+	"pools" : [
+		 ],
+	"super" : "TestCase",
+	"type" : "normal" }

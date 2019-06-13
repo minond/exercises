@@ -1,0 +1,14 @@
+{
+	"category" : "MyBoolean",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "<historical>",
+	"instvars" : [
+		 ],
+	"name" : "MyFalse",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }

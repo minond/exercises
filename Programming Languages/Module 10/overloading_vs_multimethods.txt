@@ -1,0 +1,27 @@
+Probably the best distinction I could find was this:
+
+> Overloading is when two or more methods have the same name but different
+> signature (different argument types, different number of arguments).
+> Overloading is resolved statically, depending only on the static types of the
+> arguments. (The interaction of overloading and overriding, in Java, for
+> example, makes the story a little more complicated). Overloading resolves
+> statically to a particular method signature. Then at runtime, dynamic
+> dispatch will select the most appropriate method with that signature.
+
+> Multimethods are a collection of methods that have the same name, the same
+> number of arguments, and overlapping type signatures. Whenever a call is made
+> to a multimethod (using the name of the multimethod), all of the methods in
+> the collection is considered as a possible candidate for dispatch. The
+> precise candidate is chosen depending on the runtime types of the arguments –
+> the most specific method is selected. The actual runtime types of all
+> arguments are used to determine which one to run, which differs from
+> traditional single dispatch in Java, where only the first argument (the
+> target) of the method is used to determine which method body is run.
+
+> ~ Dave Clarke
+> https://cs.stackexchange.com/questions/4660/difference-between-multimethods-and-overloading?newreg=04540502240948a891b33ccfab428756
+
+Tl;dr is overloading is a static, compile time check, while multimethods is a
+runtime operation that evaluates (checks) all argument's types at runtime.
+
+Tl;dr tl;dr is overloading is static typing and multimethods is dynamic.

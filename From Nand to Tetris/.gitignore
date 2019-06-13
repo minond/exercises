@@ -1,0 +1,10 @@
+*.cmp
+*.tst
+*.out
+*.hack
+*.asm
+*.vm
+
+/nand2tetris
+/translator
+/assembler

@@ -1,0 +1,76 @@
+Memory Segments
+---------------
+
+- Argument
+- Local
+- Static
+- Constant: the numbers 0 .. n, has just a pop and no push.
+- This
+- That
+- Temp
+- Pointer: a fixed 2-place segment. Accessing `pointer 0` should result in
+    accessing `THIS`. Accessing `pointer 1` should result in accessing `THAT`.
+
+
+RAM[0] is SP (stack pointer) and RAM[1] is LCL (base address of the local
+memory segment)
+
+Static memory is a little different. Instead of having a segment with a stack
+pointer, static memory is tied to the file/class it's definied in. For exaple,
+static 3 would be mapped to the RAM location where the assembler maps the
+variable `Foo.3`, where `Foo` is the name of the VM file in which the code
+resides.
+
+    +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+    |  0  |  1  |  2  |  3  |  4  |  5  | ... |  12 |  13 |  14 |  15 |  16 | ... | 255 |
+    +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+       |     |     |     |     |     |           |     |     |     |     |           |
+       |     |     |     |     |     +-----------+     |     |     |     +-----------+
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           |
+       |     |     |     |     |           |           |     |     |           +------------------ STATIC
+       |     |     |     |     |           |           |     |     +------------------------------ R15
+       |     |     |     |     |           |           |     +------------------------------------ R14
+       |     |     |     |     |           |           +------------------------------------------ R13
+       |     |     |     |     |           +------------------------------------------------------ TEMP
+       |     |     |     |     +------------------------------------------------------------------ THAT
+       |     |     |     +------------------------------------------------------------------------ THIS
+       |     |     +------------------------------------------------------------------------------ ARG
+       |     +------------------------------------------------------------------------------------ LCL
+       +------------------------------------------------------------------------------------------ SP
+
+Commands
+--------
+
+- push <segment> <value>
+- pop <segment> <value>
+
+
+Examples:
+
+    push constant 17
+    pop local 2
+    pop static 5
+    push argument 3
+
+    // let local 2 = argument 1
+    push argument 1
+    pop local 2
+
+    pop local i       // addr = LCL + i, SP--, *addr = *SP
+    push local i      // addr = LCL + i, *SP = *addr, SP++
+
+    push pointer 0/1  // *SP = THIS/THAT, SP++
+    pop pointer 0/1   // SP--, THIS/THAT = *SP
+
+Addressing Modes
+----------------
+
+Register:   `Add R1, R2`      // R2 = R2 + R1
+Direct:     `Add R1, M[200]`  // Mem[200] = Mem[200] + R1
+Indirect:   `Add R1, @A`      // Mem[A] = Mem[A] + R1
+Immediate:  `Add 73, R1`      // R1 = R1 + 73

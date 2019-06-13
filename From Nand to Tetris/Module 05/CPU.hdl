@@ -1,0 +1,108 @@
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU, two registers
+ * named A and D, and a program counter named PC. The CPU is designed to fetch
+ * and execute instructions written in the Hack machine language. In
+ * particular, functions as follows:
+ *
+ *  - Executes the inputted instruction according to the Hack machine language
+ *    specification.
+ *
+ *  - The D and A in the language specification refer to CPU-resident
+ *    registers, while M refers to the external memory location addressed by A,
+ *    i.e. to Memory[A]. The inM input holds the value of this location.
+ *
+ *  - If the current instruction needs to write a value to M, the value is
+ *    placed in outM, the address of the target location is placed in the
+ *    addressM output, and the writeM control bit is asserted. (When writeM==0,
+ *    any value may appear in outM).
+ *
+ *  - The outM and writeM outputs are combinational: they are affected
+ *    instantaneously by the execution of the current instruction.
+ *
+ *  - The addressM and pc outputs are clocked: although they are affected by
+ *    the execution of the current instruction, they commit to their new values
+ *    only in the next time step.
+ *
+ *  - If reset==1 then the CPU jumps to address 0 (i.e. pc is set to 0 in next
+ *    time step) rather than to the address resulting from executing the
+ *    current instruction.
+ */
+CHIP CPU {
+    IN  inM[16],         // - M value input  (M = contents of RAM[A])
+        instruction[16], // - Instruction for execution
+        reset;           // - Signals whether to re-start the current
+                         //   program (reset==1) or continue executing the
+                         //   current program (reset==0).
+
+    OUT outM[16],        // - M value output
+        writeM,          // - Write to M?
+        addressM[15],    // - Address in data memory (of M)
+        pc[15];          // - Address of next instruction
+
+    PARTS:
+    Not(in = instruction[15], out = aInstruction);
+    Not(in = aInstruction, out = cInstruction);
+
+    And(a = cInstruction, b = instruction[5], out = hasDestination);
+    Mux16(a = instruction, b = outALU, sel = hasDestination, out = inA);
+    Or(a = aInstruction, b = hasDestination, out = loadA);
+    ARegister(in = inA, load = loadA, out = outA);
+
+    // Addressing writeM output
+    And(a = cInstruction, b = instruction[3], out = writeM);
+
+    // Addressing addressM and outM outputs
+    Or16(a = outA, b = false, out[0..14] = addressM);
+    Or16(a = outALU, b = false, out = outM);
+
+    And(a = cInstruction, b = instruction[4], out = loadD);
+    DRegister(in = outALU, load = loadD, out = lhsData);
+    Mux16(a = outA, b = inM, sel = instruction[12], out = rhsData);
+
+    ALU(x = lhsData, y = rhsData,
+        zx = instruction[11], nx = instruction[10],
+        zy = instruction[9], ny = instruction[8],
+        f = instruction[7], no = instruction[6],
+        zr = isZero, ng = isNegative, out = outALU);
+
+    // Addressing pc output
+    //
+    // | Jump | j1  j2  j3 | Description        |
+    // |------|------------|--------------------|
+    // | null |  0   0   0 | No jump            |
+    // | JGT  |  0   0   1 | if out>0 jump      |
+    // | JEQ  |  0   1   0 | if out=0 jump      |
+    // | JGE  |  0   1   1 | if out>=0 jump     |
+    // | JLT  |  1   0   0 | if out<0 jump      |
+    // | JNE  |  1   0   1 | if out!=0 jump     |
+    // | JLE  |  1   1   0 | if out<=0 jump     |
+    // | JMP  |  1   1   1 | Unconditional jump |
+
+    Or(a = isZero, b = isNegative, out = isZeroOrNeg);
+    Not(in = isZeroOrNeg, out = isPositive);
+
+    And(a = instruction[0], b = isPositive, out = jgt);
+    And(a = instruction[1], b = isZero, out = jeq);
+    And(a = instruction[2], b = isNegative, out = jlt);
+
+
+    // Not(in = jeq, out = jne);
+    // Or(a = jeq, b = jgt, out = jge);
+    // Or(a = jeq, b = jlt, out = jle);
+    Or8Way(
+      out = jumps,
+      in[0] = jgt,
+      in[1] = jeq,
+      in[2] = jlt,
+      in[3] = false,
+      in[4] = false,
+      in[5] = false,
+      in[6] = false,
+      in[7] = false
+    );
+
+    And(a = cInstruction, b = jumps, out = loadPC);
+    Not(in = loadPC, out = incPC);
+    PC(in = outA, load = loadPC, inc = incPC, reset = reset,
+        out[0..14] = pc);
+}

@@ -1,3 +1,41 @@
+### Courses
+
+- Embedded Hardware and Operating Systems
+  https://www.coursera.org/learn/embedded-operating-system
+
+- From Nand to Tetris, Parts 1 and 2
+  https://www.coursera.org/learn/nand2tetris1
+  https://www.coursera.org/learn/nand2tetris2
+
+- Introduction to SWI-Prolog
+  https://edu.swi-prolog.org/
+
+- Java Programming and Software Engineering Fundamentals
+  https://www.coursera.org/specializations/java-programming
+
+- Programming Languages, Parts A, B, and C
+  https://www.coursera.org/learn/programming-languages
+  https://www.coursera.org/learn/programming-languages-part-b
+  https://www.coursera.org/learn/programming-languages-part-c
+
+- The Pharo MOOC
+  http://mooc.pharo.org
+  http://rmod-pharo-mooc.lille.inria.fr/MOOC
+  http://rmod-pharo-mooc.lille.inria.fr/MOOC/WebPortal
+
+- The R Programming Environment
+  https://www.coursera.org/learn/r-programming-environment
+
+
+### Backlog
+
+- https://cstack.github.io/db_tutorial/
+- https://github.com/s-matyukevich/raspberry-pi-os
+- https://github.com/prakhar1989/awesome-courses
+
+
+### Books
+
 - Beautiful Racket
   By Matthew Butterick
   https://beautifulracket.com/
@@ -49,6 +87,9 @@
 - The Tao of Programming
   By Geoffrey James
   https://en.wikipedia.org/wiki/The_Tao_of_Programming
+
+
+### Misc.
 
 - `d`, https://tour.dlang.org/
 - `dart`, https://www.udacity.com/course/build-native-mobile-apps-with-flutter--ud905

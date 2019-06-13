@@ -1,0 +1,62 @@
+FP and OOP often doing the same thing in exact opposite way. One organizes the
+program by rows or by columns. Which is "most natural" may depend on what you
+are doing (e.g., a GUI vs a compiler)
+
++-----------------------------------------------------------------------------+
+|        | eval | toString | hasZero | ...                                    |
++-----------------------------------------------------------------------------+
+| Int    |      |          |         |                                        |
++-----------------------------------------------------------------------------+
+| Add    |      |          |         |                                        |
++-----------------------------------------------------------------------------+
+| Negate |      |          |         |                                        |
++-----------------------------------------------------------------------------+
+| ...    |      |          |         |                                        |
++-----------------------------------------------------------------------------+
+
+Standard approach in ML would be to define a datatype, with one constructor for
+each variant (Int, Add, etc.) and in each function (eval, toString, etc.)
+pattern match type.
+
+    datatype exp
+      = Int of int
+      | Neg of exp
+
+    fun eval e =
+      case e
+       of Int i => i
+        | Neg e =>
+          case (eval e)
+           of Int i => Int (~i)
+            | _ => raise BadResult "Expecting an Int expression."
+
+
+Standard approach in OOP would be to define a class for each variant (Int, Add,
+etc.) with a method for each operation.
+
+    class Exp
+    end
+
+    class Int < Exp
+      attr_reader :i
+
+      def initialize i
+        @i = i
+      end
+
+      def eval
+        self
+      end
+    end
+
+    class Neg < Exp
+      attr_reader :e
+
+      def initialize e
+        @e = e
+      end
+
+      def eval
+        Int.new -e.eval.i
+      end
+    end
