@@ -1,0 +1,9 @@
+-- Standard stuff:
+--   ^
+--   not  - (unary negation)
+--   *    /
+--   +    -
+--   ..
+--   <    >    <=    >=    ~=    ==
+--   and
+--   or

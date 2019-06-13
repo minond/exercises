@@ -1,4 +1,54 @@
-Playing around.
+- Beautiful Racket
+  By Matthew Butterick
+  https://beautifulracket.com/
+
+- Build Your Own Lisp
+  By Daniel Holden
+  http://buildyourownlisp.com/
+
+- Compiler Construction
+  By Niklaus Wirth
+  https://books.google.com/books?id=GDUzAAAAMAAJ
+
+- Crafting Interpreters
+  By Bob Nystrom
+  http://www.craftinginterpreters.com/
+
+- Language Implementation Patterns
+  By Terence Parr
+  https://pragprog.com/book/tpdsl/language-implementation-patterns
+
+- Programming in Lua
+  By Roberto Ierusalimschy
+  https://www.lua.org/pil/contents.html
+
+- Programming in Prolog
+  By William F. Clocksin and Christopher S. Mellish
+  https://books.google.com/books/about/Programming_in_Prolog.html?id=GUFGAQAAIAAJ
+
+- Seven Concurrency Models in Seven Weeks
+  By Paul Butcher
+  https://pragprog.com/book/pb7con/seven-concurrency-models-in-seven-weeks
+
+- Seven Languages in Seven Weeks
+  By Bruce Tate
+  https://pragprog.com/book/btlang/seven-languages-in-seven-weeks
+
+- The C Programming Language (2nd Edition)
+  By Brian W. Kernighan and Dennis Ritchie
+  https://books.google.com/books?id=3_wGtAEACAAJ
+
+- The Little Schemer
+  By Daniel P. Friedman and Matthias Felleisen
+  https://mitpress.mit.edu/books/little-schemer
+
+- The Pragmatic Programmer
+  By Andy Hunt and Dave Thomas
+  https://pragprog.com/book/tpp/the-pragmatic-programmer
+
+- The Tao of Programming
+  By Geoffrey James
+  https://en.wikipedia.org/wiki/The_Tao_of_Programming
 
 - `d`, https://tour.dlang.org/
 - `dart`, https://www.udacity.com/course/build-native-mobile-apps-with-flutter--ud905
