@@ -12,3 +12,9 @@ data MyList a
 
 myHead (MyNil) = Nothing
 myHead (MyCons head _) = Just head
+
+-- sequencing computation with do syntax
+do
+  let x = x + y
+  apiResult <- makeAnAPIRequest x
+  return apiResult
