@@ -13,12 +13,13 @@ type Applicable interface {
 type Lambda struct {
 	lang.Value
 	Applicable
-	args []string
-	body lang.Expr
+	args  []string
+	body  lang.Expr
+	scope *Environment
 }
 
-func NewLambda(args []string, body lang.Expr) *Lambda {
-	return &Lambda{args: args, body: body}
+func NewLambda(args []string, body lang.Expr, scope *Environment) *Lambda {
+	return &Lambda{args: args, body: body, scope: scope}
 }
 
 func (v Lambda) Apply(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
@@ -27,18 +28,18 @@ func (v Lambda) Apply(exprs []lang.Expr, env *Environment) (lang.Value, *Environ
 			len(v.args), len(exprs))
 	}
 
-	params, newEnv, err := evalAll(exprs, env)
-	env = newEnv
+	params, _, err := evalAll(exprs, env)
 	if err != nil {
 		return nil, env, err
 	}
 
-	scope := env.Scoped()
+	scope := v.scope.Scoped()
 	for i, val := range params {
 		scope.Set(v.args[i], val)
 	}
 
-	return eval(v.body, scope)
+	ret, _, err := eval(v.body, scope)
+	return ret, env, err
 }
 
 func (v Lambda) String() string {

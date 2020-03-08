@@ -61,7 +61,7 @@ var builtinLambda = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.V
 		args[i] = id.Label()
 	}
 
-	return NewLambda(args, exprs[1]), env, nil
+	return NewLambda(args, exprs[1], env), env, nil
 })
 
 var builtinDefine = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
