@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/minond/exercises/vm/lisp/vm/lang"
 	"github.com/minond/exercises/vm/lisp/vm/runtime"
 )
 
@@ -37,24 +38,24 @@ func (r *repl) print(str string) {
 	fmt.Fprint(r.output, str)
 }
 
-func (r *repl) eval() (string, error) {
+func (r *repl) eval() (string, lang.Value, error) {
 	orig := r.buff.String()
 	code := strings.TrimSpace(orig)
 	if code == "" {
-		return "", nil
+		return "", nil, nil
 	}
 
 	switch code {
 	case "(exit)":
 		r.running = false
-		return "", nil
+		return "", nil, nil
 	}
 
 	out, env, err := runtime.Eval(orig, r.env)
 	r.env = env
 	r.buff.Reset()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	buff := strings.Builder{}
@@ -64,15 +65,23 @@ func (r *repl) eval() (string, error) {
 		}
 		if val != nil {
 			buff.WriteString(val.String())
+			buff.WriteString(" : ")
+			buff.WriteString(runtime.TypeNameOf(val))
 		}
 	}
-	return buff.String(), nil
+
+	if len(out) != 0 {
+		return buff.String(), out[len(out)-1], nil
+	} else {
+		return buff.String(), nil, nil
+	}
 }
 
 func main() {
+	env := runtime.NewEnvironmentWithPrelude()
 	r := repl{
 		running: true,
-		env:     runtime.NewEnvironmentWithPrelude(),
+		env:     env,
 		output:  os.Stdout,
 		input:   os.Stdin,
 	}
@@ -80,11 +89,12 @@ func main() {
 	for r.running {
 		r.prompt()
 		r.read()
-		val, err := r.eval()
+		str, val, err := r.eval()
+		env.Set("_", val)
 		if err != nil {
 			r.printf("%v\n", err)
-		} else if val != "" {
-			r.printf("%v\n", val)
+		} else if str != "" {
+			r.printf("%v\n", str)
 		}
 	}
 }

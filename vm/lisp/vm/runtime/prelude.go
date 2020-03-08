@@ -409,27 +409,5 @@ func procedureType(args []lang.Value) (lang.Value, error) {
 		return nil, errors.New("contract error: expected one argument")
 	}
 
-	switch args[0].(type) {
-	case *lang.List:
-		return lang.NewQuote(lang.NewIdentifier("list")), nil
-	case *lang.Boolean:
-		return lang.NewQuote(lang.NewIdentifier("boolean")), nil
-	case *lang.String:
-		return lang.NewQuote(lang.NewIdentifier("string")), nil
-	case *lang.Number:
-		return lang.NewQuote(lang.NewIdentifier("number")), nil
-	case *lang.Quote:
-		return lang.NewQuote(lang.NewIdentifier("quote")), nil
-
-	// TODO Maybe these three types should be commbined into two (a lazy one
-	// and an eager one.)
-	case *Lambda:
-		return lang.NewQuote(lang.NewIdentifier("lambda")), nil
-	case *Builtin:
-		return lang.NewQuote(lang.NewIdentifier("builtin")), nil
-	case *Procedure:
-		return lang.NewQuote(lang.NewIdentifier("procedure")), nil
-	}
-
-	return lang.NewQuote(lang.NewIdentifier("unknown")), nil
+	return lang.NewQuote(lang.NewIdentifier(TypeNameOf(args[0]))), nil
 }
