@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/minond/exercises/vm/lisp/vm/lang"
 )
@@ -21,6 +22,24 @@ func NewEnvironmentWithPrelude() *Environment {
 	env := NewEnvironment()
 	env.parent = uni
 	return env
+}
+
+func (env *Environment) String() string {
+	return env.PrettyPrint(1)
+}
+
+func (env *Environment) PrettyPrint(level int) string {
+	buff := strings.Builder{}
+	padd := strings.Repeat(" ", level*2)
+	buff.WriteString(fmt.Sprintf("%s+ level: %d\n", padd, level))
+	for key, val := range env.bindings {
+		buff.WriteString(fmt.Sprintf("%s  - %s: %s\n", padd, key, val))
+	}
+
+	if env.parent != nil {
+		return buff.String() + env.parent.PrettyPrint(level+1)
+	}
+	return buff.String()
 }
 
 func (env *Environment) Scoped() *Environment {

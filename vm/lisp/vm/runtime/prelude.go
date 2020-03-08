@@ -8,10 +8,11 @@ import (
 )
 
 var builtins = map[string]lang.Value{
-	"cond":   builtinCond,
-	"set!":   builtinSetBang,
-	"define": builtinDefine,
-	"lambda": builtinLambda,
+	"cond":           builtinCond,
+	"set!":           builtinSetBang,
+	"define":         builtinDefine,
+	"lambda":         builtinLambda,
+	"print-universe": builtinPrintUniverse,
 }
 
 var procedures = map[string]procedureFn{
@@ -40,6 +41,11 @@ func init() {
 		builtins[name] = NewProcedure(name, proc)
 	}
 }
+
+var builtinPrintUniverse = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
+	fmt.Printf("%v\n", env)
+	return lang.NewBoolean(true), env, nil
+})
 
 var builtinLambda = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
 	if len(exprs) != 2 {
