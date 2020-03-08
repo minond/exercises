@@ -13,6 +13,10 @@ var builtins = map[string]lang.Value{
 	"define":         builtinDefine,
 	"lambda":         builtinLambda,
 	"print-universe": builtinPrintUniverse,
+	"dict":           builtinDict,
+	"dict-get":       builtinDictGet,
+	"dict-keys":      builtinDictKeys,
+	"dict-values":    builtinDictValues,
 }
 
 var procedures = map[string]procedureFn{
@@ -41,6 +45,98 @@ func init() {
 		builtins[name] = NewProcedure(name, proc)
 	}
 }
+
+var builtinDictValues = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
+	if len(exprs) != 1 {
+		return nil, env, errors.New("contract error: expected one argument")
+	}
+
+	dictMaybe, _, err := eval(exprs[0], env)
+	if err != nil {
+		return nil, env, err
+	}
+
+	dict, ok := dictMaybe.(*Dict)
+	if !ok {
+		return nil, env, errors.New("contract error: expecting a dict as the first argument")
+	}
+
+	return lang.NewList(dict.Values()), env, nil
+})
+
+var builtinDictKeys = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
+	if len(exprs) != 1 {
+		return nil, env, errors.New("contract error: expected one argument")
+	}
+
+	dictMaybe, _, err := eval(exprs[0], env)
+	if err != nil {
+		return nil, env, err
+	}
+
+	dict, ok := dictMaybe.(*Dict)
+	if !ok {
+		return nil, env, errors.New("contract error: expecting a dict as the first argument")
+	}
+
+	return lang.NewList(dict.Keys()), env, nil
+})
+
+var builtinDictGet = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
+	if len(exprs) != 2 {
+		return nil, env, errors.New("contract error: expected two arguments")
+	}
+
+	dictMaybe, _, err := eval(exprs[0], env)
+	if err != nil {
+		return nil, env, err
+	}
+
+	dict, ok := dictMaybe.(*Dict)
+	if !ok {
+		return nil, env, errors.New("contract error: expecting a dict as the first argument")
+	}
+
+	keyMaybe, _, err := eval(exprs[1], env)
+	if err != nil {
+		return nil, env, err
+	}
+
+	key, ok := keyMaybe.(*lang.Quote)
+	if !ok {
+		return nil, env, errors.New("contract error: expecting a quote as the second argument")
+	}
+
+	return dict.Get(key), env, nil
+})
+
+var builtinDict = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
+	if len(exprs)%2 != 0 {
+		return nil, env, errors.New("dict: key to value mismatch")
+	}
+
+	var keys []*lang.Quote
+	var values []lang.Value
+
+	for i, expr := range exprs {
+		val, _, err := eval(expr, env)
+		if err != nil {
+			return nil, env, err
+		}
+
+		if i%2 == 0 {
+			key, ok := val.(*lang.Quote)
+			if !ok {
+				return nil, env, fmt.Errorf("contract error: expecting quote but got %v instead", val)
+			}
+			keys = append(keys, key)
+		} else {
+			values = append(values, val)
+		}
+	}
+
+	return NewDict(keys, values), env, nil
+})
 
 var builtinPrintUniverse = NewBuiltin(func(exprs []lang.Expr, env *Environment) (lang.Value, *Environment, error) {
 	fmt.Printf("%v\n", env)

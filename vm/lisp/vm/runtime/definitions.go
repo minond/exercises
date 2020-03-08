@@ -93,3 +93,39 @@ func (v Procedure) Apply(exprs []lang.Expr, env *Environment) (lang.Value, *Envi
 	val, err := v.fn(params)
 	return val, env, err
 }
+
+type Dict struct {
+	lang.Value
+	keys   []*lang.Quote
+	values []lang.Value
+}
+
+func NewDict(keys []*lang.Quote, values []lang.Value) *Dict {
+	return &Dict{keys: keys, values: values}
+}
+
+func (d Dict) String() string {
+	return "dict"
+}
+
+func (d Dict) Keys() []lang.Value {
+	vals := make([]lang.Value, len(d.keys))
+	for i, key := range d.keys {
+		vals[i] = key
+	}
+	return vals
+}
+
+func (d Dict) Values() []lang.Value {
+	return d.values
+}
+
+func (d Dict) Get(key *lang.Quote) lang.Value {
+	for i := range d.keys {
+		// TODO this comparison check needs to be improved
+		if key.String() == d.keys[i].String() {
+			return d.values[i]
+		}
+	}
+	return lang.NewList(nil)
+}
