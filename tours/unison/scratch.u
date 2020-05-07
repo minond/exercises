@@ -1,0 +1,65 @@
+-- Anything below this line is ignored by Unison.
+
+-- Every definition is hashed, including its type signature and body. This
+-- allows for indexing searching this content across the codebase, like
+-- Smalltalk's code search tool.
+
+-- The `find` command is able to search for a matching type. The `view` command
+-- is able to re-generate a definition (using the hashed content that Unison
+-- stores.)
+
+-- An example:
+--
+--   .> find : [a] -> [a]
+--
+--     1. base.Heap.sort : [a] -> [a]
+--     2. base.List.distinct : [a] -> [a]
+--     3. base.List.init : [a] -> [a]
+--     4. base.List.reverse : [a] -> [a]
+--     5. base.Heap.sortDescending : [a] -> [a]
+--
+--
+--  .> view 3
+--
+--    base.List.init : [a] -> [a]                   -- ":" is pronounces as "has type", lowercase type variables are type variables.
+--    base.List.init = cases
+--      []      -> []
+--      xs :+ _ -> xs
+
+
+square : Nat -> Nat
+square x =
+  sum (map (x -> x * 2 + 1) (range 0 x))
+
+sum : [Nat] -> Nat
+sum = foldl (+) 0
+
+> square 32
+
+---
+
+use .base                                           -- allows us to say Nat instead of base.Nat
+
+square : Nat -> Nat
+square x = x * x
+
+
+use test
+
+test> square.tests.example1 = check (square 4 == 16)
+test> square.tests.example2 = check (square 3 == 9)
+
+-- Let's test that forall a b. square a * square b = square (a * b)
+
+test> square.tests.property1 =
+  go _ = a = !nat -- this is a block. it can have any number of bindings at
+                  -- the same indentation level and is terminated by a single
+                  -- expression.
+         b = !nat -- !nat means the same as nat(). nat comes from test.nat
+         expect (square a * square b == square (a * b)) -- this is the expression that terminates the block
+  runs 100 go
+
+---
+
+> List.map square [1, 2, 3, 4]
+> List.map (x -> x * 10) [1, 2, 3, 4]
