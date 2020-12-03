@@ -18,6 +18,16 @@ structure ListExt = struct
     in
       foldl aux NONE xs
     end
+
+  fun count f xs =
+    let
+      fun aux xs n =
+        case xs
+          of nil => n
+           | h :: t => aux t (n + (if f h then 1 else 0))
+    in
+      aux xs 0
+    end
 end
 
 structure StringExt = struct
@@ -27,5 +37,11 @@ structure StringExt = struct
     tokens (Op.eq char) str
 end
 
+structure Aoc = struct
+  val readAllLines =
+    StringExt.splitBy #"\n" o TextIOExt.readAll
+end
+
 val eq = Op.eq ;
 val first = ListExt.first ;
+val count = ListExt.count ;
