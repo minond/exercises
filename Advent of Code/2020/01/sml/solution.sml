@@ -1,3 +1,5 @@
+use "../../../../utils/aoc.sml";
+
 (* https://adventofcode.com/2020/day/1
  *
  * Before you leave, the Elves in accounting just need you to fix your expense
@@ -19,20 +21,6 @@
  * them together produces 1721 * 299 = 514579, so the correct answer is 514579. *)
 structure Day01 = struct
   val TOTAL = 2020
-
-  val readAll =
-    TextIO.inputAll o TextIO.openIn
-
-  fun eq a b =
-    a = b
-
-  fun splitTokens char str =
-    String.tokens (eq char) str
-
-  fun first f (n, acc) =
-    case acc of
-         NONE => f n
-       | _ => acc
 
   fun withPartner ns n =
     let
@@ -58,10 +46,10 @@ structure Day01 = struct
 
   fun run inputFile =
     let
-      val input = readAll inputFile
-      val lines = splitTokens #"\n" input
+      val input = TextIOExt.readAll inputFile
+      val lines = StringExt.splitBy #"\n" input
       val numbs = List.mapPartial Int.fromString lines
-      val results = foldl (first (withPartner numbs)) NONE numbs
+      val results = first (withPartner numbs) numbs
     in
       printAnswer results
     end
