@@ -1,4 +1,4 @@
-use "../../../../utils/aoc.sml";
+use "../../../utils/aoc.sml";
 
 (* https://adventofcode.com/2020/day/1
  *
@@ -55,4 +55,4 @@ structure Day01 = struct
     end
 end ;
 
-Day01.run "../input.txt"
+Day01.run "input.txt"
