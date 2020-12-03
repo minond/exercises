@@ -53,10 +53,10 @@ structure PasswordEntry :> PASSWORD_ENTRY = struct
     end
     handle Subscript => NONE
 
-  fun valid entry =
-    case #policy entry
+  fun valid {policy, password} =
+    case policy
       of Policy(min, max, ch) =>
-           let val curr = count (eq ch) (String.explode (#password entry))
+           let val curr = count (eq ch) (String.explode password)
            in
              curr >= min andalso curr <= max
            end
