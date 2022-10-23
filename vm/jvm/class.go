@@ -19,11 +19,11 @@ type ClassFile struct {
 	InterfacesCount   uint16
 	Interfaces        []uint16
 	FieldsCount       uint16
-	Fields            []FieldInfo
+	Fields            []*FieldInfo
 	MethodsCount      uint16
-	Methods           []MethodInfo
+	Methods           []*MethodInfo
 	AttributesCount   uint16
-	Attributes        []AttributeInfo
+	Attributes        []*AttributeInfo
 }
 
 func (cf ClassFile) String() string {
@@ -34,9 +34,7 @@ func (cf ClassFile) String() string {
 	return string(bytes)
 }
 
-func Read(r *bufio.Reader) ClassFile {
-	cf := ClassFile{}
-
+func (cf *ClassFile) Read(r *bufio.Reader) {
 	cf.Magic = hex.EncodeToString(read(r, 4))
 	cf.MinorVersion = read_u16(r)
 	cf.MajorVersion = read_u16(r)
@@ -63,27 +61,28 @@ func Read(r *bufio.Reader) ClassFile {
 
 	cf.FieldsCount = read_u16(r)
 	if cf.FieldsCount > 0 {
-		cf.Fields = make([]FieldInfo, cf.FieldsCount)
+		cf.Fields = make([]*FieldInfo, cf.FieldsCount)
 		for i := uint16(0); i < cf.FieldsCount; i++ {
-			cf.Fields[i] = readFieldInfo(r)
+			cf.Fields[i] = &FieldInfo{}
+			cf.Fields[i].Read(r)
 		}
 	}
 
 	cf.MethodsCount = read_u16(r)
 	if cf.MethodsCount > 0 {
-		cf.Methods = make([]MethodInfo, cf.MethodsCount)
+		cf.Methods = make([]*MethodInfo, cf.MethodsCount)
 		for i := uint16(0); i < cf.MethodsCount; i++ {
-			cf.Methods[i] = readMethodInfo(r)
+			cf.Methods[i] = &MethodInfo{}
+			cf.Methods[i].Read(r)
 		}
 	}
 
 	cf.AttributesCount = read_u16(r)
 	if cf.AttributesCount > 0 {
-		cf.Attributes = make([]AttributeInfo, cf.AttributesCount)
+		cf.Attributes = make([]*AttributeInfo, cf.AttributesCount)
 		for i := uint16(0); i < cf.AttributesCount; i++ {
-			cf.Attributes[i] = readAttributeInfo(r)
+			cf.Attributes[i] = &AttributeInfo{}
+			cf.Attributes[i].Read(r)
 		}
 	}
-
-	return cf
 }

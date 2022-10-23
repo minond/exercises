@@ -13,7 +13,9 @@ func main() {
 	}
 
 	r := bufio.NewReader(f)
-	cf := Read(r)
+
+	cf := &ClassFile{}
+	cf.Read(r)
 
 	for _, info := range cf.ConstantPool {
 		classInfo, ok := info.(*ClassInfo)
@@ -29,5 +31,4 @@ func main() {
 		fmt.Println(utf8Info.Value)
 		fmt.Println(classInfo)
 	}
-	fmt.Println(cf)
 }

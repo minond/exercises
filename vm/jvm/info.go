@@ -10,22 +10,21 @@ type MethodInfo struct {
 	NameIndex       uint16
 	DescriptorIndex uint16
 	AttributesCount uint16
-	Attributes      []AttributeInfo
+	Attributes      []*AttributeInfo
 }
 
-func readMethodInfo(r *bufio.Reader) MethodInfo {
-	info := MethodInfo{}
+func (info *MethodInfo) Read(r *bufio.Reader) {
 	info.AccessFlags = read_u16(r)
 	info.NameIndex = read_u16(r)
 	info.DescriptorIndex = read_u16(r)
 	info.AttributesCount = read_u16(r)
 	if info.AttributesCount > 0 {
-		info.Attributes = make([]AttributeInfo, info.AttributesCount)
+		info.Attributes = make([]*AttributeInfo, info.AttributesCount)
 		for i := uint16(0); i < info.AttributesCount; i++ {
-			info.Attributes[i] = readAttributeInfo(r)
+			info.Attributes[i] = &AttributeInfo{}
+			info.Attributes[i].Read(r)
 		}
 	}
-	return info
 }
 
 type FieldInfo struct {
@@ -33,22 +32,21 @@ type FieldInfo struct {
 	NameIndex       uint16
 	DescriptorIndex uint16
 	AttributesCount uint16
-	Attributes      []AttributeInfo
+	Attributes      []*AttributeInfo
 }
 
-func readFieldInfo(r *bufio.Reader) FieldInfo {
-	info := FieldInfo{}
+func (info *FieldInfo) Read(r *bufio.Reader) {
 	info.AccessFlags = read_u16(r)
 	info.NameIndex = read_u16(r)
 	info.DescriptorIndex = read_u16(r)
 	info.AttributesCount = read_u16(r)
 	if info.AttributesCount > 0 {
-		info.Attributes = make([]AttributeInfo, info.AttributesCount)
+		info.Attributes = make([]*AttributeInfo, info.AttributesCount)
 		for i := uint16(0); i < info.AttributesCount; i++ {
-			info.Attributes[i] = readAttributeInfo(r)
+			info.Attributes[i] = &AttributeInfo{}
+			info.Attributes[i].Read(r)
 		}
 	}
-	return info
 }
 
 type AttributeInfo struct {
@@ -57,12 +55,10 @@ type AttributeInfo struct {
 	Info               []byte
 }
 
-func readAttributeInfo(r *bufio.Reader) AttributeInfo {
-	info := AttributeInfo{}
+func (info *AttributeInfo) Read(r *bufio.Reader) {
 	info.AttributeNameIndex = read_u16(r)
 	info.AttributeLength = read_u32(r)
 	info.Info = read(r, info.AttributeLength)
-	return info
 }
 
 const (
