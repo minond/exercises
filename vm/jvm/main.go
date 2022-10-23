@@ -13,6 +13,21 @@ func main() {
 	}
 
 	r := bufio.NewReader(f)
-	class := Read(r)
-	fmt.Println(class)
+	cf := Read(r)
+
+	for _, info := range cf.ConstantPool {
+		classInfo, ok := info.(*ClassInfo)
+		if !ok {
+			continue
+		}
+
+		utf8Info, ok := cf.ConstantPool[classInfo.NameIndex-1].(*Utf8Info)
+		if !ok {
+			panic(fmt.Sprintf("expecting utf8_info"))
+		}
+
+		fmt.Println(utf8Info.Value)
+		fmt.Println(classInfo)
+	}
+	fmt.Println(cf)
 }
