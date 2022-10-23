@@ -9,4 +9,4 @@ compile:
 	@$(CC) $(SRC) -o main $(C_FLAGS)
 
 clean:
-	@-rm main
+	[ -f main ] && rm main || true
