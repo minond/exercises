@@ -20,6 +20,10 @@ type Class struct {
 	Interfaces        []uint16
 	FieldsCount       uint16
 	Fields            []FieldInfo
+	MethodsCount      uint16
+	Methods           []MethodInfo
+	AttributesCount   uint16
+	Attributes        []AttributeInfo
 }
 
 func (class Class) String() string {
@@ -51,7 +55,7 @@ func Read(r *bufio.Reader) Class {
 
 	class.InterfacesCount = read_u16(r)
 	if class.InterfacesCount > 0 {
-		class.Interfaces = make([]uint16, class.InterfacesCount-1)
+		class.Interfaces = make([]uint16, class.InterfacesCount)
 		for i := uint16(0); i < class.InterfacesCount; i++ {
 			class.Interfaces[i] = read_u16(r)
 		}
@@ -59,9 +63,25 @@ func Read(r *bufio.Reader) Class {
 
 	class.FieldsCount = read_u16(r)
 	if class.FieldsCount > 0 {
-		class.Fields = make([]FieldInfo, class.FieldsCount-1)
+		class.Fields = make([]FieldInfo, class.FieldsCount)
 		for i := uint16(0); i < class.FieldsCount; i++ {
 			class.Fields[i] = readFieldInfo(r)
+		}
+	}
+
+	class.MethodsCount = read_u16(r)
+	if class.MethodsCount > 0 {
+		class.Methods = make([]MethodInfo, class.MethodsCount)
+		for i := uint16(0); i < class.MethodsCount; i++ {
+			class.Methods[i] = readMethodInfo(r)
+		}
+	}
+
+	class.AttributesCount = read_u16(r)
+	if class.AttributesCount > 0 {
+		class.Attributes = make([]AttributeInfo, class.AttributesCount)
+		for i := uint16(0); i < class.AttributesCount; i++ {
+			class.Attributes[i] = readAttributeInfo(r)
 		}
 	}
 

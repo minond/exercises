@@ -5,6 +5,29 @@ import (
 	"fmt"
 )
 
+type MethodInfo struct {
+	AccessFlags     uint16
+	NameIndex       uint16
+	DescriptorIndex uint16
+	AttributesCount uint16
+	Attributes      []AttributeInfo
+}
+
+func readMethodInfo(r *bufio.Reader) MethodInfo {
+	info := MethodInfo{}
+	info.AccessFlags = read_u16(r)
+	info.NameIndex = read_u16(r)
+	info.DescriptorIndex = read_u16(r)
+	info.AttributesCount = read_u16(r)
+	if info.AttributesCount > 0 {
+		info.Attributes = make([]AttributeInfo, info.AttributesCount)
+		for i := uint16(0); i < info.AttributesCount; i++ {
+			info.Attributes[i] = readAttributeInfo(r)
+		}
+	}
+	return info
+}
+
 type FieldInfo struct {
 	AccessFlags     uint16
 	NameIndex       uint16
@@ -20,7 +43,7 @@ func readFieldInfo(r *bufio.Reader) FieldInfo {
 	info.DescriptorIndex = read_u16(r)
 	info.AttributesCount = read_u16(r)
 	if info.AttributesCount > 0 {
-		info.Attributes = make([]AttributeInfo, info.AttributesCount-1)
+		info.Attributes = make([]AttributeInfo, info.AttributesCount)
 		for i := uint16(0); i < info.AttributesCount; i++ {
 			info.Attributes[i] = readAttributeInfo(r)
 		}
