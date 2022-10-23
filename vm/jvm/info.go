@@ -65,6 +65,23 @@ func readAttributeInfo(r *bufio.Reader) AttributeInfo {
 	return info
 }
 
+const (
+	Utf8Tag               uint8 = 1
+	IntegerTag                  = 3
+	FloatTag                    = 4
+	LongTag                     = 5
+	DoubleTag                   = 6
+	ClassTag                    = 7
+	StringTag                   = 8
+	FieldrefTag                 = 9
+	MethodrefTag                = 10
+	InterfaceMethodrefTag       = 11
+	NameAndTypeTag              = 12
+	MethodHandleTag             = 15
+	MethodTypeTag               = 16
+	InvokeDynamicTag            = 18
+)
+
 type CpInfo interface {
 	Read(*bufio.Reader)
 }
@@ -73,17 +90,17 @@ func readCpInfo(r *bufio.Reader) CpInfo {
 	var info CpInfo
 
 	switch tag := peek_u8(r); tag {
-	case 1:
+	case Utf8Tag:
 		info = &Utf8Info{}
-	case 7:
+	case ClassTag:
 		info = &ClassInfo{}
-	case 8:
+	case StringTag:
 		info = &StringInfo{}
-	case 9:
+	case FieldrefTag:
 		info = &FieldrefInfo{}
-	case 10:
+	case MethodrefTag:
 		info = &MethodrefInfo{}
-	case 12:
+	case NameAndTypeTag:
 		info = &NameAndTypeInfo{}
 	default:
 		panic(fmt.Sprintf("unable to parse tag: %d", tag))

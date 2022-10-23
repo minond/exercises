@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type Class struct {
+type ClassFile struct {
 	Magic             string
 	MinorVersion      uint16
 	MajorVersion      uint16
@@ -26,64 +26,64 @@ type Class struct {
 	Attributes        []AttributeInfo
 }
 
-func (class Class) String() string {
-	bytes, err := json.MarshalIndent(class, "", "    ")
+func (cf ClassFile) String() string {
+	bytes, err := json.MarshalIndent(cf, "", "    ")
 	if err != nil {
 		panic(fmt.Sprintf("unable to marshal class data: %s", err))
 	}
 	return string(bytes)
 }
 
-func Read(r *bufio.Reader) Class {
-	class := Class{}
+func Read(r *bufio.Reader) ClassFile {
+	cf := ClassFile{}
 
-	class.Magic = hex.EncodeToString(read(r, 4))
-	class.MinorVersion = read_u16(r)
-	class.MajorVersion = read_u16(r)
+	cf.Magic = hex.EncodeToString(read(r, 4))
+	cf.MinorVersion = read_u16(r)
+	cf.MajorVersion = read_u16(r)
 
-	class.ConstantPoolCount = read_u16(r)
-	if class.ConstantPoolCount > 0 {
-		class.ConstantPool = make([]CpInfo, class.ConstantPoolCount-1)
-		for i := uint16(0); i < class.ConstantPoolCount-1; i++ {
-			class.ConstantPool[i] = readCpInfo(r)
+	cf.ConstantPoolCount = read_u16(r)
+	if cf.ConstantPoolCount > 0 {
+		cf.ConstantPool = make([]CpInfo, cf.ConstantPoolCount-1)
+		for i := uint16(0); i < cf.ConstantPoolCount-1; i++ {
+			cf.ConstantPool[i] = readCpInfo(r)
 		}
 	}
 
-	class.AccessFlags = read_u16(r)
-	class.ThisClass = read_u16(r)
-	class.SuperClass = read_u16(r)
+	cf.AccessFlags = read_u16(r)
+	cf.ThisClass = read_u16(r)
+	cf.SuperClass = read_u16(r)
 
-	class.InterfacesCount = read_u16(r)
-	if class.InterfacesCount > 0 {
-		class.Interfaces = make([]uint16, class.InterfacesCount)
-		for i := uint16(0); i < class.InterfacesCount; i++ {
-			class.Interfaces[i] = read_u16(r)
+	cf.InterfacesCount = read_u16(r)
+	if cf.InterfacesCount > 0 {
+		cf.Interfaces = make([]uint16, cf.InterfacesCount)
+		for i := uint16(0); i < cf.InterfacesCount; i++ {
+			cf.Interfaces[i] = read_u16(r)
 		}
 	}
 
-	class.FieldsCount = read_u16(r)
-	if class.FieldsCount > 0 {
-		class.Fields = make([]FieldInfo, class.FieldsCount)
-		for i := uint16(0); i < class.FieldsCount; i++ {
-			class.Fields[i] = readFieldInfo(r)
+	cf.FieldsCount = read_u16(r)
+	if cf.FieldsCount > 0 {
+		cf.Fields = make([]FieldInfo, cf.FieldsCount)
+		for i := uint16(0); i < cf.FieldsCount; i++ {
+			cf.Fields[i] = readFieldInfo(r)
 		}
 	}
 
-	class.MethodsCount = read_u16(r)
-	if class.MethodsCount > 0 {
-		class.Methods = make([]MethodInfo, class.MethodsCount)
-		for i := uint16(0); i < class.MethodsCount; i++ {
-			class.Methods[i] = readMethodInfo(r)
+	cf.MethodsCount = read_u16(r)
+	if cf.MethodsCount > 0 {
+		cf.Methods = make([]MethodInfo, cf.MethodsCount)
+		for i := uint16(0); i < cf.MethodsCount; i++ {
+			cf.Methods[i] = readMethodInfo(r)
 		}
 	}
 
-	class.AttributesCount = read_u16(r)
-	if class.AttributesCount > 0 {
-		class.Attributes = make([]AttributeInfo, class.AttributesCount)
-		for i := uint16(0); i < class.AttributesCount; i++ {
-			class.Attributes[i] = readAttributeInfo(r)
+	cf.AttributesCount = read_u16(r)
+	if cf.AttributesCount > 0 {
+		cf.Attributes = make([]AttributeInfo, cf.AttributesCount)
+		for i := uint16(0); i < cf.AttributesCount; i++ {
+			cf.Attributes[i] = readAttributeInfo(r)
 		}
 	}
 
-	return class
+	return cf
 }

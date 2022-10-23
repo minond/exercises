@@ -3,7 +3,8 @@ interface Tester {
 }
 
 public class Main {
+    final static String greeting = "Hello, world";
     public static void main(String[] args) {
-        System.out.println("hello, world");
+        System.out.println(greeting);
     }
 }
