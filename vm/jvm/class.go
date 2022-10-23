@@ -29,7 +29,7 @@ type ClassFile struct {
 func (cf ClassFile) String() string {
 	bytes, err := json.MarshalIndent(cf, "", "    ")
 	if err != nil {
-		panic(fmt.Sprintf("unable to marshal class data: %s", err))
+		panic(fmt.Sprintf("unable to marshal class file: %s", err))
 	}
 	return string(bytes)
 }
@@ -85,4 +85,37 @@ func (cf *ClassFile) Read(r *bufio.Reader) {
 			cf.Attributes[i].Read(r)
 		}
 	}
+}
+
+func (cf ClassFile) Classes() ([]*Class, error) {
+	var classes []*Class
+
+	classInfosByIndex := make(map[uint16]*ClassInfo)
+	methodrefsByIndex := make(map[uint16][]*MethodrefInfo)
+	fieldrefsByIndex := make(map[uint16][]*FieldrefInfo)
+
+	for index, info := range cf.ConstantPool {
+		switch ref := info.(type) {
+		case *ClassInfo:
+			classInfosByIndex[uint16(index+1)] = ref
+		case *MethodrefInfo:
+			methodrefsByIndex[ref.ClassIndex] = append(methodrefsByIndex[ref.ClassIndex], ref)
+		case *FieldrefInfo:
+			fieldrefsByIndex[ref.ClassIndex] = append(fieldrefsByIndex[ref.ClassIndex], ref)
+		}
+	}
+
+	for index, classInfo := range classInfosByIndex {
+		nameInfo, ok := cf.ConstantPool[classInfo.NameIndex-1].(*Utf8Info)
+		if !ok {
+			return nil, fmt.Errorf("expecting class name utf8 info")
+		}
+
+		classes = append(classes, NewClass(nameInfo,
+			methodrefsByIndex[index],
+			fieldrefsByIndex[index],
+			cf.ConstantPool))
+	}
+
+	return classes, nil
 }

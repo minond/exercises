@@ -12,23 +12,8 @@ func main() {
 		panic("error opening class file")
 	}
 
-	r := bufio.NewReader(f)
-
 	cf := &ClassFile{}
-	cf.Read(r)
+	cf.Read(bufio.NewReader(f))
 
-	for _, info := range cf.ConstantPool {
-		classInfo, ok := info.(*ClassInfo)
-		if !ok {
-			continue
-		}
-
-		utf8Info, ok := cf.ConstantPool[classInfo.NameIndex-1].(*Utf8Info)
-		if !ok {
-			panic(fmt.Sprintf("expecting utf8_info"))
-		}
-
-		fmt.Println(utf8Info.Value)
-		fmt.Println(classInfo)
-	}
+	fmt.Println(cf.Classes())
 }
