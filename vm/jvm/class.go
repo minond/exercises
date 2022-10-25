@@ -91,18 +91,23 @@ func (cf ClassFile) Classes() ([]*Class, error) {
 	var classes []*Class
 
 	classInfosByIndex := make(map[uint16]*ClassInfo)
-	methodrefsByIndex := make(map[uint16][]*MethodrefInfo)
-	fieldrefsByIndex := make(map[uint16][]*FieldrefInfo)
+	methodsByNameIndex := make(map[uint16][]*MethodInfo)
+	methodRefsByIndex := make(map[uint16][]*MethodrefInfo)
+	fieldRefsByIndex := make(map[uint16][]*FieldrefInfo)
 
 	for index, info := range cf.ConstantPool {
 		switch ref := info.(type) {
 		case *ClassInfo:
 			classInfosByIndex[uint16(index+1)] = ref
 		case *MethodrefInfo:
-			methodrefsByIndex[ref.ClassIndex] = append(methodrefsByIndex[ref.ClassIndex], ref)
+			methodRefsByIndex[ref.ClassIndex] = append(methodRefsByIndex[ref.ClassIndex], ref)
 		case *FieldrefInfo:
-			fieldrefsByIndex[ref.ClassIndex] = append(fieldrefsByIndex[ref.ClassIndex], ref)
+			fieldRefsByIndex[ref.ClassIndex] = append(fieldRefsByIndex[ref.ClassIndex], ref)
 		}
+	}
+
+	for _, method := range cf.Methods {
+		methodsByNameIndex[method.NameIndex] = append(methodsByNameIndex[method.NameIndex], method)
 	}
 
 	for index, classInfo := range classInfosByIndex {
@@ -112,9 +117,10 @@ func (cf ClassFile) Classes() ([]*Class, error) {
 		}
 
 		classes = append(classes, NewClass(nameInfo,
-			methodrefsByIndex[index],
-			fieldrefsByIndex[index],
-			cf.ConstantPool))
+			methodRefsByIndex[index],
+			fieldRefsByIndex[index],
+			methodsByNameIndex,
+			cf))
 	}
 
 	return classes, nil

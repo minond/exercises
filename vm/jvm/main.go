@@ -2,8 +2,9 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+
+	"github.com/kr/pretty"
 )
 
 func main() {
@@ -15,5 +16,5 @@ func main() {
 	cf := &ClassFile{}
 	cf.Read(bufio.NewReader(f))
 
-	fmt.Println(cf.Classes())
+	pretty.Println(cf.Classes())
 }

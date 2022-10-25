@@ -1,10 +1,16 @@
-interface Tester {
-    public int test();
-}
-
 public class Main {
-    final static String greeting = "Hello, world";
+    int base;
+
+    public Main(int base) {
+        this.base = base;
+    }
+
+    public int processIt(int x) {
+        return x + x + base;
+    }
+
     public static void main(String[] args) {
-        System.out.println(greeting);
+        Main main = new Main(10);
+        System.out.println(main.processIt(10));
     }
 }
