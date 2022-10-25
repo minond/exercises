@@ -1,7 +1,13 @@
 package main
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+)
+
 type Class struct {
-	Name    string
+	Name    *Utf8Info
 	Methods []*Method
 	Fields  []*Field
 }
@@ -12,6 +18,45 @@ type Method struct {
 
 	methodRef   *MethodrefInfo
 	nameAndType *NameAndTypeInfo
+}
+
+func (method Method) PrintInstructions() {
+	for _, impl := range method.Impl {
+		opcodes := bytes.NewReader(impl.Attributes[0].Info)
+
+		for {
+			opcode, err := opcodes.ReadByte()
+			if err == io.EOF {
+				break
+			}
+
+			// tail1, _ := opcodes.ReadByte()
+			// tail2, _ := opcodes.ReadByte()
+			// // tail3, _ := opcodes.ReadByte()
+			// x := (opcode << 16) | (tail1 << 8) | (tail2 << 0)
+			// fmt.Printf("    ?? 0x%0x\n", x)
+			//
+			// continue
+
+			if mnemonic, found := instructionMnemonics[opcode]; found {
+				fmt.Printf("    %s", mnemonic)
+			} else {
+				fmt.Printf("    ? 0x%0x", opcode)
+			}
+
+			switch opcode {
+			case 0xb7:
+				fallthrough
+			case 0xb4:
+				arg1, _ := opcodes.ReadByte()
+				arg2, _ := opcodes.ReadByte()
+				arg := (arg1 << 8) | arg2
+				fmt.Printf(" %d", arg)
+			}
+
+			fmt.Println("")
+		}
+	}
 }
 
 type Field struct {
@@ -63,7 +108,7 @@ func NewClass(name *Utf8Info, methodRefsByIndex []*MethodrefInfo, fieldRefsByInd
 	}
 
 	return &Class{
-		Name:    name.Value,
+		Name:    name,
 		Methods: methods,
 		Fields:  fields,
 	}

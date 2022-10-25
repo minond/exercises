@@ -2,9 +2,8 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
-
-	"github.com/kr/pretty"
 )
 
 func main() {
@@ -16,5 +15,16 @@ func main() {
 	cf := &ClassFile{}
 	cf.Read(bufio.NewReader(f))
 
-	pretty.Println(cf.Classes())
+	classes, err := cf.Classes()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, class := range classes {
+		fmt.Printf("%s:\n", class.Name.Value)
+		for _, method := range class.Methods {
+			fmt.Printf("  %s:\n", method.Name.Value)
+			method.PrintInstructions()
+		}
+	}
 }
