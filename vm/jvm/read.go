@@ -19,6 +19,14 @@ func peek_u8(r *bufio.Reader) uint8 {
 	return data[0]
 }
 
+func peek_u16(r *bufio.Reader) uint16 {
+	data, err := r.Peek(2)
+	if err != nil {
+		panic("error reading data from reader")
+	}
+	return uint16(data[0]<<8) | uint16(data[1])
+}
+
 func read_u8(r *bufio.Reader) uint8 {
 	return read(r, 1)[0]
 }

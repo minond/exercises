@@ -10,19 +10,18 @@ type MethodInfo struct {
 	NameIndex       uint16
 	DescriptorIndex uint16
 	AttributesCount uint16
-	Attributes      []*AttributeInfo
+	Attributes      []AttributeInfo
 }
 
-func (info *MethodInfo) Read(r *bufio.Reader) {
+func (info *MethodInfo) Read(r *bufio.Reader, cp []CpInfo) {
 	info.AccessFlags = read_u16(r)
 	info.NameIndex = read_u16(r)
 	info.DescriptorIndex = read_u16(r)
 	info.AttributesCount = read_u16(r)
 	if info.AttributesCount > 0 {
-		info.Attributes = make([]*AttributeInfo, info.AttributesCount)
+		info.Attributes = make([]AttributeInfo, info.AttributesCount)
 		for i := uint16(0); i < info.AttributesCount; i++ {
-			info.Attributes[i] = &AttributeInfo{}
-			info.Attributes[i].Read(r)
+			info.Attributes[i] = readAttribute(r, cp)
 		}
 	}
 }
@@ -32,33 +31,20 @@ type FieldInfo struct {
 	NameIndex       uint16
 	DescriptorIndex uint16
 	AttributesCount uint16
-	Attributes      []*AttributeInfo
+	Attributes      []AttributeInfo
 }
 
-func (info *FieldInfo) Read(r *bufio.Reader) {
+func (info *FieldInfo) Read(r *bufio.Reader, cp []CpInfo) {
 	info.AccessFlags = read_u16(r)
 	info.NameIndex = read_u16(r)
 	info.DescriptorIndex = read_u16(r)
 	info.AttributesCount = read_u16(r)
 	if info.AttributesCount > 0 {
-		info.Attributes = make([]*AttributeInfo, info.AttributesCount)
+		info.Attributes = make([]AttributeInfo, info.AttributesCount)
 		for i := uint16(0); i < info.AttributesCount; i++ {
-			info.Attributes[i] = &AttributeInfo{}
-			info.Attributes[i].Read(r)
+			info.Attributes[i] = readAttribute(r, cp)
 		}
 	}
-}
-
-type AttributeInfo struct {
-	AttributeNameIndex uint16
-	AttributeLength    uint32
-	Info               []byte
-}
-
-func (info *AttributeInfo) Read(r *bufio.Reader) {
-	info.AttributeNameIndex = read_u16(r)
-	info.AttributeLength = read_u32(r)
-	info.Info = read(r, info.AttributeLength)
 }
 
 const (
@@ -186,4 +172,120 @@ func (info *StringInfo) Read(r *bufio.Reader) {
 	info.Name = "CONSTANT_String"
 	info.Tag = read_u8(r)
 	info.StringIndex = read_u16(r)
+}
+
+type AttributeInfo interface {
+	Read(*bufio.Reader, []CpInfo)
+}
+
+func readAttribute(r *bufio.Reader, cp []CpInfo) AttributeInfo {
+	var attr AttributeInfo
+
+	utf8, ok := cp[peek_u16(r)-1].(*Utf8Info)
+	if !ok {
+		panic("unable to locate utf-8 info constant for attribute")
+	}
+
+	switch utf8.Value {
+	case "Code":
+		attr = &CodeAttribute{}
+	case "LineNumberTable":
+		attr = &LineNumberTableAttribute{}
+	case "SourceFile":
+		attr = &LineNumberTableAttribute{}
+	default:
+		panic(fmt.Sprintf("unable to parse attribute: %s", utf8.Value))
+	}
+
+	attr.Read(r, cp)
+	return attr
+}
+
+type CodeAttribute struct {
+	AttributeNameIndex   uint16
+	AttributeLength      uint32
+	MaxStack             uint16
+	MaxLocals            uint16
+	CodeLength           uint32
+	Code                 []byte
+	ExceptionTableLength uint16
+	ExceptionTable       []*ExceptionTableEntry
+	AttributesCount      uint16
+	Attributes           []AttributeInfo
+}
+
+func (attr *CodeAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.MaxStack = read_u16(r)
+	attr.MaxLocals = read_u16(r)
+	attr.CodeLength = read_u32(r)
+	attr.Code = read(r, attr.CodeLength)
+
+	attr.ExceptionTableLength = read_u16(r)
+	if attr.ExceptionTableLength > 0 {
+		attr.ExceptionTable = make([]*ExceptionTableEntry, attr.ExceptionTableLength)
+		for i := uint16(0); i < attr.ExceptionTableLength; i++ {
+			attr.ExceptionTable[i] = &ExceptionTableEntry{
+				StartPc:   read_u16(r),
+				EndPc:     read_u16(r),
+				HandlerPc: read_u16(r),
+				CatchType: read_u16(r),
+			}
+		}
+	}
+
+	attr.AttributesCount = read_u16(r)
+	if attr.AttributesCount > 0 {
+		attr.Attributes = make([]AttributeInfo, attr.AttributesCount)
+		for i := uint16(0); i < attr.AttributesCount; i++ {
+			attr.Attributes[i] = readAttribute(r, cp)
+		}
+	}
+}
+
+type ExceptionTableEntry struct {
+	StartPc   uint16
+	EndPc     uint16
+	HandlerPc uint16
+	CatchType uint16
+}
+
+type LineNumberTableAttribute struct {
+	AttributeNameIndex    uint16
+	AttributeLength       uint32
+	LineNumberTableLength uint16
+	LineNumberTable       []*LineNumberTableEntry
+}
+
+func (attr *LineNumberTableAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.LineNumberTableLength = read_u16(r)
+	if attr.LineNumberTableLength > 0 {
+		attr.LineNumberTable = make([]*LineNumberTableEntry, attr.LineNumberTableLength)
+		for i := uint16(0); i < attr.LineNumberTableLength; i++ {
+			attr.LineNumberTable[i] = &LineNumberTableEntry{
+				StartPc:    read_u16(r),
+				LineNumber: read_u16(r),
+			}
+		}
+	}
+}
+
+type LineNumberTableEntry struct {
+	StartPc    uint16
+	LineNumber uint16
+}
+
+type SourceFileAttribute struct {
+	AttributeNameIndex uint16
+	AttributeLength    uint32
+	SourcefileIndex    uint16
+}
+
+func (attr *SourceFileAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.SourcefileIndex = read_u16(r)
 }

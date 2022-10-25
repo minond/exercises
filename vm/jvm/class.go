@@ -23,7 +23,7 @@ type ClassFile struct {
 	MethodsCount      uint16
 	Methods           []*MethodInfo
 	AttributesCount   uint16
-	Attributes        []*AttributeInfo
+	Attributes        []AttributeInfo
 }
 
 func (cf ClassFile) String() string {
@@ -64,7 +64,7 @@ func (cf *ClassFile) Read(r *bufio.Reader) {
 		cf.Fields = make([]*FieldInfo, cf.FieldsCount)
 		for i := uint16(0); i < cf.FieldsCount; i++ {
 			cf.Fields[i] = &FieldInfo{}
-			cf.Fields[i].Read(r)
+			cf.Fields[i].Read(r, cf.ConstantPool)
 		}
 	}
 
@@ -73,16 +73,15 @@ func (cf *ClassFile) Read(r *bufio.Reader) {
 		cf.Methods = make([]*MethodInfo, cf.MethodsCount)
 		for i := uint16(0); i < cf.MethodsCount; i++ {
 			cf.Methods[i] = &MethodInfo{}
-			cf.Methods[i].Read(r)
+			cf.Methods[i].Read(r, cf.ConstantPool)
 		}
 	}
 
 	cf.AttributesCount = read_u16(r)
 	if cf.AttributesCount > 0 {
-		cf.Attributes = make([]*AttributeInfo, cf.AttributesCount)
+		cf.Attributes = make([]AttributeInfo, cf.AttributesCount)
 		for i := uint16(0); i < cf.AttributesCount; i++ {
-			cf.Attributes[i] = &AttributeInfo{}
-			cf.Attributes[i].Read(r)
+			cf.Attributes[i] = readAttribute(r, cf.ConstantPool)
 		}
 	}
 }
