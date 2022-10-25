@@ -192,7 +192,7 @@ func readAttribute(r *bufio.Reader, cp []CpInfo) AttributeInfo {
 	case "LineNumberTable":
 		attr = &LineNumberTableAttribute{}
 	case "SourceFile":
-		attr = &LineNumberTableAttribute{}
+		attr = &SourceFileAttribute{}
 	default:
 		panic(fmt.Sprintf("unable to parse attribute: %s", utf8.Value))
 	}

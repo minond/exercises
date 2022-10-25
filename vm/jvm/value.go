@@ -15,9 +15,6 @@ type Class struct {
 type Method struct {
 	Name *Utf8Info
 	Impl []*MethodInfo
-
-	methodRef   *MethodrefInfo
-	nameAndType *NameAndTypeInfo
 }
 
 func (method Method) PrintInstructions() {
@@ -42,6 +39,16 @@ func (method Method) PrintInstructions() {
 				}
 
 				switch opcode {
+				case 0x16:
+					fallthrough
+				case 0x10:
+					arg, _ := opcodes.ReadByte()
+					fmt.Printf(" %d", arg)
+
+				case 0xb2:
+					fallthrough
+				case 0xb6:
+					fallthrough
 				case 0xb7:
 					fallthrough
 				case 0xb4:
@@ -59,9 +66,6 @@ func (method Method) PrintInstructions() {
 
 type Field struct {
 	Name *Utf8Info
-
-	fieldRef    *FieldrefInfo
-	nameAndType *NameAndTypeInfo
 }
 
 func NewClass(name *Utf8Info, methodRefsByIndex []*MethodrefInfo, fieldRefsByIndex []*FieldrefInfo, methodsByNameIndex map[uint16][]*MethodInfo, cf ClassFile) *Class {
@@ -79,10 +83,8 @@ func NewClass(name *Utf8Info, methodRefsByIndex []*MethodrefInfo, fieldRefsByInd
 
 		impl := methodsByNameIndex[nat.NameIndex]
 		methods[i] = &Method{
-			Name:        name,
-			Impl:        impl,
-			methodRef:   ref,
-			nameAndType: nat,
+			Name: name,
+			Impl: impl,
 		}
 	}
 
@@ -99,9 +101,7 @@ func NewClass(name *Utf8Info, methodRefsByIndex []*MethodrefInfo, fieldRefsByInd
 		}
 
 		fields[i] = &Field{
-			Name:        name,
-			fieldRef:    ref,
-			nameAndType: nat,
+			Name: name,
 		}
 	}
 
