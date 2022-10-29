@@ -33,9 +33,9 @@ func (method Method) PrintInstructions() {
 				}
 
 				if mnemonic, found := instructionMnemonics[opcode]; found {
-					fmt.Printf("    %s", mnemonic)
+					fmt.Printf("    0x%02x		%s", opcode, mnemonic)
 				} else {
-					fmt.Printf("    ? 0x%0x", opcode)
+					fmt.Printf("    0x%02x		?", opcode)
 				}
 
 				switch opcode {
@@ -45,6 +45,8 @@ func (method Method) PrintInstructions() {
 					arg, _ := opcodes.ReadByte()
 					fmt.Printf(" %d", arg)
 
+				case 0xbb:
+					fallthrough
 				case 0xb2:
 					fallthrough
 				case 0xb6:
@@ -55,7 +57,7 @@ func (method Method) PrintInstructions() {
 					arg1, _ := opcodes.ReadByte()
 					arg2, _ := opcodes.ReadByte()
 					arg := (arg1 << 8) | arg2
-					fmt.Printf(" %d", arg)
+					fmt.Printf(" #%d", arg)
 				}
 
 				fmt.Println("")

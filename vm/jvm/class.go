@@ -24,6 +24,11 @@ type ClassFile struct {
 	Methods           []*MethodInfo
 	AttributesCount   uint16
 	Attributes        []AttributeInfo
+
+	ClassInfosByIndex  map[uint16]*ClassInfo
+	MethodsByNameIndex map[uint16][]*MethodInfo
+	MethodRefsByIndex  map[uint16][]*MethodrefInfo
+	FieldRefsByIndex   map[uint16][]*FieldrefInfo
 }
 
 func (cf ClassFile) String() string {
@@ -84,43 +89,70 @@ func (cf *ClassFile) Read(r *bufio.Reader) {
 			cf.Attributes[i] = readAttribute(r, cf.ConstantPool)
 		}
 	}
+
+	cf.cache()
+}
+
+func (cf *ClassFile) cache() {
+	cf.ClassInfosByIndex = make(map[uint16]*ClassInfo)
+	cf.MethodsByNameIndex = make(map[uint16][]*MethodInfo)
+	cf.MethodRefsByIndex = make(map[uint16][]*MethodrefInfo)
+	cf.FieldRefsByIndex = make(map[uint16][]*FieldrefInfo)
+
+	for index, info := range cf.ConstantPool {
+		switch ref := info.(type) {
+		case *ClassInfo:
+			cf.ClassInfosByIndex[uint16(index+1)] = ref
+		case *MethodrefInfo:
+			cf.MethodRefsByIndex[ref.ClassIndex] = append(cf.MethodRefsByIndex[ref.ClassIndex], ref)
+		case *FieldrefInfo:
+			cf.FieldRefsByIndex[ref.ClassIndex] = append(cf.FieldRefsByIndex[ref.ClassIndex], ref)
+		}
+	}
+
+	for _, method := range cf.Methods {
+		cf.MethodsByNameIndex[method.NameIndex] = append(cf.MethodsByNameIndex[method.NameIndex], method)
+	}
 }
 
 func (cf ClassFile) Classes() ([]*Class, error) {
 	var classes []*Class
 
-	classInfosByIndex := make(map[uint16]*ClassInfo)
-	methodsByNameIndex := make(map[uint16][]*MethodInfo)
-	methodRefsByIndex := make(map[uint16][]*MethodrefInfo)
-	fieldRefsByIndex := make(map[uint16][]*FieldrefInfo)
-
-	for index, info := range cf.ConstantPool {
-		switch ref := info.(type) {
-		case *ClassInfo:
-			classInfosByIndex[uint16(index+1)] = ref
-		case *MethodrefInfo:
-			methodRefsByIndex[ref.ClassIndex] = append(methodRefsByIndex[ref.ClassIndex], ref)
-		case *FieldrefInfo:
-			fieldRefsByIndex[ref.ClassIndex] = append(fieldRefsByIndex[ref.ClassIndex], ref)
-		}
-	}
-
-	for _, method := range cf.Methods {
-		methodsByNameIndex[method.NameIndex] = append(methodsByNameIndex[method.NameIndex], method)
-	}
-
-	for index, classInfo := range classInfosByIndex {
+	for index, classInfo := range cf.ClassInfosByIndex {
 		nameInfo, ok := cf.ConstantPool[classInfo.NameIndex-1].(*Utf8Info)
 		if !ok {
 			return nil, fmt.Errorf("expecting class name utf8 info")
 		}
 
 		classes = append(classes, NewClass(nameInfo,
-			methodRefsByIndex[index],
-			fieldRefsByIndex[index],
-			methodsByNameIndex,
+			cf.MethodRefsByIndex[index],
+			cf.FieldRefsByIndex[index],
+			cf.MethodsByNameIndex,
 			cf))
 	}
 
 	return classes, nil
+}
+
+func (cf ClassFile) MethodByIndex(index int) *Method {
+	ref, ok := cf.ConstantPool[index].(*MethodrefInfo)
+	if !ok {
+		return nil
+	}
+
+	nat, ok := cf.ConstantPool[ref.NameAndTypeIndex-1].(*NameAndTypeInfo)
+	if !ok {
+		return nil
+	}
+
+	name, ok := cf.ConstantPool[nat.NameIndex-1].(*Utf8Info)
+	if !ok {
+		return nil
+	}
+
+	impl := cf.MethodsByNameIndex[nat.NameIndex]
+	return &Method{
+		Name: name,
+		Impl: impl,
+	}
 }
