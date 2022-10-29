@@ -5,6 +5,8 @@ var instructionMnemonics = map[byte]string{
 
 	0x1: "aconst_null",
 
+	0x12: "ldc",
+
 	0x16: "iload",
 	0x1a: "iload_0",
 	0x1b: "iload_1",
@@ -30,6 +32,7 @@ var instructionMnemonics = map[byte]string{
 	0x60: "iadd",
 
 	0xac: "ireturn",
+	0xb0: "areturn",
 	0xb1: "return",
 
 	0xbb: "new",
@@ -42,6 +45,7 @@ var instructionMnemonics = map[byte]string{
 
 	0xb6: "invokevirtual",
 	0xb7: "invokespecial",
+	0xba: "invokedynamic",
 
 	0x10: "bipush",
 

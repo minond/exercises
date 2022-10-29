@@ -39,12 +39,16 @@ func (method Method) PrintInstructions() {
 				}
 
 				switch opcode {
+				case 0x12:
+					fallthrough
 				case 0x16:
 					fallthrough
 				case 0x10:
 					arg, _ := opcodes.ReadByte()
 					fmt.Printf(" %d", arg)
 
+				case 0xb5:
+					fallthrough
 				case 0xbb:
 					fallthrough
 				case 0xb2:
@@ -58,6 +62,14 @@ func (method Method) PrintInstructions() {
 					arg2, _ := opcodes.ReadByte()
 					arg := (arg1 << 8) | arg2
 					fmt.Printf(" #%d", arg)
+
+				case 0xba:
+					arg1, _ := opcodes.ReadByte()
+					arg2, _ := opcodes.ReadByte()
+					_, _ = opcodes.ReadByte()
+					_, _ = opcodes.ReadByte()
+					arg := (arg1 << 8) | arg2
+					fmt.Printf(" #%d 0 0", arg)
 				}
 
 				fmt.Println("")
