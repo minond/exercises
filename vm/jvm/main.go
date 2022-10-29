@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-
-	"github.com/kr/pretty"
 )
 
 func main() {
@@ -42,8 +40,8 @@ func main() {
 		m.PrintInstructions()
 	}
 
-	pretty.Println(cf.MethodByIndex(1 - 1))
-	cf.MethodByIndex(1 - 1).PrintInstructions()
+	// pretty.Println(cf.MethodByIndex(1 - 1))
+	// cf.MethodByIndex(1 - 1).PrintInstructions()
 	// pretty.Println(cf.MethodByIndex(13 - 1))
 	// pretty.Println(cf.MethodByIndex(22 - 1))
 	// pretty.Println(cf.MethodByIndex(26 - 1))

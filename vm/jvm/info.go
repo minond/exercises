@@ -84,6 +84,10 @@ func readCpInfo(r *bufio.Reader) CpInfo {
 		info = &MethodrefInfo{}
 	case NameAndTypeTag:
 		info = &NameAndTypeInfo{}
+	case MethodHandleTag:
+		info = &MethodHandleInfo{}
+	case InvokeDynamicTag:
+		info = &InvokeDynamicInfo{}
 	default:
 		panic(fmt.Sprintf("unable to parse tag: %d", tag))
 	}
@@ -130,6 +134,34 @@ func (info *NameAndTypeInfo) Read(r *bufio.Reader) {
 	info.Tag = read_u8(r)
 	info.NameIndex = read_u16(r)
 	info.DescriptorIndex = read_u16(r)
+}
+
+type InvokeDynamicInfo struct {
+	Name                     string
+	Tag                      uint8
+	BootstrapMethodAttrIndex uint16
+	NameAndTypeIndex         uint16
+}
+
+func (info *InvokeDynamicInfo) Read(r *bufio.Reader) {
+	info.Name = "CONSTANT_InvokeDynamic_info"
+	info.Tag = read_u8(r)
+	info.BootstrapMethodAttrIndex = read_u16(r)
+	info.NameAndTypeIndex = read_u16(r)
+}
+
+type MethodHandleInfo struct {
+	Name           string
+	Tag            uint8
+	ReferenceKind  uint8
+	ReferenceIndex uint16
+}
+
+func (info *MethodHandleInfo) Read(r *bufio.Reader) {
+	info.Name = "CONSTANT_MethodHandle_info"
+	info.Tag = read_u8(r)
+	info.ReferenceKind = read_u8(r)
+	info.ReferenceIndex = read_u16(r)
 }
 
 type Utf8Info struct {
@@ -193,6 +225,10 @@ func readAttribute(r *bufio.Reader, cp []CpInfo) AttributeInfo {
 		attr = &LineNumberTableAttribute{}
 	case "SourceFile":
 		attr = &SourceFileAttribute{}
+	case "BootstrapMethods":
+		attr = &BootstrapMethodsAttribute{}
+	case "InnerClasses":
+		attr = &InnerClassesAttribute{}
 	default:
 		panic(fmt.Sprintf("unable to parse attribute: %s", utf8.Value))
 	}
@@ -288,4 +324,72 @@ func (attr *SourceFileAttribute) Read(r *bufio.Reader, cp []CpInfo) {
 	attr.AttributeNameIndex = read_u16(r)
 	attr.AttributeLength = read_u32(r)
 	attr.SourcefileIndex = read_u16(r)
+}
+
+type BootstrapMethodsAttribute struct {
+	AttributeNameIndex  uint16
+	AttributeLength     uint32
+	NumBootstrapMethods uint16
+	BootstrapMethods    []*BootstrapMethodEntry
+}
+
+type BootstrapMethodEntry struct {
+	BootstrapMethodRef    uint16
+	NumBootstrapArguments uint16
+	BootstrapArguments    []uint16
+}
+
+func (attr *BootstrapMethodsAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.NumBootstrapMethods = read_u16(r)
+
+	if attr.NumBootstrapMethods > 0 {
+		attr.BootstrapMethods = make([]*BootstrapMethodEntry, attr.NumBootstrapMethods)
+		for i := uint16(0); i < attr.NumBootstrapMethods; i++ {
+			attr.BootstrapMethods[i] = &BootstrapMethodEntry{
+				BootstrapMethodRef:    read_u16(r),
+				NumBootstrapArguments: read_u16(r),
+			}
+
+			if attr.BootstrapMethods[i].NumBootstrapArguments > 0 {
+				attr.BootstrapMethods[i].BootstrapArguments = make([]uint16, attr.BootstrapMethods[i].NumBootstrapArguments)
+				for j := uint16(0); j < attr.BootstrapMethods[i].NumBootstrapArguments; j++ {
+					attr.BootstrapMethods[i].BootstrapArguments[j] = read_u16(r)
+				}
+			}
+		}
+	}
+}
+
+type InnerClassesAttribute struct {
+	AttributeNameIndex uint16
+	AttributeLength    uint32
+	NumberOfClasses    uint16
+	Classes            []*InnerClassEntry
+}
+
+type InnerClassEntry struct {
+	InnerClassInfoIndex   uint8
+	OuterClassInfoIndex   uint8
+	InnerNameIndex        uint8
+	InnerClassAccessFlags uint8
+}
+
+func (attr *InnerClassesAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.NumberOfClasses = read_u16(r)
+
+	if attr.NumberOfClasses > 0 {
+		attr.Classes = make([]*InnerClassEntry, attr.NumberOfClasses)
+		for i := uint16(0); i < attr.NumberOfClasses; i++ {
+			attr.Classes[i] = &InnerClassEntry{
+				InnerClassInfoIndex:   read_u8(r),
+				OuterClassInfoIndex:   read_u8(r),
+				InnerNameIndex:        read_u8(r),
+				InnerClassAccessFlags: read_u8(r),
+			}
+		}
+	}
 }

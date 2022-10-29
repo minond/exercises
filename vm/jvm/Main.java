@@ -9,8 +9,13 @@ public class Main {
         return x + x + base;
     }
 
+    public String processIt(String x) {
+        return x + x;
+    }
+
     public static void main(String[] args) {
         Main main = new Main(10);
         System.out.println(main.processIt(10));
+        System.out.println(main.processIt("10"));
     }
 }
