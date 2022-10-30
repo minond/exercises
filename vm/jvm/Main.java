@@ -15,7 +15,11 @@ public class Main {
 
     public static void main(String[] args) {
         Main main = new Main(10);
-        System.out.println(main.processIt(10));
-        System.out.println(main.processIt("10"));
+        try {
+            System.out.println(main.processIt(10));
+            System.out.println(main.processIt("10"));
+        } catch (Exception err) {
+            System.out.println("err");
+        }
     }
 }

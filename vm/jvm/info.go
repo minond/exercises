@@ -229,6 +229,8 @@ func readAttribute(r *bufio.Reader, cp []CpInfo) AttributeInfo {
 		attr = &BootstrapMethodsAttribute{}
 	case "InnerClasses":
 		attr = &InnerClassesAttribute{}
+	case "StackMapTable":
+		attr = &StackMapTableAttribute{}
 	default:
 		panic(fmt.Sprintf("unable to parse attribute: %s", utf8.Value))
 	}
@@ -392,4 +394,194 @@ func (attr *InnerClassesAttribute) Read(r *bufio.Reader, cp []CpInfo) {
 			}
 		}
 	}
+}
+
+type StackMapTableAttribute struct {
+	AttributeNameIndex uint16
+	AttributeLength    uint32
+	NumberOfEntries    uint16
+	Entries            []StackMapFrameEntry
+}
+
+func (attr *StackMapTableAttribute) Read(r *bufio.Reader, cp []CpInfo) {
+	attr.AttributeNameIndex = read_u16(r)
+	attr.AttributeLength = read_u32(r)
+	attr.NumberOfEntries = read_u16(r)
+
+	if attr.NumberOfEntries > 0 {
+		attr.Entries = make([]StackMapFrameEntry, attr.NumberOfEntries)
+		for i := uint16(0); i < attr.NumberOfEntries; i++ {
+			var frame StackMapFrameEntry
+			rawFrameType := peek_u8(r)
+
+			switch frameTypeFromByte(rawFrameType) {
+			case FullFrame:
+				frame = &FullFrameStackMapFrame{}
+			case Same:
+				frame = &SameFrameStackMapFrame{}
+			default:
+				panic(fmt.Sprintf("unable to parse stack frame of type: %d", rawFrameType))
+			}
+
+			frame.Read(r)
+		}
+	}
+}
+
+type FrameType int
+
+const (
+	InvalidFrameType FrameType = iota
+	Same
+	SameLocals1StackItem
+	SameLocals1StackItemExtended
+	Chop
+	SameFrameExtended
+	Append
+	FullFrame
+)
+
+func frameTypeFromByte(byte byte) FrameType {
+	switch {
+	case byte >= 0 && byte <= 63:
+		return Same
+	case byte >= 64 && byte <= 127:
+		return SameLocals1StackItem
+	case byte == 247:
+		return SameLocals1StackItemExtended
+	case byte >= 248 && byte <= 250:
+		return Chop
+	case byte == 251:
+		return SameFrameExtended
+	case byte >= 252 && byte <= 254:
+		return Append
+	case byte == 255:
+		return FullFrame
+	default:
+		return InvalidFrameType
+	}
+}
+
+type StackMapFrameEntry interface {
+	Read(*bufio.Reader)
+}
+
+type SameFrameStackMapFrame struct {
+	FrameType uint8
+}
+
+func (frame *SameFrameStackMapFrame) Read(r *bufio.Reader) {
+	frame.FrameType = read_u8(r)
+}
+
+type FullFrameStackMapFrame struct {
+	FrameType          uint8
+	OffsetDelta        uint16
+	NumberOfLocals     uint16
+	Locals             []VerificationTypeInfoEntry
+	NumberOfStackItems uint16
+	Stack              []VerificationTypeInfoEntry
+}
+
+func (frame *FullFrameStackMapFrame) Read(r *bufio.Reader) {
+	frame.FrameType = read_u8(r)
+	frame.OffsetDelta = read_u16(r)
+
+	frame.NumberOfLocals = read_u16(r)
+	if frame.NumberOfLocals > 0 {
+		frame.Locals = make([]VerificationTypeInfoEntry, frame.NumberOfLocals)
+		for i := uint16(0); i < frame.NumberOfLocals; i++ {
+			frame.Locals[i] = readVerificationTypeInfoEntry(r)
+		}
+	}
+
+	frame.NumberOfStackItems = read_u16(r)
+	frame.Stack = make([]VerificationTypeInfoEntry, frame.NumberOfStackItems)
+	for i := uint16(0); i < frame.NumberOfStackItems; i++ {
+		frame.Stack[i] = readVerificationTypeInfoEntry(r)
+	}
+}
+
+func readVerificationTypeInfoEntry(r *bufio.Reader) VerificationTypeInfoEntry {
+	var item VerificationTypeInfoEntry
+
+	switch tag := peek_u8(r); ItemTag(tag) {
+	case TopItem:
+		item = &TopVariableInfo{}
+	case IntegerItem:
+		item = &IntegerVariableInfo{}
+	case FloatItem:
+		item = &FloatVariableInfo{}
+	case DoubleItem:
+		item = &DoubleVariableInfo{}
+	case LongItem:
+		item = &LongVariableInfo{}
+	case NullItem:
+		item = &NullVariableInfo{}
+	case UninitializedThisItem:
+		item = &UninitializedThisVariableInfo{}
+	case ObjectItem:
+		item = &ObjectVariableInfo{}
+	case UninitializedItem:
+		item = &UninitializedVariableInfo{}
+	default:
+		panic(fmt.Sprintf("unable to parse variable: %d", tag))
+	}
+
+	item.Read(r)
+	return item
+}
+
+type ItemTag uint8
+
+const (
+	TopItem ItemTag = iota
+	IntegerItem
+	FloatItem
+	DoubleItem
+	LongItem
+	NullItem
+	UninitializedThisItem
+	ObjectItem
+	UninitializedItem
+)
+
+type VerificationTypeInfoEntry interface {
+	Read(*bufio.Reader)
+}
+
+type TopVariableInfo struct{ Tag ItemTag }
+type IntegerVariableInfo struct{ Tag ItemTag }
+type FloatVariableInfo struct{ Tag ItemTag }
+type DoubleVariableInfo struct{ Tag ItemTag }
+type LongVariableInfo struct{ Tag ItemTag }
+type NullVariableInfo struct{ Tag ItemTag }
+type UninitializedThisVariableInfo struct{ Tag ItemTag }
+
+type ObjectVariableInfo struct {
+	Tag        ItemTag
+	CpoolIndex uint16
+}
+
+type UninitializedVariableInfo struct {
+	Tag    ItemTag
+	Offset uint16
+}
+
+func (info *TopVariableInfo) Read(r *bufio.Reader)               { info.Tag = ItemTag(read_u8(r)) }
+func (info *IntegerVariableInfo) Read(r *bufio.Reader)           { info.Tag = ItemTag(read_u8(r)) }
+func (info *FloatVariableInfo) Read(r *bufio.Reader)             { info.Tag = ItemTag(read_u8(r)) }
+func (info *DoubleVariableInfo) Read(r *bufio.Reader)            { info.Tag = ItemTag(read_u8(r)) }
+func (info *LongVariableInfo) Read(r *bufio.Reader)              { info.Tag = ItemTag(read_u8(r)) }
+func (info *NullVariableInfo) Read(r *bufio.Reader)              { info.Tag = ItemTag(read_u8(r)) }
+func (info *UninitializedThisVariableInfo) Read(r *bufio.Reader) { info.Tag = ItemTag(read_u8(r)) }
+
+func (info *ObjectVariableInfo) Read(r *bufio.Reader) {
+	info.Tag = ItemTag(read_u8(r))
+	info.CpoolIndex = read_u16(r)
+}
+
+func (info *UninitializedVariableInfo) Read(r *bufio.Reader) {
+	info.Tag = ItemTag(read_u8(r))
+	info.Offset = read_u16(r)
 }

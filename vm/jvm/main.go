@@ -45,4 +45,7 @@ func main() {
 	// pretty.Println(cf.MethodByIndex(13 - 1))
 	// pretty.Println(cf.MethodByIndex(22 - 1))
 	// pretty.Println(cf.MethodByIndex(26 - 1))
+	// pretty.Println(cf.ConstantPool[26-1])
+	// pretty.Println(cf.MethodByIndex(37 - 1))
+	// pretty.Println(cf.ConstantPool[37-1])
 }
