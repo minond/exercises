@@ -47,6 +47,8 @@ func (method Method) PrintInstructions() {
 					arg, _ := opcodes.ReadByte()
 					fmt.Printf(" %d", arg)
 
+				case 0xa7:
+					fallthrough
 				case 0xb5:
 					fallthrough
 				case 0xbb:

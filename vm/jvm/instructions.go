@@ -6,6 +6,7 @@ var instructionMnemonics = map[byte]string{
 	0x1: "aconst_null",
 
 	0x12: "ldc",
+	0xa7: "goto",
 
 	0x16: "iload",
 	0x1a: "iload_0",
