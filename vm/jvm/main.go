@@ -39,13 +39,4 @@ func main() {
 		fmt.Printf("  %s:\n", m.Name.Value)
 		m.PrintInstructions()
 	}
-
-	// pretty.Println(cf.MethodByIndex(1 - 1))
-	// cf.MethodByIndex(1 - 1).PrintInstructions()
-	// pretty.Println(cf.MethodByIndex(13 - 1))
-	// pretty.Println(cf.MethodByIndex(22 - 1))
-	// pretty.Println(cf.MethodByIndex(26 - 1))
-	// pretty.Println(cf.ConstantPool[26-1])
-	// pretty.Println(cf.MethodByIndex(37 - 1))
-	// pretty.Println(cf.ConstantPool[37-1])
 }
