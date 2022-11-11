@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-	lb := NewLoadBalancer()
 	matchMaker := NewMatchMaker(1000)
 	games1 := NewGamesManager(10, matchMaker.Matches)
 	games2 := NewGamesManager(10, matchMaker.Matches)
