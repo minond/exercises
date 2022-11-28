@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/kr/pretty"
 )
 
 func main() {
@@ -47,5 +49,5 @@ func main() {
 	// fmt.Printf("  | name and type index: %s\n", pretty.Sprint(cf.ConstantPool[0x16-1]))
 	// fmt.Printf("    | name: %s\n", pretty.Sprint(cf.ConstantPool[0x18-1]))
 
-	// pretty.Println(cf.Methods)
+	pretty.Println(cf)
 }
