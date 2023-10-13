@@ -9,13 +9,13 @@ fn main() {
 
     loop {
         println!("Loop");
-        break
+        break;
     }
 
     let result = 'parent: loop {
         loop {
             loop {
-                break 'parent 123
+                break 'parent 123;
             }
         }
     };
